@@ -1,0 +1,535 @@
+{
+  "fileKey": "cwIWojuveOSNxGeK3nlDUZ",
+  "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish",
+  "pageId": "0:1",
+  "screens": [
+    {
+      "id": "1:2",
+      "name": "FINAL MOBILE 02 — Saved Places Map",
+      "width": 390,
+      "height": 884,
+      "textCount": 14,
+      "vectorCount": 12,
+      "autoLayoutCount": 61,
+      "sections": [
+        {
+          "id": "1:3",
+          "name": "Container",
+          "width": 390,
+          "height": 884,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:106",
+      "name": "FINAL MOBILE 01 — Your Places List",
+      "width": 390,
+      "height": 1396,
+      "textCount": 31,
+      "vectorCount": 30,
+      "autoLayoutCount": 145,
+      "sections": [
+        {
+          "id": "1:107",
+          "name": "Container",
+          "width": 390,
+          "height": 1396,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:320",
+      "name": "FINAL DESKTOP 03 — Save Place Modal",
+      "width": 1280,
+      "height": 1024,
+      "textCount": 25,
+      "vectorCount": 15,
+      "autoLayoutCount": 87,
+      "sections": [
+        {
+          "id": "1:321",
+          "name": "Main",
+          "width": 898,
+          "height": 1024,
+          "x": 382,
+          "y": 0
+        },
+        {
+          "id": "1:389",
+          "name": "Background+VerticalBorder",
+          "width": 310,
+          "height": 1024,
+          "x": 72,
+          "y": 0
+        },
+        {
+          "id": "4:103",
+          "name": "Navigation / Desktop rail",
+          "width": 72,
+          "height": 1024,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:452",
+      "name": "FINAL MOBILE 03 — Place Details Bottom Sheet",
+      "width": 390,
+      "height": 884,
+      "textCount": 15,
+      "vectorCount": 15,
+      "autoLayoutCount": 66,
+      "sections": [
+        {
+          "id": "1:453",
+          "name": "Main",
+          "width": 390,
+          "height": 884,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "id": "1:476",
+          "name": "Section - Place Details Sheet",
+          "width": 390,
+          "height": 570,
+          "x": 0,
+          "y": 314
+        },
+        {
+          "id": "1:548",
+          "name": "Header",
+          "width": 390,
+          "height": 56,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:560",
+      "name": "FINAL DESKTOP 01 — Empty Collection",
+      "width": 1280,
+      "height": 1024,
+      "textCount": 16,
+      "vectorCount": 14,
+      "autoLayoutCount": 64,
+      "sections": [
+        {
+          "id": "1:561",
+          "name": "Main",
+          "width": 898,
+          "height": 1024,
+          "x": 382,
+          "y": 0
+        },
+        {
+          "id": "1:573",
+          "name": "Background+VerticalBorder",
+          "width": 310,
+          "height": 1024,
+          "x": 72,
+          "y": 0
+        },
+        {
+          "id": "4:63",
+          "name": "Navigation / Desktop rail",
+          "width": 72,
+          "height": 1024,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:656",
+      "name": "FINAL DESKTOP 05 — Place Detail Drawer",
+      "width": 1280,
+      "height": 1024,
+      "textCount": 52,
+      "vectorCount": 32,
+      "autoLayoutCount": 166,
+      "sections": [
+        {
+          "id": "1:657",
+          "name": "Main",
+          "width": 898,
+          "height": 1024,
+          "x": 382,
+          "y": 0
+        },
+        {
+          "id": "1:862",
+          "name": "Background+VerticalBorder",
+          "width": 310,
+          "height": 1024,
+          "x": 72,
+          "y": 0
+        },
+        {
+          "id": "4:143",
+          "name": "Navigation / Desktop rail",
+          "width": 72,
+          "height": 1024,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:925",
+      "name": "FINAL DESKTOP 02 — Your Places Workspace",
+      "width": 1280,
+      "height": 1024,
+      "textCount": 41,
+      "vectorCount": 23,
+      "autoLayoutCount": 142,
+      "sections": [
+        {
+          "id": "1:926",
+          "name": "Main",
+          "width": 898,
+          "height": 1024,
+          "x": 382,
+          "y": 0
+        },
+        {
+          "id": "1:1079",
+          "name": "Background+VerticalBorder",
+          "width": 310,
+          "height": 1024,
+          "x": 72,
+          "y": 0
+        },
+        {
+          "id": "4:83",
+          "name": "Navigation / Desktop rail",
+          "width": 72,
+          "height": 1024,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    },
+    {
+      "id": "1:1142",
+      "name": "FINAL DESKTOP 04 — Save Success Workspace",
+      "width": 1280,
+      "height": 1024,
+      "textCount": 22,
+      "vectorCount": 26,
+      "autoLayoutCount": 93,
+      "sections": [
+        {
+          "id": "1:1143",
+          "name": "Main",
+          "width": 898,
+          "height": 1024,
+          "x": 382,
+          "y": 0
+        },
+        {
+          "id": "1:1239",
+          "name": "Background+VerticalBorder",
+          "width": 310,
+          "height": 1024,
+          "x": 72,
+          "y": 0
+        },
+        {
+          "id": "4:123",
+          "name": "Navigation / Desktop rail",
+          "width": 72,
+          "height": 1024,
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "clipsContent": true
+    }
+  ],
+  "components": {
+    "wordmark": "4:24",
+    "desktopNavigation": "4:62"
+  },
+  "styles": [
+    {
+      "id": "S:ba5147df35c48fb6d0c86948702989c81727cf13,",
+      "name": "PinWish / 15px / Semi Bold / 20 / 0",
+      "count": 13
+    },
+    {
+      "id": "S:4b536261babf603a3030180104041eb2e61ba9d2,",
+      "name": "PinWish / 12px / Medium / 16 / 1",
+      "count": 52
+    },
+    {
+      "id": "S:342355d8fc45307931f61fa71b1e00dd555357ea,",
+      "name": "PinWish / 12px / Semi Bold / 16 / 2",
+      "count": 2
+    },
+    {
+      "id": "S:0533bde63df1a93fa079b261885be39764c39a7b,",
+      "name": "PinWish / 13px / Regular / 18 / 3",
+      "count": 21
+    },
+    {
+      "id": "S:4ac80f62d2cb453e72bd54c7ad61278c916eb180,",
+      "name": "PinWish / 12px / Regular / 16 / 4",
+      "count": 42
+    },
+    {
+      "id": "S:058c16836d7cc0552018b2d08d1313641642ae71,",
+      "name": "PinWish / 15px / Semi Bold / 20 / 5",
+      "count": 2
+    },
+    {
+      "id": "S:170d3334974f51ffa4408ac07254678fc7a86b7b,",
+      "name": "PinWish / 13px / Medium / 16 / 6",
+      "count": 32
+    },
+    {
+      "id": "S:7c6640fcac0125b7fc78f2c221f7b1a9485b7244,",
+      "name": "PinWish / 12px / Medium / 16 / 7",
+      "count": 10
+    },
+    {
+      "id": "S:44872154348fa585d94709d346ed58388d2a4712,",
+      "name": "PinWish / 13px / Regular / Auto / 8",
+      "count": 7
+    },
+    {
+      "id": "S:524e9c697d6e773323c50e8f656971e8abf3e445,",
+      "name": "PinWish / 12px / Regular / 16 / 9",
+      "count": 2
+    },
+    {
+      "id": "S:44a2a05d2d1fb95c7b74cd64b442cb7df2d38b1b,",
+      "name": "PinWish / 22px / Semi Bold / Auto / 10",
+      "count": 6
+    },
+    {
+      "id": "S:eca35262df03c074e366cfcd8d791f6f4ebda0fd,",
+      "name": "PinWish / 13px / Medium / 16 / 11",
+      "count": 6
+    },
+    {
+      "id": "S:83aaec2306df5e895e72f68934b7ccce83b2fe01,",
+      "name": "PinWish / 12px / Regular / 16 / 12",
+      "count": 3
+    },
+    {
+      "id": "S:8df35b5a4829b354d30e1b70f9633ea87363ac65,",
+      "name": "PinWish / 13px / Semi Bold / 16 / 13",
+      "count": 3
+    },
+    {
+      "id": "S:486bd4fd0a1e6422e70dd82702669627513318e7,",
+      "name": "PinWish / 11px / Regular / 20 / 14",
+      "count": 2
+    }
+  ],
+  "fontFamilies": [
+    "Inter"
+  ],
+  "map": {
+    "asset": "assets/map-preview.png",
+    "type": "AI-generated illustrative design basemap",
+    "production": "Replace with interactive map provider; keep markers and controls separate. Coordinates and place positions are illustrative."
+  },
+  "implementation": {
+    "desktopReferenceWidth": 1280,
+    "mobileReferenceWidth": 390,
+    "navigationWidth": 72,
+    "sidebarWidth": 310,
+    "modalWidth": 440,
+    "detailDrawerWidth": 400,
+    "note": "Use Figma MCP design context on screen node IDs for implementation. Responsive behavior and application functionality still require code."
+  },
+  "lastReview": {
+    "date": "2026-10-29",
+    "visualFixesApplied": true,
+    "details": "design-review.json",
+    "remaining": "Authentication and multiple-location candidate picker designs remain outside this mobile save-state task. Production layout must be tested on real devices."
+  },
+  "mobileSaveFlow": "mobile-save-flow.json",
+  "mobileSaveScreens": [
+    {
+      "key": "entry",
+      "nodeId": "11:136",
+      "name": "MOBILE SAVE / 01 — Enter link",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-136",
+      "actions": {
+        "back": "I11:137;11:131",
+        "paste": "11:148",
+        "primary": "11:153"
+      }
+    },
+    {
+      "key": "resolving",
+      "nodeId": "11:155",
+      "name": "MOBILE SAVE / 02 — Finding location",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-155",
+      "actions": {
+        "back": "I11:156;11:131",
+        "primary": "11:171",
+        "secondary": "11:173"
+      }
+    },
+    {
+      "key": "ready",
+      "nodeId": "11:175",
+      "name": "MOBILE SAVE / 03 — Confirm and save",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-175",
+      "actions": {
+        "back": "I11:176;11:131",
+        "change": "11:193",
+        "collection": "11:199",
+        "primary": "11:203"
+      }
+    },
+    {
+      "key": "invalid",
+      "nodeId": "11:205",
+      "name": "MOBILE SAVE / 04 — Invalid link",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-205",
+      "actions": {
+        "back": "I11:206;11:131",
+        "primary": "11:219"
+      }
+    },
+    {
+      "key": "not_found",
+      "nodeId": "11:221",
+      "name": "MOBILE SAVE / 05 — Location not found",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-221",
+      "actions": {
+        "back": "I11:222;11:131",
+        "primary": "11:235",
+        "secondary": "11:237"
+      }
+    },
+    {
+      "key": "lookup_error",
+      "nodeId": "11:239",
+      "name": "MOBILE SAVE / 06 — Connection error",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-239",
+      "actions": {
+        "back": "I11:240;11:131",
+        "primary": "11:253",
+        "secondary": "11:255"
+      }
+    },
+    {
+      "key": "saving",
+      "nodeId": "11:257",
+      "name": "MOBILE SAVE / 07 — Saving place",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-257",
+      "actions": {
+        "back": "I11:258;11:131",
+        "change": "11:278",
+        "collection": "11:284",
+        "primary": "11:289"
+      }
+    },
+    {
+      "key": "save_error",
+      "nodeId": "11:291",
+      "name": "MOBILE SAVE / 08 — Save failed",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-291",
+      "actions": {
+        "back": "I11:292;11:131",
+        "change": "11:312",
+        "collection": "11:318",
+        "primary": "11:322"
+      }
+    },
+    {
+      "key": "duplicate",
+      "nodeId": "11:324",
+      "name": "MOBILE SAVE / 09 — Already saved",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-324",
+      "actions": {
+        "back": "I11:325;11:131",
+        "primary": "11:343"
+      }
+    },
+    {
+      "key": "success",
+      "nodeId": "11:345",
+      "name": "MOBILE SAVE / 10 — Place saved",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-345",
+      "actions": {
+        "back": "I11:346;11:131",
+        "primary": "11:364",
+        "secondary": "11:366"
+      }
+    },
+    {
+      "key": "list_loading",
+      "nodeId": "11:368",
+      "name": "MOBILE SAVE / 11 — List loading",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-368",
+      "actions": {
+        "back": "I11:369;11:131"
+      }
+    },
+    {
+      "key": "list_error",
+      "nodeId": "11:389",
+      "name": "MOBILE SAVE / 12 — List load error",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-389",
+      "actions": {
+        "back": "I11:390;11:131",
+        "primary": "11:401",
+        "secondary": "11:403"
+      }
+    }
+  ],
+  "mobileSaveComponents": [
+    {
+      "id": "11:109",
+      "name": "PinWish / Mobile / Button / Primary"
+    },
+    {
+      "id": "11:112",
+      "name": "PinWish / Mobile / Button / Secondary"
+    },
+    {
+      "id": "11:115",
+      "name": "PinWish / Mobile / Button / Disabled"
+    },
+    {
+      "id": "11:118",
+      "name": "PinWish / Mobile / Link input"
+    },
+    {
+      "id": "11:121",
+      "name": "PinWish / Mobile / Personal note"
+    },
+    {
+      "id": "11:125",
+      "name": "PinWish / Mobile / Collection selector"
+    },
+    {
+      "id": "11:129",
+      "name": "PinWish / Mobile / Inline status"
+    },
+    {
+      "id": "11:135",
+      "name": "PinWish / Mobile / Save header"
+    }
+  ]
+}

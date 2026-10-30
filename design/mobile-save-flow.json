@@ -1,0 +1,601 @@
+{
+  "version": 1,
+  "fileKey": "cwIWojuveOSNxGeK3nlDUZ",
+  "screens": [
+    {
+      "key": "entry",
+      "nodeId": "11:136",
+      "name": "MOBILE SAVE / 01 — Enter link",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-136",
+      "actions": {
+        "back": "I11:137;11:131",
+        "paste": "11:148",
+        "primary": "11:153"
+      }
+    },
+    {
+      "key": "resolving",
+      "nodeId": "11:155",
+      "name": "MOBILE SAVE / 02 — Finding location",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-155",
+      "actions": {
+        "back": "I11:156;11:131",
+        "primary": "11:171",
+        "secondary": "11:173"
+      }
+    },
+    {
+      "key": "ready",
+      "nodeId": "11:175",
+      "name": "MOBILE SAVE / 03 — Confirm and save",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-175",
+      "actions": {
+        "back": "I11:176;11:131",
+        "change": "11:193",
+        "collection": "11:199",
+        "primary": "11:203"
+      }
+    },
+    {
+      "key": "invalid",
+      "nodeId": "11:205",
+      "name": "MOBILE SAVE / 04 — Invalid link",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-205",
+      "actions": {
+        "back": "I11:206;11:131",
+        "primary": "11:219"
+      }
+    },
+    {
+      "key": "not_found",
+      "nodeId": "11:221",
+      "name": "MOBILE SAVE / 05 — Location not found",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-221",
+      "actions": {
+        "back": "I11:222;11:131",
+        "primary": "11:235",
+        "secondary": "11:237"
+      }
+    },
+    {
+      "key": "lookup_error",
+      "nodeId": "11:239",
+      "name": "MOBILE SAVE / 06 — Connection error",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-239",
+      "actions": {
+        "back": "I11:240;11:131",
+        "primary": "11:253",
+        "secondary": "11:255"
+      }
+    },
+    {
+      "key": "saving",
+      "nodeId": "11:257",
+      "name": "MOBILE SAVE / 07 — Saving place",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-257",
+      "actions": {
+        "back": "I11:258;11:131",
+        "change": "11:278",
+        "collection": "11:284",
+        "primary": "11:289"
+      }
+    },
+    {
+      "key": "save_error",
+      "nodeId": "11:291",
+      "name": "MOBILE SAVE / 08 — Save failed",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-291",
+      "actions": {
+        "back": "I11:292;11:131",
+        "change": "11:312",
+        "collection": "11:318",
+        "primary": "11:322"
+      }
+    },
+    {
+      "key": "duplicate",
+      "nodeId": "11:324",
+      "name": "MOBILE SAVE / 09 — Already saved",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-324",
+      "actions": {
+        "back": "I11:325;11:131",
+        "primary": "11:343"
+      }
+    },
+    {
+      "key": "success",
+      "nodeId": "11:345",
+      "name": "MOBILE SAVE / 10 — Place saved",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-345",
+      "actions": {
+        "back": "I11:346;11:131",
+        "primary": "11:364",
+        "secondary": "11:366"
+      }
+    },
+    {
+      "key": "list_loading",
+      "nodeId": "11:368",
+      "name": "MOBILE SAVE / 11 — List loading",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-368",
+      "actions": {
+        "back": "I11:369;11:131"
+      }
+    },
+    {
+      "key": "list_error",
+      "nodeId": "11:389",
+      "name": "MOBILE SAVE / 12 — List load error",
+      "url": "https://www.figma.com/design/cwIWojuveOSNxGeK3nlDUZ/pinWish?node-id=11-389",
+      "actions": {
+        "back": "I11:390;11:131",
+        "primary": "11:401",
+        "secondary": "11:403"
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "11:109",
+      "name": "PinWish / Mobile / Button / Primary"
+    },
+    {
+      "id": "11:112",
+      "name": "PinWish / Mobile / Button / Secondary"
+    },
+    {
+      "id": "11:115",
+      "name": "PinWish / Mobile / Button / Disabled"
+    },
+    {
+      "id": "11:118",
+      "name": "PinWish / Mobile / Link input"
+    },
+    {
+      "id": "11:121",
+      "name": "PinWish / Mobile / Personal note"
+    },
+    {
+      "id": "11:125",
+      "name": "PinWish / Mobile / Collection selector"
+    },
+    {
+      "id": "11:129",
+      "name": "PinWish / Mobile / Inline status"
+    },
+    {
+      "id": "11:135",
+      "name": "PinWish / Mobile / Save header"
+    }
+  ],
+  "entryPoints": {
+    "list": "12:241",
+    "map": "12:244"
+  },
+  "layout": {
+    "reference": {
+      "width": 390,
+      "height": 884
+    },
+    "viewport": "100dvh; do not hardcode 884px in production",
+    "header": 64,
+    "horizontalPadding": 16,
+    "gap": 12,
+    "primaryButtonHeight": 48,
+    "minHitTarget": 44,
+    "footer": "Pinned after flex:1 scroll body; pad bottom by max(16px, env(safe-area-inset-bottom)). Keep form visible above mobile keyboard.",
+    "body": "min-height:0; overflow-y:auto; keep header and action footer outside body scrolling",
+    "width": "Fluid from 320px through mobile widths; fields width:100%; at desktop reuse existing 440px save dialog",
+    "breakpoints": "Suggested implementation breakpoint 768px for mobile/full-screen vs desktop dialog; validate against actual host layout before shipping",
+    "fonts": "Inter; reuse src/styles/tokens.css and Figma styles; editable text, not screenshots",
+    "map": "Illustrative preview only; replace with actual map provider. All pins remain independent UI."
+  },
+  "draft": {
+    "fields": [
+      "originalInput",
+      "inputMode: link | address",
+      "resolvedPlaceId",
+      "displayName",
+      "formattedAddress",
+      "latitude",
+      "longitude",
+      "note",
+      "collectionId",
+      "originView: list | map",
+      "idempotencyKey"
+    ],
+    "persistence": "Keep draft in memory during screen changes and network failures; never clear until save confirmed or user explicitly discards. Do not persist private notes to storage by default.",
+    "noteMaxLength": 1000,
+    "inputMaxLength": 2048,
+    "collection": "Required. Default to originating collection, or first available collection. Use native select/dialog populated from actual collections; Change does not create collections.",
+    "source": "Keep original social link when manual address lookup is used; never replace origin URL with generated text."
+  },
+  "states": {
+    "entry": {
+      "primary": "Find place",
+      "behavior": "Validate on submit. Empty or malformed input -> invalid. Valid link/address -> resolving. Paste only on explicit click; clipboard denied/unavailable leaves manual input usable with inline feedback."
+    },
+    "resolving": {
+      "primaryDisabled": true,
+      "fieldsReadOnly": true,
+      "busy": true,
+      "onResolved": "ready",
+      "onNoLocation": "not_found",
+      "onFailure": "lookup_error",
+      "onCancel": "entry",
+      "timeoutMs": 15000,
+      "behavior": "Abort lookup on cancel or edit; ignore stale responses using request identity. Never save automatically."
+    },
+    "ready": {
+      "primary": "Save place",
+      "enabledWhen": "Resolved place with coordinates AND selected collection",
+      "onSubmit": "saving",
+      "changeLocation": "not_found in manual-address mode; preserve original link and note",
+      "behavior": "Use user confirmation to save; UI does not imply every social post can be parsed."
+    },
+    "invalid": {
+      "alert": true,
+      "onEdit": "entry with previous input retained",
+      "onValidSubmit": "resolving",
+      "behavior": "Field aria-invalid=true, error linked via aria-describedby. Focus input after failed submit."
+    },
+    "not_found": {
+      "alert": true,
+      "mode": "address",
+      "onSubmit": "resolving",
+      "onEditOriginal": "entry",
+      "behavior": "Do not invent coordinates. Show candidate selection when provider returns multiple results; confirm candidate before ready. Existing frame illustrates manual fallback."
+    },
+    "lookup_error": {
+      "alert": true,
+      "onRetry": "resolving",
+      "onEditOriginal": "entry",
+      "behavior": "Network error is not invalid input; do not mark input aria-invalid."
+    },
+    "saving": {
+      "primaryDisabled": true,
+      "fieldsReadOnly": true,
+      "busy": true,
+      "onConfirmed": "success",
+      "onAlreadySaved": "duplicate",
+      "onFailure": "save_error",
+      "timeoutMs": 15000,
+      "behavior": "Disable duplicate submissions and change-location/collection while pending. Use a bounded request; never leave UI indefinitely busy. Back control disabled for this bounded pending operation. Reuse idempotency key on uncertain retry."
+    },
+    "save_error": {
+      "alert": true,
+      "onRetry": "saving",
+      "behavior": "Keep all draft values. Network/timeouts do not mean original link is invalid. Retry with original idempotency key; server returns prior confirmed result if it already saved."
+    },
+    "duplicate": {
+      "primary": "View saved place",
+      "target": "Existing saved record, not a new duplicate",
+      "behavior": "Detected by stable place identity within collection; do not overwrite existing note silently. Existing draft can be recovered by back."
+    },
+    "success": {
+      "primary": "View place",
+      "secondary": "Back to map",
+      "behavior": "Only after server acknowledgement. Update list/map cache from saved record, not arbitrary +1. Clear confirmed draft. Return to saved place details or centered map."
+    },
+    "list_loading": {
+      "busy": true,
+      "onSuccess": "existing mobile list 1:106",
+      "onFailure": "list_error",
+      "behavior": "Skeletons are aria-hidden; announce Loading your saved places with role=status. If cached records exist, retain them and show a small refresh indicator instead of skeletons."
+    },
+    "list_error": {
+      "alert": true,
+      "onRetry": "list_loading",
+      "secondary": "existing mobile map 1:2",
+      "behavior": "Never show fake empty collection on fetch failure; cached places remain available if present."
+    }
+  },
+  "prototype": {
+    "links": [
+      {
+        "nodeId": "I11:137;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:156;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:176;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:206;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:222;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:240;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:292;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:325;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:346;11:131",
+        "target": "1:2",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:369;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "I11:390;11:131",
+        "target": "1:106",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:153",
+        "target": "11:155",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:219",
+        "target": "11:155",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:235",
+        "target": "11:155",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:253",
+        "target": "11:155",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:203",
+        "target": "11:257",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:322",
+        "target": "11:257",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:155",
+        "target": "11:175",
+        "trigger": "demo-timeout"
+      },
+      {
+        "nodeId": "11:257",
+        "target": "11:345",
+        "trigger": "demo-timeout"
+      },
+      {
+        "nodeId": "11:368",
+        "target": "1:106",
+        "trigger": "demo-timeout"
+      },
+      {
+        "nodeId": "11:364",
+        "target": "1:452",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:343",
+        "target": "1:452",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:366",
+        "target": "1:2",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:173",
+        "target": "11:136",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:237",
+        "target": "11:136",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:255",
+        "target": "11:136",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:193",
+        "target": "11:221",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:312",
+        "target": "11:221",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:401",
+        "target": "11:368",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "11:403",
+        "target": "1:2",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "12:241",
+        "target": "11:136",
+        "trigger": "click"
+      },
+      {
+        "nodeId": "12:244",
+        "target": "11:136",
+        "trigger": "click"
+      }
+    ],
+    "notice": "Prototype uses sample data and 1.5s success transitions solely for visual demonstration. Production transitions must depend on real validation and API results. Figma input/paste controls are not functioning browser inputs. Error frames are review entry points, not random timer branches."
+  },
+  "accessibility": {
+    "status": "role=status aria-live=polite for progress/success; aria-busy on submitting form/list",
+    "error": "role=alert; visible message, not color alone",
+    "buttons": "Use native button disabled for pending, not opacity alone",
+    "navigation": "Restore focus to launching Save button on cancel; on success focus place heading. Preserve originView for back behavior.",
+    "motion": "Respect prefers-reduced-motion; skeleton animations optional"
+  },
+  "dataNotes": [
+    "The existing five-place list represents the post-save sample. Do not treat it as five places plus the demonstrated Grand Central Market.",
+    "Mock labels, coordinates and generated map are visual samples; verified provider data is required at runtime."
+  ],
+  "validation": {
+    "screens": [
+      {
+        "id": "11:136",
+        "name": "MOBILE SAVE / 01 — Enter link",
+        "width": 390,
+        "height": 884,
+        "textCount": 9,
+        "instanceCount": 4,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:155",
+        "name": "MOBILE SAVE / 02 — Finding location",
+        "width": 390,
+        "height": 884,
+        "textCount": 7,
+        "instanceCount": 5,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:175",
+        "name": "MOBILE SAVE / 03 — Confirm and save",
+        "width": 390,
+        "height": 884,
+        "textCount": 12,
+        "instanceCount": 6,
+        "vectorCount": 2,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:205",
+        "name": "MOBILE SAVE / 04 — Invalid link",
+        "width": 390,
+        "height": 884,
+        "textCount": 6,
+        "instanceCount": 4,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:221",
+        "name": "MOBILE SAVE / 05 — Location not found",
+        "width": 390,
+        "height": 884,
+        "textCount": 7,
+        "instanceCount": 5,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:239",
+        "name": "MOBILE SAVE / 06 — Connection error",
+        "width": 390,
+        "height": 884,
+        "textCount": 7,
+        "instanceCount": 5,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:257",
+        "name": "MOBILE SAVE / 07 — Saving place",
+        "width": 390,
+        "height": 884,
+        "textCount": 15,
+        "instanceCount": 7,
+        "vectorCount": 2,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:291",
+        "name": "MOBILE SAVE / 08 — Save failed",
+        "width": 390,
+        "height": 884,
+        "textCount": 14,
+        "instanceCount": 7,
+        "vectorCount": 2,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:324",
+        "name": "MOBILE SAVE / 09 — Already saved",
+        "width": 390,
+        "height": 884,
+        "textCount": 6,
+        "instanceCount": 3,
+        "vectorCount": 2,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:345",
+        "name": "MOBILE SAVE / 10 — Place saved",
+        "width": 390,
+        "height": 884,
+        "textCount": 7,
+        "instanceCount": 4,
+        "vectorCount": 2,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:368",
+        "name": "MOBILE SAVE / 11 — List loading",
+        "width": 390,
+        "height": 884,
+        "textCount": 3,
+        "instanceCount": 1,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      },
+      {
+        "id": "11:389",
+        "name": "MOBILE SAVE / 12 — List load error",
+        "width": 390,
+        "height": 884,
+        "textCount": 7,
+        "instanceCount": 4,
+        "vectorCount": 1,
+        "bodyScroll": "VERTICAL"
+      }
+    ],
+    "font": "Inter",
+    "sharedComponentCount": 8,
+    "visualReviewed": true
+  },
+  "outOfScope": [
+    "Backend/API implementation",
+    "Authentication screens",
+    "Multi-candidate location picker dedicated frame (use provider-backed accessible list before confirmation)"
+  ]
+}

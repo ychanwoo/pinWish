@@ -1,0 +1,29 @@
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/inter/wght-italic.css';
+@import 'tailwindcss';
+@import './styles/tokens.css';
+
+@theme inline {
+  --color-brand: var(--pw-brand-primary);
+  --color-page: var(--pw-surface-base);
+  --color-ink: var(--pw-text-primary);
+  --color-muted: var(--pw-text-muted);
+  --font-sans: var(--pw-font-family);
+}
+
+:root {
+  font-family: var(--pw-font-family);
+  color: var(--pw-text-primary);
+  background: var(--pw-surface-base);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+#root {
+  min-height: 100dvh;
+}
