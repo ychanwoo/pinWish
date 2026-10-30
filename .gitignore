@@ -34,3 +34,7 @@ dist-ssr
 # Test output and local TypeScript caches
 coverage/
 *.tsbuildinfo
+
+# Browser test artifacts
+playwright-report/
+test-results/
