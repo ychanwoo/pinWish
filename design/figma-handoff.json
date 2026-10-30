@@ -361,7 +361,7 @@
   "lastReview": {
     "date": "2026-10-29",
     "visualFixesApplied": true,
-    "details": "review-pending.json",
+    "details": "design-review.json",
     "remaining": "Authentication and multiple-location candidate picker designs remain outside this mobile save-state task. Production layout must be tested on real devices."
   },
   "mobileSaveFlow": "mobile-save-flow.json",

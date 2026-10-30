@@ -1,7 +1,6 @@
 {
   "version": 1,
   "fileKey": "cwIWojuveOSNxGeK3nlDUZ",
-  "sessionId": "452fd378-57ca-48f9-9be0-0cd20d3e0470",
   "screens": [
     {
       "key": "entry",
@@ -188,7 +187,7 @@
     "body": "min-height:0; overflow-y:auto; keep header and action footer outside body scrolling",
     "width": "Fluid from 320px through mobile widths; fields width:100%; at desktop reuse existing 440px save dialog",
     "breakpoints": "Suggested implementation breakpoint 768px for mobile/full-screen vs desktop dialog; validate against actual host layout before shipping",
-    "fonts": "Inter; reuse tokens.css and Figma styles; editable text, not screenshots",
+    "fonts": "Inter; reuse src/styles/tokens.css and Figma styles; editable text, not screenshots",
     "map": "Illustrative preview only; replace with actual map provider. All pins remain independent UI."
   },
   "draft": {

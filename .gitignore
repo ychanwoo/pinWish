@@ -30,3 +30,7 @@ dist-ssr
 *.pem
 # Official MCP configuration contains only a public server URL
 !.vscode/mcp.json
+
+# Test output and local TypeScript caches
+coverage/
+*.tsbuildinfo

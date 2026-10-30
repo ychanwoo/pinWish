@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "../design/tokens.css";
+@import "./styles/tokens.css";
 
 @theme inline {
   --color-brand: var(--pw-brand-primary);
@@ -18,5 +18,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
-body { margin: 0; min-width: 320px; }
-#root { min-height: 100dvh; }
+body {
+  margin: 0;
+  min-width: 320px;
+}
+#root {
+  min-height: 100dvh;
+}
