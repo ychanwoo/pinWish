@@ -1,0 +1,25 @@
+:root {
+  --pw-text-muted: #635a57;
+  --pw-surface-white: #ffffff;
+  --pw-text-primary: #181d1a;
+  --pw-brand-primary: #a43628;
+  --pw-text-secondary: #57423e;
+  --pw-surface-subtle: #f0f5f0;
+  --pw-surface-container: #ebefea;
+  --pw-surface-base: #f6fbf5;
+  --pw-surface-raised: #e5e9e4;
+  --pw-brand-soft: #ffdad4;
+  --pw-surface-inverse: #2c322e;
+  --pw-space-0: 0px;
+  --pw-space-4: 4px;
+  --pw-space-8: 8px;
+  --pw-space-12: 12px;
+  --pw-space-16: 16px;
+  --pw-space-20: 20px;
+  --pw-space-24: 24px;
+  --pw-space-32: 32px;
+  --pw-space-40: 40px;
+  --pw-space-48: 48px;
+  --pw-font-family: Inter, sans-serif;
+}
+

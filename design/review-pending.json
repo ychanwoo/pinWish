@@ -1,0 +1,125 @@
+{
+  "reviewDate": "2026-10-29",
+  "fileKey": "cwIWojuveOSNxGeK3nlDUZ",
+  "status": "Listed visual fixes applied and visually verified in Figma. Remaining implementation decisions are not yet designed or implemented.",
+  "readiness": "Suitable visual reference for initial UI implementation. Not a complete responsive or behavioral specification.",
+  "fixes": [
+    {
+      "priority": "high",
+      "issue": "Same LA weekend collection displays 5, 6, and 12 places across screens",
+      "nodes": {
+        "1:944": "5 places",
+        "1:948": "All (5)",
+        "1:950": "Coffee (1)",
+        "1:952": "Food (2)",
+        "1:954": "Culture (2)",
+        "1:1192": "5 pins",
+        "1:141": "LA weekend (count omitted in compact mobile chip; list total remains 5)"
+      },
+      "status": "applied"
+    },
+    {
+      "priority": "high",
+      "issue": "Mobile collection add button lies outside its 358px container",
+      "parent": "1:136",
+      "child": "1:151",
+      "fix": "Use horizontal Auto Layout; keep add button visible; put collection chips in an independently horizontally scrolling region or reduce chip labels.",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Mobile map markers overlap the selected callout; marker names differ from visible list places",
+      "nodes": [
+        "1:23",
+        "1:28",
+        "1:33",
+        "1:38",
+        "1:43"
+      ],
+      "fix": "Use the same five place records as the list, separate illustrative marker positions and keep selected callout readable. Production uses geographic coordinates, not design pixel positions.",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Desktop map scale begins outside map viewport at x=-29",
+      "node": "1:693",
+      "fix": "Place inside map at bottom-right with 16px inset; reserve bottom-left for zoom controls.",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Mobile map content is 872px tall in an 884px frame",
+      "nodes": [
+        "1:3",
+        "1:22",
+        "1:70"
+      ],
+      "fix": "Fill remaining viewport height under 48px header and anchor preview card 12px from bottom.",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Offline map copy implies an unimplemented capability",
+      "node": "1:1009",
+      "replacement": "Saved to LA weekend",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Desktop shows six photos while mobile shows twelve for the same place",
+      "node": "1:503",
+      "replacement": "6 photos",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Nearby section lists two rows but claims three",
+      "node": "1:832",
+      "replacement": "2 saved places",
+      "status": "applied"
+    },
+    {
+      "priority": "medium",
+      "issue": "Mobile notes contain manual line breaks and an abruptly cut sentence",
+      "nodes": [
+        "1:189",
+        "1:219",
+        "1:538"
+      ],
+      "fix": "Use container-based wrapping and intentional line-clamp on list previews; full note in details.",
+      "status": "applied"
+    },
+    {
+      "priority": "low",
+      "issue": "Close/back controls have negative child offsets",
+      "nodes": [
+        "1:714",
+        "1:715",
+        "1:551",
+        "1:552"
+      ],
+      "fix": "Give wrapper same width as hit target and reset child x to 0.",
+      "status": "applied"
+    },
+    {
+      "priority": "low",
+      "issue": "All screen roots have clipsContent=false",
+      "fix": "Clip screen frames while preserving overflow for intentional callouts inside map containers.",
+      "status": "applied"
+    }
+  ],
+  "implementationDecisionsStillNeeded": [
+    "Define tablet/intermediate breakpoints and scrolling behavior; 1280px desktop and 390px mobile references do not establish all responsive behavior.",
+    "Generated basemap is illustrative. Do not use its street labels or mock distances as geographic truth.",
+    "Define whether Directions opens an external map, and whether operating hours, nearby distances, transit layers and walking routes are in the MVP.",
+    "Authentication, empty-search and multi-candidate picker states remain outside the completed mobile save/loading/error design."
+  ],
+  "planVerification": {
+    "team": "wooych",
+    "teamId": "1550126331698435439",
+    "tier": "student",
+    "seat": "Full",
+    "mcpReadAndWriteVerified": true
+  },
+  "mobileSaveFlowAdded": "mobile-save-flow.json"
+}
