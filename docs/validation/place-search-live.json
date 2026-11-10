@@ -1,0 +1,720 @@
+{
+  "checkedAt": "2026-11-10T22:27:22.888Z",
+  "method": "Live loopback API calling Amazon Location V2 with existing server AWS credentials",
+  "automaticConfirmation": false,
+  "la": [
+    {
+      "slide": 2,
+      "sourceName": "그리피스 천문대",
+      "manualEnglishQuery": "Griffith Observatory",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAntbE_lf5GwGQOmVHbLi3PkmHMaDZOh6buuSyN3_Rwf_2DqyWXwfDn4Uf8U0emOkrGMl8pU6D-hYIOFAZ83hjGKZywRlw197wR3HUTMw9jb005wMyc7wRNNUTkfOz2Y_dD4gMjQ27M2u-bef7RmzqJ9NHccgp",
+          "name": "Griffith Observatory",
+          "address": "Griffith Observatory, 2800 E Observatory Ave, Los Angeles, CA 90027, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.30039,
+            "latitude": 34.11838
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Griffith Observatory",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAntbE_lf5GwGQOmVHbLi3PkmHMaDZOh6buuSyN3_Rwf_2DqyWXwfDn4Uf8U0emOkrGMl8pU6D-hYIOFAZ83hjGKZywRlw197wR3HUTMw9jb005wMyc7wRNNUTkfOz2Y_dD4gMjQ27M2u-bef7RmzqJ9NHccgp",
+        "name": "Griffith Observatory",
+        "address": "Griffith Observatory, 2800 E Observatory Ave, Los Angeles, CA 90027, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.30039,
+          "latitude": 34.11838
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Griffith Observatory",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:18.026Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 3,
+      "sourceName": "산타모니카 피어",
+      "manualEnglishQuery": "Santa Monica Pier",
+      "originalStatus": 200,
+      "originalMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUA1I8HVg86qQyxgE-RmE7v0WhxJSkuOxt-77u_75kbP_u_JRTh04eSNwZBrgef0Vmbz4mdsNvsSFZhjp-GZmOyK4XGOiy4tJNXURcN6VJk5xehs82cVKbXfcNk812UQmvw3EnN4PaRJrVXOzRzQbUPKIiUwB-J",
+          "name": "Comfort Inn (컴포트 인 니어 산타모니카 피어)",
+          "address": "Comfort Inn, 2815 Santa Monica Blvd, Santa Monica, CA 90404, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.47242,
+            "latitude": 34.03532
+          },
+          "placeType": "PointOfInterest",
+          "englishName": null,
+          "koreanName": null
+        }
+      ],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUA3qMyVsfvABTHHXfgf7M9_yyzjvp9PrD2bqSr_LKX3dE_VIvL4O_dgNGgT6zOj2J1yBGtjd1DEpsQ0OCzikpdhOz-YCR24OhqL5Lli8UkkyI549KUbzwDv-7GTvZs9nFdCmJ2lG2y1mJCXzIgLJfrWK5Iicd9",
+          "name": "Santa Monica Pier",
+          "address": "Santa Monica Pier, 200 Santa Monica Pier, Santa Monica, CA 90401, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.49762,
+            "latitude": 34.0087
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Santa Monica Pier",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUA3qMyVsfvABTHHXfgf7M9_yyzjvp9PrD2bqSr_LKX3dE_VIvL4O_dgNGgT6zOj2J1yBGtjd1DEpsQ0OCzikpdhOz-YCR24OhqL5Lli8UkkyI549KUbzwDv-7GTvZs9nFdCmJ2lG2y1mJCXzIgLJfrWK5Iicd9",
+        "name": "Santa Monica Pier",
+        "address": "Santa Monica Pier, 200 Santa Monica Pier, Santa Monica, CA 90401, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.49762,
+          "latitude": 34.0087
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Santa Monica Pier",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:18.560Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 4,
+      "sourceName": "포인트 둠",
+      "manualEnglishQuery": "Point Dume",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAIXpwFqLpC-sMNNjYSwfKYKDIJb7il2mdpjQA2w37RGRjEH7qMwY2a6R39r-xT0PrhizVqqbC-NwtOIo3gLridd1Nc-7VxI3t2ffoYmYSpM4mUarhR7ccODW_LYMnZGDaFgCXQA8Z1rJD3WTVekO1GDqH2X2e",
+          "name": "Point Dume State Beach",
+          "address": "Point Dume State Beach, 6800 Westward Beach Rd, Malibu, CA 90265-4166, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.817,
+            "latitude": 34.01155
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Point Dume State Beach",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAvMQFJjbRnbs-m6m9B8rub8zWsr8RyHDxDcFIvfslXF5T1PCqnqWWgdwvzqJmfIsILwQoXybCPNWfXDN2LsS58CVPZVzyDlzZDACDlkazmAlTopFim6i5SjE-yXV1bFnFHLdOHI70zjULUtd2VvJ7sntgV0vU",
+          "name": "Point Dume Village",
+          "address": "Point Dume Village, 29169 Heathercliff Rd, Malibu, CA 90265, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.80952,
+            "latitude": 34.02124
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Point Dume Village",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAIXpwFqLpC-sMNNjYSwfKYKDIJb7il2mdpjQA2w37RGRjEH7qMwY2a6R39r-xT0PrhizVqqbC-NwtOIo3gLridd1Nc-7VxI3t2ffoYmYSpM4mUarhR7ccODW_LYMnZGDaFgCXQA8Z1rJD3WTVekO1GDqH2X2e",
+        "name": "Point Dume State Beach",
+        "address": "Point Dume State Beach, 6800 Westward Beach Rd, Malibu, CA 90265-4166, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.817,
+          "latitude": 34.01155
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Point Dume State Beach",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:19.095Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 5,
+      "sourceName": "브래드버리 빌딩",
+      "manualEnglishQuery": "Bradbury Building",
+      "originalStatus": 200,
+      "originalMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAccN2EgNwnAujpCZtL2j_mBQc2xpbnnlrHqwASaHQ2VnjkD4yccb5eALn2d6bv2r9xtBQxXK6TKbZpu4x6_tF1JWC9-6xj4I-LpitC2nPOM4vB8jgF52ty_1m5dIOcVrTT0qkqXFDKJuv0KOkFEod8YF_sQTO",
+          "name": "Bradbury Building (브래드버리 빌딩)",
+          "address": "Bradbury Building, 304 S Broadway, Los Angeles, CA 90013-1025, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.24793,
+            "latitude": 34.05076
+          },
+          "placeType": "PointOfInterest",
+          "englishName": null,
+          "koreanName": null
+        }
+      ],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAccN2EgNwnAujpCZtL2j_mBQc2xpbnnlrHqwASaHQ2VnjkD4yccb5eALn2d6bv2r9xtBQxXK6TKbZpu4x6_tF1JWC9-6xj4I-LpitC2nPOM4vB8jgF52ty_1m5dIOcVrTT0qkqXFDKJuv0KOkFEod8YF_sQTO",
+          "name": "Bradbury Building",
+          "address": "Bradbury Building, 304 S Broadway, Los Angeles, CA 90013-1025, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.24793,
+            "latitude": 34.05076
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Bradbury Building",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAccN2EgNwnAujpCZtL2j_mBQc2xpbnnlrHqwASaHQ2VnjkD4yccb5eALn2d6bv2r9xtBQxXK6TKbZpu4x6_tF1JWC9-6xj4I-LpitC2nPOM4vB8jgF52ty_1m5dIOcVrTT0qkqXFDKJuv0KOkFEod8YF_sQTO",
+        "name": "Bradbury Building",
+        "address": "Bradbury Building, 304 S Broadway, Los Angeles, CA 90013-1025, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.24793,
+          "latitude": 34.05076
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Bradbury Building",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:19.606Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 6,
+      "sourceName": "로데오 드라이브",
+      "manualEnglishQuery": "Rodeo Drive",
+      "originalStatus": 200,
+      "originalMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAdRPk-35YWKtMlvm7V2Y4WsTSLLDUeqMXXP-wGuLP4Mh3rEMVQUFtgElH_l98ax4eh2FLJEl2iHKxP-5JjFu2l7-9u3lcq1bNyVaw0xx1z5J2JXzgP9NtD7xwveCCW5Y4SfrkfuzU1P_dYNjj7JWc_hU0BH4T",
+          "name": "Orange Drive Hostel (오렌지 드라이브 호스텔)",
+          "address": "Orange Drive Hostel, 1764 N Orange Dr, Los Angeles, CA 90028, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.34133,
+            "latitude": 34.10351
+          },
+          "placeType": "PointOfInterest",
+          "englishName": null,
+          "koreanName": null
+        }
+      ],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAEIA7gpsBHZBF8F9urseatTY3LrahRb8yXsnR810mLNCm1YxUuHH9svG0SI8qYZ36E4HjI37nG5BdxF3O7alH9wiMosA4rewSJdLbsABQRc9Qg28KBOV16OoA5YOFBm6QUtPM4o",
+          "name": "Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90210, United States",
+          "address": "Rodeo Dr, Beverly Hills, CA 90210, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.40772,
+            "latitude": 34.07341
+          },
+          "placeType": "Street",
+          "englishName": "Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90210, United States",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAsBZtI5QEhxq5DR4appS83aeI5DV8oLDUoItln99qI1nvMKGr-E0ClPKsfU8Zkj30dmksjfyn2nH-JnzLGWLY2ZX5LtGPjDipQCYThB53mwsVWx9g4tXbREHKT1ayWfOBrcA0LuftWCKHmPeCZEo3NFfFSUzo",
+          "name": "Two Rodeo Drive",
+          "address": "Two Rodeo Drive, 9480 Dayton Way, Beverly Hills, CA 90210, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.40085,
+            "latitude": 34.06781
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Two Rodeo Drive",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAEIAfJMXo3rUgNFs3OlgLgDhwTxxaKmrqmtPoWxzecfWwTnRPwuoW-qnCCD-KLaqrTzPCjQQi6O3-jix9_MFwcogFK7wmNA5xN6JdMddJ9HpvWkt173qGUQGTwkMaSXwN_t7ArA",
+          "name": "N Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90210, United States",
+          "address": "N Rodeo Dr, Beverly Hills, CA 90210, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.40772,
+            "latitude": 34.07341
+          },
+          "placeType": "Street",
+          "englishName": "N Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90210, United States",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAEIAKnBtnJvwYt9_sst6tGH3tinX-4gpQ_lDvTgFdeENOu8dzG3oQwlLk5CeGgsjlKKY2pi-QrhQujKsqPx4F6O6AuhFNklKfmeAgxCEUNbzJtyz0DHeF01Ost0AqFKIRZeloN0",
+          "name": "S Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90212, United States",
+          "address": "S Rodeo Dr, Beverly Hills, CA 90212, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.40129,
+            "latitude": 34.06194
+          },
+          "placeType": "Street",
+          "englishName": "S Rodeo Dr, Beverly Hills (Los Angeles Metro Area), CA 90212, United States",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAEIAKy-YkuMebi68jB3nxCyhokOm-ox1egpp5NbYOsuVlJ5anmjAqDEY67VUN7gCTBExPgu2mmpOkOByEl37FreJCybDYR8efZO77sXjVwOKg8NbQW2_p3R0FnO5OrskXAeueLY",
+          "name": "Rodeo Dr, Garden Grove (Los Angeles Metro Area), CA 92840, United States",
+          "address": "Rodeo Dr, Garden Grove, CA 92840, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -117.90471,
+            "latitude": 33.78135
+          },
+          "placeType": "Street",
+          "englishName": "Rodeo Dr, Garden Grove (Los Angeles Metro Area), CA 92840, United States",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAEIA7gpsBHZBF8F9urseatTY3LrahRb8yXsnR810mLNCm1YxUuHH9svG0SI8qYZ36E4HjI37nG5BdxF3O7alH9wiMosA4rewSJdLbsABQRc9Qg28KBOV16OoA5YOFBm6QUtPM4o",
+        "name": "Rodeo Dr, Beverly Hills, CA 90210, United States",
+        "address": "Rodeo Dr, Beverly Hills, CA 90210, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.40772,
+          "latitude": 34.07341
+        },
+        "placeType": "Street",
+        "englishName": "Rodeo Dr, Beverly Hills, CA 90210, United States",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:20.116Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 7,
+      "sourceName": "허모사 비치 피어",
+      "manualEnglishQuery": "Hermosa Beach Pier",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAupMNqOvHUkvv7PcBjPyIAyV4jZ3uK3CevBnxkmbUd0CuwtbunZYOM9CUBhbupAnt3jpQYWFIpWXXWN-F46Dj5xVIppVse5LGGQ5v7xdzNfvqQCrPqLLuq4bq4bosy-1hBVZFl5SXdtbREHoL4H6vvPIOig2i",
+          "name": "Hermosa Beach (Hermosa Beach Pier)",
+          "address": "Hermosa Beach, 1 Pier Ave, Hermosa Beach, CA 90254-3731, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.40185,
+            "latitude": 33.86194
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Hermosa Beach (Hermosa Beach Pier)",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAupMNqOvHUkvv7PcBjPyIAyV4jZ3uK3CevBnxkmbUd0CuwtbunZYOM9CUBhbupAnt3jpQYWFIpWXXWN-F46Dj5xVIppVse5LGGQ5v7xdzNfvqQCrPqLLuq4bq4bosy-1hBVZFl5SXdtbREHoL4H6vvPIOig2i",
+        "name": "Hermosa Beach",
+        "address": "Hermosa Beach, 1 Pier Ave, Hermosa Beach, CA 90254-3731, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.40185,
+          "latitude": 33.86194
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Hermosa Beach",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:20.651Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 8,
+      "sourceName": "랜디스 도넛",
+      "manualEnglishQuery": "Randy’s Donuts",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUADvEMHUXrzcIqYZS6yU1bA4WyMLYqIU4024wzVXtle0JkoQ5rybZ6n38DKWgBL5YTn5gkOsZ2X-7uAhvBoIHaJwHfvhPS7Z7RKS21ukM2LZ5W1nmmhoTV2-iWJK4WdQ2bhj32xE7HOSCFdbSOy52oF_lvDvcg",
+          "name": "RANDY'S DONUTS",
+          "address": "RANDY'S DONUTS, 210 N Market St, Inglewood, CA 90301, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.35087,
+            "latitude": 33.96464
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "RANDY'S DONUTS",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUA-4zCiwkDyN3LTu6t1nLjDaalmrUhYtjJsTXma89c_quai5o71w81urTjQsc1jXc8JPHukC_VBp3WhoeksfeYkCYi413y2ZnrFMrSNAdx9cRgoAZJL1eejyHvZpe4hifEigla2MP9OyS30lxUyihLEqI0xvXH",
+          "name": "RANDY'S DONUTS",
+          "address": "RANDY'S DONUTS, 230 S Lake Ave, Pasadena, CA 91101-3002, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.13182,
+            "latitude": 34.1419
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "RANDY'S DONUTS",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAdmvT1mtF7saaHoxb3maPImfBmg-l4PbarYihLVsVcqckhNh6qTOqqGz_86jnjsjVQJdWlCX4FAf9lRDKu3qFo1P30nUJSahomPrQyaRGHjnXBTn-KWWt8QGZ8dQBuSmAmrdOZ8zOT9ppfG2HqrByIqG_E2MN",
+          "name": "RANDY'S DONUTS",
+          "address": "RANDY'S DONUTS, 805 W Manchester Blvd, Inglewood, CA 90301-1524, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.37045,
+            "latitude": 33.96185
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "RANDY'S DONUTS",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAdVvzkCzV9zqbYs5zzCDlV9-lACrUFX0Yospkze0Nm13tsiDFhYQF9r5uZlT3WxHsFhURrnbiJRlW8KirwWSLzKJEgu45gl051bzfpVWqxEjMZ7Qajw8qGLaU25F6WfUnwB_twJ3MjAfbILqBJShYs5IctJ6m",
+          "name": "RANDY'S DONUTS",
+          "address": "RANDY'S DONUTS, 805 W Manchester Blvd, Inglewood, CA 90301-1524, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.37045,
+            "latitude": 33.96185
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "RANDY'S DONUTS",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUADxPxNkfKC3S4oPPtnSI0R0jATAHOB11dAE1HwbL84JPgh-5U5XUx1JsfDXb3T59fr2U5uJXCiuj8H03waF2HJrBet0mVphgWuWWCMrlH1tCi4Auv8sOEpkxSxc8tw8WM701j8osIb4evADMZCGZSvEzQ0KOv",
+          "name": "RANDY'S DONUTS",
+          "address": "RANDY'S DONUTS, 4114 Sepulveda Blvd, Culver City, CA 90232, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.41262,
+            "latitude": 34.0072
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "RANDY'S DONUTS",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUADvEMHUXrzcIqYZS6yU1bA4WyMLYqIU4024wzVXtle0JkoQ5rybZ6n38DKWgBL5YTn5gkOsZ2X-7uAhvBoIHaJwHfvhPS7Z7RKS21ukM2LZ5W1nmmhoTV2-iWJK4WdQ2bhj32xE7HOSCFdbSOy52oF_lvDvcg",
+        "name": "RANDY'S DONUTS",
+        "address": "RANDY'S DONUTS, 210 N Market St, Inglewood, CA 90301, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.35087,
+          "latitude": 33.96464
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "RANDY'S DONUTS",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:21.176Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 9,
+      "sourceName": "유니언 역",
+      "manualEnglishQuery": "Union Station",
+      "originalStatus": 200,
+      "originalMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAS-1-kzQOpqXrdoBJEh0VBVqudEovdR8QBTUeyJVm_SFelvNOZV1NJpumddl4Hai70n2jOfs2w-J8nzd_eezPjoTh_CQ-osImKUsUeNn7RBMnKVciKnjxUWZcphpwGei-ICpnr9cShlIKy-39mPtmCmjaGanh",
+          "name": "Union Station (유니언 스테이션)",
+          "address": "Union Station, 800 N Alameda St, Los Angeles, CA 90012-2177, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.23649,
+            "latitude": 34.05635
+          },
+          "placeType": "PointOfInterest",
+          "englishName": null,
+          "koreanName": null
+        }
+      ],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAQes7y5_KDyEkVDmMKRsuJeyR1cPDGWDeQIK92637EfI2w9v28JaeyOvVhR_hmRfvDu3Tcc3sRyXL2LWx9WY6ruskWn--1obOmQu1LT8D8LHqpDZUoeAY_rpS8Lv3NtnCB49at7ukjHaZBZr116veXGIV2OmV",
+          "name": "Union Station",
+          "address": "Union Station, Los Angeles, CA 90012-2177, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.23645,
+            "latitude": 34.05602
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Union Station",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAQes7y5_KDyEkVDmMKRsuJeyR1cPDGWDeQIK92637EfI2w9v28JaeyOvVhR_hmRfvDu3Tcc3sRyXL2LWx9WY6ruskWn--1obOmQu1LT8D8LHqpDZUoeAY_rpS8Lv3NtnCB49at7ukjHaZBZr116veXGIV2OmV",
+        "name": "Union Station",
+        "address": "Union Station, Los Angeles, CA 90012-2177, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.23645,
+          "latitude": 34.05602
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Union Station",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:21.704Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 10,
+      "sourceName": "갬블 하우스",
+      "manualEnglishQuery": "Gamble House",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUA_qiTE8GMx9JrXnZb0Ee9ePDEwFtjwsI5HBWqH1C2hWA6mmvLvBTrT4aH9ZKsDWfnjuAeU3fP3nUa3LwokVVuEVLZFWxJcEVVbQHDEMsixAMQ_6fy_PYr1N_hNSZpkI5Vl30E9hDE426iOU4BEF8UUtxKI0Ir",
+          "name": "The Gamble House",
+          "address": "The Gamble House, 4 Westmoreland Pl, Pasadena, CA 91103, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.1609,
+            "latitude": 34.15167
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "The Gamble House",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUA_qiTE8GMx9JrXnZb0Ee9ePDEwFtjwsI5HBWqH1C2hWA6mmvLvBTrT4aH9ZKsDWfnjuAeU3fP3nUa3LwokVVuEVLZFWxJcEVVbQHDEMsixAMQ_6fy_PYr1N_hNSZpkI5Vl30E9hDE426iOU4BEF8UUtxKI0Ir",
+        "name": "The Gamble House",
+        "address": "The Gamble House, 4 Westmoreland Pl, Pasadena, CA 91103, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.1609,
+          "latitude": 34.15167
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "The Gamble House",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:22.211Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    },
+    {
+      "slide": 11,
+      "sourceName": "무소 앤 프랭크 그릴",
+      "manualEnglishQuery": "Musso & Frank Grill",
+      "originalStatus": 200,
+      "originalMatches": [],
+      "refinedStatus": 200,
+      "refinedMatches": [
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAdK548j-XKlLAGvtqri9nfv1zbHfT25YgVJyn9pB6xflTQxwXwldN3c5KpoNNXqnhMFhqcO2sFYmSIK0q9mYfZVhU1QLUht-bKXUtGkQ4iBlYS74fZwvsTF7eWj816a7aV6wVdh0LeFXr1EGg4OTXXPgEzTqd",
+          "name": "Musso & Frank Grill",
+          "address": "Musso & Frank Grill, 6667 Hollywood Blvd, Los Angeles, CA 90028-6220, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.33539,
+            "latitude": 34.10185
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Musso & Frank Grill",
+          "koreanName": null
+        },
+        {
+          "provider": "amazon-location",
+          "placeId": "AQAAAFUAmleMgePPysk0U239PKq2WmW9EKCDUzn8Q2uwbxJdtec3gAndWEpgscwFt7s_KQd0ouVzroaLjZYa75QzLBVvPGxxpfEmilnW5erzTvIFXMNLkU8a1EiaV0UKAfXiHQPkZetMVflAEgCGSusLx1xg5KTC_vgr",
+          "name": "Musso & Frank Grill",
+          "address": "Musso & Frank Grill, 1735 N Cherokee Ave, Los Angeles, CA 90028-4806, United States",
+          "countryCode": "US",
+          "countryName": "United States",
+          "coordinates": {
+            "longitude": -118.33516,
+            "latitude": 34.10217
+          },
+          "placeType": "PointOfInterest",
+          "englishName": "Musso & Frank Grill",
+          "koreanName": null
+        }
+      ],
+      "detailStatus": 200,
+      "detail": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAdK548j-XKlLAGvtqri9nfv1zbHfT25YgVJyn9pB6xflTQxwXwldN3c5KpoNNXqnhMFhqcO2sFYmSIK0q9mYfZVhU1QLUht-bKXUtGkQ4iBlYS74fZwvsTF7eWj816a7aV6wVdh0LeFXr1EGg4OTXXPgEzTqd",
+        "name": "Musso & Frank Grill",
+        "address": "Musso & Frank Grill, 6667 Hollywood Blvd, Los Angeles, CA 90028-6220, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.33539,
+          "latitude": 34.10185
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Musso & Frank Grill",
+        "koreanName": null,
+        "retrievedAt": "2026-11-10T22:27:22.724Z"
+      },
+      "error": null,
+      "note": "Top match fetched for inspection only; not automatically user-confirmed or saved."
+    }
+  ],
+  "korea": [
+    {
+      "slide": 2,
+      "sourceName": "어달삼거리",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 3,
+      "sourceName": "111호 프로젝트",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 4,
+      "sourceName": "하평해변",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 5,
+      "sourceName": "무코야 선물가게",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 6,
+      "sourceName": "논골담길",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 7,
+      "sourceName": "도째비골 스카이밸리&해랑전망대",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 8,
+      "sourceName": "묵호다방",
+      "status": 422,
+      "code": "unsupported_country"
+    },
+    {
+      "slide": 9,
+      "sourceName": "브릭베이커스 동해",
+      "status": 422,
+      "code": "unsupported_country"
+    }
+  ],
+  "unfilteredKorea": {
+    "status": 200,
+    "matches": [],
+    "excludedResults": 1,
+    "unsupportedCountries": [
+      "KR"
+    ],
+    "attribution": "Search results provided by Amazon Location Service"
+  }
+}

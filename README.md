@@ -4,7 +4,7 @@ CS 446 final project UI built with React, TypeScript, Vite, and Tailwind CSS.
 
 ## Run locally
 
-Use Node 22.12+ (or Node 20.19+). With nvm: `nvm use`.
+Use Node 22.14+ for the local API and tests (which use native TypeScript stripping). With nvm: `nvm use`.
 
 ```sh
 npm ci
@@ -74,7 +74,7 @@ The mock resolver recognizes only the supplied sample places. Other well-formed 
 
 Use `/?state=ready&scenario=save_error` to simulate one failed save followed by a successful retry. Use `/?state=entry&scenario=lookup_error` to simulate one failed lookup. Draft fields survive retries. `?scenario=not_found` exercises manual lookup fallback. Clipboard buttons use the browser clipboard API and display a fallback message when permission is denied.
 
-Sidebar counts, collection selection, search results, and map pins follow the in-memory sample records. Desktop detail pins switch the dossier without closing it; the map remains an illustrative image, not geographic positioning or automatic panning. Notes can be edited or cancelled, and saved edits survive navigation within this page session. Opening hours are unverified; coordinates, dates, and imagery remain design samples. Live place metadata, transit layers, account settings, and source-link integration belong to the backend/map follow-up work.
+Sidebar counts, collection selection, search results, and map pins follow the in-memory sample records. Desktop detail pins switch the dossier without closing it; the map remains an illustrative image, not geographic positioning or automatic panning. Notes can be edited or cancelled, and saved edits survive navigation within this page session. Opening hours are unverified; coordinates, dates, and imagery remain design samples. The sample map remains separate from the live place-confirmation flow below. Persistence, transit layers and account settings belong to follow-up work.
 
 ## Browser checks
 
@@ -96,8 +96,37 @@ npm run test:unit
 npm run test:import-ui
 ```
 
-`test:import-ui` uses synthetic API fixtures and makes no AWS calls. `npm run extract:instagram -- DfFCMjzk02S` is an explicit, billable live experiment. The local API caps requests at three per process.
+`test:import-ui` uses synthetic API fixtures and makes no AWS calls. `npm run extract:instagram -- DfFCMjzk02S` is an explicit, billable live experiment. The local API caps Instagram imports at three per process; place requests have a separate cap.
 
 ### Place display names
 
-Extraction preserves the original `name` and `evidence`; user changes are stored separately as `correctedName`. The shared `getPlaceDisplayName` policy selects Korean names for confirmed South Korean locations (`KR`) and English names for other confirmed countries, falling back to the correction/original when the requested localized name is unavailable. The country must come from confirmed place-search results, never from the language of an Instagram post. Location search is not connected yet, so current candidates continue to show their original or user-corrected names. No automatic translation or sample-specific spelling replacement is performed.
+Extraction preserves the original `name` and `evidence`; user changes are stored separately as `correctedName`. The shared `getPlaceDisplayName` policy selects Korean names for confirmed South Korean locations (`KR`) and English names for other confirmed countries, falling back to the correction/original when the requested localized name is unavailable. The country must come from confirmed place-search results, never from the language of an Instagram post. The opt-in import review now connects to Amazon Location search and details. Explicit confirmation applies the provider name while preserving OCR evidence. Amazon Location does not support detailed South Korean places; those candidates cannot be confirmed with this provider. Korean overseas search queries are automatically converted to English through Bedrock; original OCR text is never rewritten. There are no sample-specific runtime substitutions.
+
+
+## Place search and confirmation (issue #11)
+
+The import review supports searching by name/region/country, comparing addresses, selecting a match, and explicitly confirming fresh AWS place details. Each photo heading can have multiple locations or be skipped. Confirmation retains the provider ID, coordinates, country, original Instagram URL, slide numbers, OCR evidence and user correction. Closing/reopening retains this draft; refreshing clears it. **Done reviewing does not save to the database or place pins on the map.**
+
+```sh
+# Terminal 1: AWS credentials remain server-side (normal AWS credential chain)
+npm run dev:api
+# Terminal 2
+VITE_ENABLE_INSTAGRAM_PREVIEW=true npm run dev
+```
+
+Requires Bedrock access for new imports and Korean query conversion and `geo-places:SearchText` / `geo-places:GetPlace` for locations. The scoped policy template is [docs/aws/place-search-policy.json](docs/aws/place-search-policy.json); no IAM role or cloud deployment is created by these commands. Export server settings in your shell; the Node API does not automatically load Vite `.env` files.
+
+**Known limits:** Automatic English conversion can be uncertain or wrong, especially when OCR misspells a name. The UI shows the search query; correct it and inspect the address when needed. English localization may fall back to the provider's default name. South Korea detailed POI/address coverage is unsupported, and country-center results are rejected. Same-name branches require explicit review. Duplicate protection uses provider IDs, so distinct IDs for the same physical venue still require review.
+
+The local API caps Instagram imports at 3 and place API requests at 100 per process, with separate concurrency limits. Restarting resets these limits; they are not an AWS billing cap. AWS calls are billable and use Storage intended use. This loopback development API is not a public production API.
+
+See [the implementation and live validation report](docs/validation/place-confirmation.md) for coverage, evidence and remaining work. `npm run test:unit` and `npm run test:import-ui` use synthetic provider fixtures and do not call AWS.
+
+
+### Automatic English search queries
+
+For Korean-containing name/region input, the server asks Bedrock for an English search query and region, then searches Amazon Location. English-only input bypasses the model. Explicit KR country filters remain unsupported. Uncertain/malformed output or a model outage falls back to the original input with an explanatory message; cancellation still stops the request. Successful conversions are cached by query, region and country for 15 minutes (at most 100 entries). Each uncached conversion makes one billable Bedrock request within the existing place-request quota.
+
+Optional server setting `PINWISH_QUERY_MODEL` overrides the query model; otherwise it uses `PINWISH_BEDROCK_MODEL` or the existing Qwen3-VL default. Requires `bedrock:InvokeModel` permission on that model, in addition to the Places-only policy template. No credentials belong in browser variables. Confirmed English labels come from AWS place details, not the generated search guess; provider localization fallback remains possible.
+
+Live original LA OCR validation: 9/10 inputs produced English queries with relevant candidates. The misread `포인트 듑` was left for review rather than silently guessed. Search results remain candidates, not automatic venue confirmations. See [live evidence](docs/validation/english-query-live.json).

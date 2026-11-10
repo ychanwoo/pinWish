@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-11-10T22:33:57.881Z",
+  "importSource": "Replayed recorded real LA extraction; no new image extraction call",
+  "placeSource": "Real Bedrock query conversion and Amazon Location search/details via local API and Vite proxy",
+  "query": "랜디스 도넛",
+  "conversion": "English search: Randys Donuts · Inglewood, CA. Original text is preserved. Check the address before confirming.",
+  "region": "Inglewood, CA",
+  "selection": "Explicitly selected 805 W Manchester Blvd instead of automatically taking first result",
+  "confirmedText": "RANDY'S DONUTS\n\nRANDY'S DONUTS, 805 W Manchester Blvd, Inglewood, CA 90301-1524, United States\n\nUnited States (US)\n\nLocation confirmed for this session. Not saved to the map.\n\nChange location",
+  "calls": [
+    {
+      "path": "/api/places/search",
+      "status": 200
+    },
+    {
+      "path": "/api/places/details",
+      "status": 200
+    }
+  ],
+  "mobileHorizontalOverflow": false,
+  "persisted": false,
+  "mapConnected": false
+}

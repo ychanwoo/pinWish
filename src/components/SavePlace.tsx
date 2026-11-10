@@ -1,3 +1,5 @@
+import { PlaceConfirmation } from './PlaceConfirmation'
+import type { CandidateLocationDraft } from '../lib/place-search'
 import { isInstagramPreview, importErrorMessages, type InstagramPreview } from '../lib/instagram-preview'
 import { getPlaceDisplayName } from '../lib/place-name'
 import { isUrlInput, parseInstagramLink } from '../lib/instagram'
@@ -22,6 +24,7 @@ export interface SaveDraft {
   manual: boolean
   preview?: InstagramPreview | null
   importError?: string
+  locationReviews?: Record<number, CandidateLocationDraft>
 }
 interface Props {
   draft: SaveDraft | null
@@ -79,6 +82,7 @@ export function SavePlace({
     draft?.manual ?? initialState === 'not_found',
   )
   const [preview, setPreview] = useState<InstagramPreview | null>(draft?.preview ?? null)
+  const [locationReviews, setLocationReviews] = useState<Record<number, CandidateLocationDraft>>(draft?.locationReviews ?? {})
   const [editingCandidate, setEditingCandidate] = useState<number | null>(null)
   const [candidateName, setCandidateName] = useState('')
   const [importError, setImportError] = useState(draft?.importError ?? '')
@@ -106,6 +110,7 @@ export function SavePlace({
             manual,
             preview,
             importError,
+            locationReviews,
           },
     )
     onClose()
@@ -138,7 +143,7 @@ export function SavePlace({
       if (e.key === 'Tab') {
         const elements = [
           ...(dialog.current?.querySelectorAll<HTMLElement>(
-            'a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]',
+            'summary, a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]',
           ) ?? []),
         ].filter((el) => el.getClientRects().length > 0)
         const first = elements[0],
@@ -181,6 +186,7 @@ export function SavePlace({
     if (isUrlInput(value) && value !== sampleLink && value !== 'https://maps.app.goo.gl/grandcentral') {
       setManual(false)
       setPreview(null)
+      setLocationReviews({})
       setImportError('')
       if (import.meta.env.VITE_ENABLE_INSTAGRAM_PREVIEW !== 'true') {
         setState('import_unavailable')
@@ -289,10 +295,15 @@ export function SavePlace({
     cancelPending()
     setManual(false)
     setPreview(null)
+    setLocationReviews({})
     setImportError('')
     setState('entry')
   }
   const instagramSource = parseInstagramLink(input)
+  const confirmedIds = Object.values(locationReviews).flatMap(review => review.targets.flatMap(target =>
+    target.status === 'confirmed' && target.confirmed ? [target.confirmed.placeId] : []))
+  const reviewComplete = !!preview?.result.places.length && preview.result.places.every((_, index) =>
+    locationReviews[index]?.targets.length && locationReviews[index].targets.every(target => target.status !== 'pending'))
   const messages: Partial<Record<SaveState, [string, string]>> = {
     resolving: instagramSource.ok && input.trim() !== sampleLink ? [
       'Reading post photos…',
@@ -315,7 +326,7 @@ export function SavePlace({
       importError ? 'Couldn’t analyze this post' : 'Instagram import is not connected yet',
       importError || 'Your link format is valid. We have not retrieved the post or its photos. No places have been added. You can open the original post or keep this link for later.',
     ],
-    import_review: ['Review extracted place names', 'Experimental results: names may be missing or incorrect. Locations have not been verified and nothing has been saved to your map.'],
+    import_review: ['Review places and confirm locations', 'Check extracted names, search for the intended locations, and confirm their addresses. Your review stays in this session; nothing is saved to the map yet.'],
     lookup_error: [
       'Couldn’t check this link',
       'Check your connection and try again. Your link is still here.',
@@ -390,7 +401,7 @@ export function SavePlace({
           className="save-form"
           onSubmit={(e) => {
             e.preventDefault()
-            if (!busy && !confirmed) {
+            if (!busy && !confirmed && state !== 'import_review') {
               if (hasPlace) save()
               else void lookup()
             }
@@ -422,24 +433,28 @@ export function SavePlace({
             {state === 'import_review' && preview && (
               <section aria-label="Extracted place candidates" className="import-candidates">
                 <p>{preview.fetchedImages} photos analyzed · {preview.result.places.length} place candidates</p>
-                <p className="field-help">Original names are shown until locations are confirmed.</p>
+                <p className="field-help">Original names are preserved. Confirmed locations use Korean names in South Korea and English elsewhere when available.</p>
                 {preview.result.places.length === 0 && <p>No readable place names were extracted. This does not mean the post contains no places. Review the original post.</p>}
                 <ol>{preview.result.places.map((place, index) => (
-                  <li key={`${place.name}-${index}`}>
+                  <li key={`${place.name}-${index}`} aria-label={`Place candidate ${index + 1}`}>
                     {editingCandidate === index ? (
                       <div className="candidate-edit">
+                        <p>Changing this name resets its location review.</p>
                         <label htmlFor={`candidate-name-${index}`}>Place name</label>
                         <input id={`candidate-name-${index}`} className="link-input" value={candidateName} maxLength={200}
                           onChange={event => setCandidateName(event.target.value)} />
                         <button type="button" disabled={!candidateName.trim()} onClick={() => {
                           setPreview({ ...preview, result: { ...preview.result, places: preview.result.places.map((p, i) =>
                             i === index ? { ...p, correctedName: candidateName.trim() } : p) } })
+                          setLocationReviews(previous => { const next = { ...previous }; delete next[index]; return next })
                           setEditingCandidate(null)
                         }}>Keep name correction</button>
                         <button type="button" onClick={() => setEditingCandidate(null)}>Cancel correction</button>
                       </div>
                     ) : <>
-                      <strong>{getPlaceDisplayName({ sourceName: place.name, correctedName: place.correctedName })}</strong>{' '}
+                      <strong>{locationReviews[index]?.targets.length === 1 && locationReviews[index].targets[0].status === 'confirmed'
+                        ? locationReviews[index].targets[0].confirmed?.displayName
+                        : getPlaceDisplayName({ sourceName: place.name, correctedName: place.correctedName })}</strong>{' '}
                       <button type="button" aria-label={`Edit candidate ${index + 1} name`} onClick={() => {
                         setCandidateName(getPlaceDisplayName({ sourceName: place.name, correctedName: place.correctedName })); setEditingCandidate(index)
                       }}>Edit name</button>
@@ -448,13 +463,18 @@ export function SavePlace({
                     <p>{place.regionHint || 'Region needs confirmation'} · Photos {place.slides.join(', ')}</p>
                     <small>Read from photo: {place.evidence}</small>
                     {place.correctedName && <p className="field-help">Originally extracted name: {place.name}</p>}
+                    {instagramSource.ok && <PlaceConfirmation key={`${index}-${place.correctedName ?? ''}`} candidateNumber={index + 1}
+                      source={{ instagram: instagramSource.source, slides: place.slides, extractedName: place.name,
+                        correctedName: place.correctedName, evidence: place.evidence }}
+                      initialRegion={place.regionHint} value={locationReviews[index]} confirmedIds={confirmedIds}
+                      onChange={review => setLocationReviews(previous => ({ ...previous, [index]: review }))} />}
                     {instagramSource.ok && <p>{place.slides.map(slide => (
                       <a key={slide} href={`${instagramSource.source.canonicalUrl}?img_index=${slide}`} target="_blank" rel="noopener noreferrer">Review photo {slide}{' '}</a>
                     ))}</p>}
                   </li>
                 ))}</ol>
                 {preview.result.ignoredSlides.length > 0 && <p>No candidate extracted from photos {preview.result.ignoredSlides.join(', ')}. These may be covers, promotions or unreadable text; check the original.</p>}
-                <p>Location search and saving these candidates will be connected in the next step.</p>
+                <p>Confirm each location or skip it. For a photo listing multiple places, add a separate location search for each. Saving to a live map comes next.</p>
                 {instagramSource.ok && <a href={instagramSource.source.canonicalUrl} target="_blank" rel="noopener noreferrer">Open original Instagram post</a>}
               </section>
             )}
@@ -607,16 +627,16 @@ export function SavePlace({
             </button>
             <button
               className="primary"
-              type={confirmed ? 'button' : 'submit'}
-              disabled={busy || state === 'import_review'}
-              onClick={confirmed ? () => onView(resolved) : undefined}
+              type={confirmed || state === 'import_review' ? 'button' : 'submit'}
+              disabled={busy || (state === 'import_review' && !reviewComplete)}
+              onClick={state === 'import_review' ? handleClose : confirmed ? () => onView(resolved) : undefined}
             >
               {state === 'ready' && (
                 <span className="desktop-only">
                   <Icon name="41542" />
                 </span>
               )}
-              {state === 'import_review' ? 'Location confirmation pending' : action}
+              {state === 'import_review' ? reviewComplete ? 'Done reviewing' : 'Location confirmation pending' : action}
             </button>
             {['resolving', 'not_found', 'lookup_error', 'import_unavailable', 'import_review', 'success'].includes(
               state,
