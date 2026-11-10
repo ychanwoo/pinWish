@@ -25,3 +25,11 @@ test('unconfirmed or unavailable localized names preserve source/correction with
   assert.equal(getPlaceDisplayName({ ...source, confirmedLocation: { countryCode: 'US', englishName: 'Point Dume' } }), 'Point Dume')
   assert.equal(source.sourceName, '포인트 듑')
 })
+
+test('overseas visible labels never fall back to Korean while Korean places can retain it', async () => {
+  const { visiblePlaceText } = await import('../../src/lib/place-name.ts')
+  assert.equal(visiblePlaceText('그리피스 천문대', 'US', 'Place 1'), 'Place 1')
+  assert.equal(visiblePlaceText('Griffith Observatory', 'US'), 'Griffith Observatory')
+  assert.equal(visiblePlaceText('묵호다방', 'KR'), '묵호다방')
+  assert.equal(visiblePlaceText('東京タワー', 'JP', 'Tokyo Tower'), 'Tokyo Tower')
+})

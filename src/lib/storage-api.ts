@@ -1,3 +1,4 @@
+import { visiblePlaceText } from './place-name'
 import {
   accessToken,
   cloudConfig,
@@ -120,7 +121,7 @@ export const deleteSaved = (place: SavedPlace) =>
 export function toUIPlace(item: SavedPlace): import('../data/places').Place {
   return {
     id: item.id,
-    name: item.displayName,
+    name: visiblePlaceText(item.displayName, item.countryCode, visiblePlaceText(item.name, item.countryCode)),
     kind: item.placeType === 'PointOfInterest' ? 'Saved place' : item.placeType,
     district: item.countryName,
     category: 'Other',

@@ -321,8 +321,8 @@ export function PlaceDetail({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Instagram · photos {source.slides.join(', ')} ·{' '}
-                      {source.correctedName || source.extractedName}
+                      Instagram · photos {source.slides.join(', ')}
+                      {place.saved?.countryCode === 'KR' ? ` · ${source.correctedName || source.extractedName}` : ''}
                     </a>
                   ))
                 ) : (

@@ -2864,3 +2864,14 @@ a {
 
 @media(max-width:767px){.cloud-enabled .workspace{min-height:calc(100dvh - 58px)}.cloud-enabled .cloud-list-status{flex-shrink:0}}
 
+.review-footer .desktop-cancel{background:transparent;border:1px solid #b9beb8;color:#575e57}
+.review-footer .save-edit-link{background:transparent;border:0;color:var(--pw-brand-primary);text-decoration:underline;text-underline-offset:3px;order:3;flex-basis:100%;padding:4px 0;min-height:32px;text-align:right}
+.review-footer .primary:disabled{background:#ead3cd;color:#75483f;opacity:1;cursor:not-allowed}
+.review-footer .primary:not(:disabled){background:var(--pw-brand-primary);color:white}
+@media(max-width:767px){.review-footer .save-edit-link{text-align:center;flex-basis:auto}}
+
+.automatic-places .retry-missing-button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 18px;border:1px solid var(--pw-brand-primary);border-radius:8px;background:transparent;color:var(--pw-brand-primary);font-size:14px;font-weight:600;line-height:20px;cursor:pointer;transition:background-color .15s}
+.automatic-places .retry-missing-button:hover:not(:disabled){background:#f6e9e5}
+.automatic-places .retry-missing-button:focus-visible{outline:2px solid var(--pw-brand-primary);outline-offset:3px}
+.automatic-places .retry-missing-button:disabled{opacity:.5;cursor:wait}
+@media(max-width:767px){.automatic-places .retry-missing-button{width:100%;min-height:44px}}
