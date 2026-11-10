@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-10T22:48:18.979Z",
+  "realServices": [
+    "Cognito sign-in",
+    "Bedrock query conversion",
+    "Amazon Location search/details",
+    "API Gateway",
+    "Lambda",
+    "DynamoDB"
+  ],
+  "replayed": "Previously recorded real Instagram extraction only",
+  "checks": [
+    "Signed-out link triggers auth modal",
+    "Original link retained after sign-in",
+    "Korean query searched and location explicitly confirmed",
+    "Confirmed place persisted",
+    "Reload retained record and note",
+    "Note edit persisted across sign-out and new sign-in",
+    "Explicit delete removed record"
+  ],
+  "emailDeliveryVerified": false
+}
