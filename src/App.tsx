@@ -1,4 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { AuthModal } from './components/AuthModal'
+import {
+  cloudEnabled,
+  getSession,
+  subscribeSession,
+  signOut,
+} from './lib/cloud-auth'
+import {
+  listSaved,
+  saveConfirmed,
+  patchSaved,
+  deleteSaved,
+  toUIPlace,
+} from './lib/storage-api'
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import {
   initialPlaces,
   inCollection,
@@ -35,8 +55,18 @@ const initialSave = saveStates.includes(params.get('state') as SaveState)
   ? (params.get('state') as SaveState)
   : null
 function App() {
+  const session = useSyncExternalStore(subscribeSession, getSession)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authReason, setAuthReason] = useState('')
+  const [resumeSave, setResumeSave] = useState(false)
+  const [cloudLoading, setCloudLoading] = useState(false)
+  const [cloudError, setCloudError] = useState('')
+  const [cursor, setCursor] = useState<string | null>(null)
+  const loadGeneration = useRef(0)
   const [view, setView] = useState<View>(initialView)
-  const [places, setPlaces] = useState(initialPlaces)
+  const [places, setPlaces] = useState<Place[]>(
+    cloudEnabled ? [] : initialPlaces,
+  )
   const [selectedId, setSelectedId] = useState(
     params.get('place') || initialPlaces[0].id,
   )
@@ -51,6 +81,13 @@ function App() {
     'Weekend ideas',
   ])
   const [draft, setDraft] = useState<SaveDraft | null>(null)
+  const draftOwner = useRef<string | null>(null)
+  const keepDraft = (value: SaveDraft | null) => {
+    setDraft(value)
+    draftOwner.current = value
+      ? (getSession()?.sub ?? draftOwner.current)
+      : null
+  }
   const [saveState, setSaveState] = useState<SaveState | null>(initialSave)
   const [notice, setNotice] = useState('')
   const [newCollection, setNewCollection] = useState(false)
@@ -59,6 +96,64 @@ function App() {
   const collectionDialog = useModalFocus(newCollection, () =>
     setNewCollection(false),
   )
+  const loadPlaces = useCallback(async (next: string | null = null) => {
+    if (!getSession()) return
+    const owner = getSession()!.sub,
+      generation = ++loadGeneration.current
+    setCloudLoading(true)
+    setCloudError('')
+    try {
+      const result = await listSaved(next)
+      if (getSession()?.sub !== owner || generation !== loadGeneration.current)
+        return
+      const incoming = result.items.map(toUIPlace)
+      setPlaces((previous) =>
+        next
+          ? [
+              ...previous.filter((p) => !incoming.some((i) => i.id === p.id)),
+              ...incoming,
+            ]
+          : incoming,
+      )
+      setCollections((previous) => [
+        ...new Set([...previous, ...incoming.map((p) => p.collection)]),
+      ])
+      setCursor(result.cursor)
+      if (!next && incoming.length)
+        setCollection((current) =>
+          incoming.some((p) => p.collection === current)
+            ? current
+            : incoming[0].collection,
+        )
+    } catch (e) {
+      if (getSession()?.sub === owner && generation === loadGeneration.current)
+        setCloudError(e instanceof Error ? e.message : 'Could not load places.')
+    } finally {
+      if (generation === loadGeneration.current) setCloudLoading(false)
+    }
+  }, [])
+  useEffect(() => {
+    if (!cloudEnabled) return
+    // Clear private data when the external authentication session changes.
+    loadGeneration.current++
+    // eslint-disable-next-line react/set-state-in-effect
+    setPlaces([])
+    setCursor(null)
+    setCloudError('')
+    setCloudLoading(false)
+    setView('list')
+    if (
+      session?.sub &&
+      draftOwner.current &&
+      draftOwner.current !== session.sub
+    ) {
+      setDraft(null)
+      draftOwner.current = null
+      setSaveState(null)
+      setResumeSave(false)
+    }
+    if (session?.sub) void loadPlaces()
+  }, [session?.sub, loadPlaces])
   const changeCollection = (name: string) => {
     setCollection(name)
     setCategory('All')
@@ -103,10 +198,36 @@ function App() {
     navigate('detail')
     setTimeout(() => document.getElementById('place-heading')?.focus(), 0)
   }
-  const updatePlace = (place: Place, changes: Partial<Place>) =>
+  const updatePlace = async (place: Place, changes: Partial<Place>) => {
+    if (cloudEnabled) {
+      if (!place.saved) {
+        setNotice('Only confirmed cloud places can be updated.')
+        return false
+      }
+      try {
+        const allowed = {
+          ...('note' in changes ? { note: changes.note } : {}),
+          ...('visited' in changes ? { visited: changes.visited } : {}),
+          ...('bookmarked' in changes
+            ? { bookmarked: changes.bookmarked }
+            : {}),
+        }
+        const result = await patchSaved(place.saved, allowed)
+        setPlaces((items) =>
+          items.map((p) => (p.id === place.id ? toUIPlace(result.item) : p)),
+        )
+        setNotice('Changes saved.')
+        return true
+      } catch (e) {
+        setNotice(e instanceof Error ? e.message : 'Update failed.')
+        return false
+      }
+    }
     setPlaces((items) =>
       items.map((p) => (p.id === place.id ? { ...p, ...changes } : p)),
     )
+    return true
+  }
   const bookmark = (place: Place) =>
     updatePlace(place, { bookmarked: !place.bookmarked })
   const directions = (place: Place) =>
@@ -138,11 +259,51 @@ function App() {
   const mapSelected =
     mapPlaces.find((p) => p.id === selected.id) ?? mapPlaces[0] ?? selected
   return (
-    <div className={`app-shell view-${view} ${saveState ? 'has-save' : ''}`}>
+    <div
+      className={`app-shell view-${view} ${saveState ? 'has-save' : ''} ${cloudEnabled ? 'cloud-enabled' : ''}`}
+    >
       <a className="skip-link" href="#main-content">
         Skip to places
       </a>
-      <div inert={Boolean(saveState || newCollection)}>
+      {cloudEnabled && (
+        <header
+          className="account-bar"
+          inert={Boolean(saveState || authOpen || newCollection)}
+        >
+          <span>pinWish</span>
+          <div>
+            {session ? (
+              <>
+                <span className="account-email">{session.email}</span>
+                <button
+                  onClick={() => {
+                    setDraft(null)
+                    setSaveState(null)
+                    setPlaces([])
+                    setCollections(['LA weekend', 'Weekend ideas'])
+                    setSelectedId('')
+                    setView('list')
+                    void signOut()
+                  }}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <button
+                className="primary small"
+                onClick={() => {
+                  setAuthReason('')
+                  setAuthOpen(true)
+                }}
+              >
+                Sign in
+              </button>
+            )}
+          </div>
+        </header>
+      )}
+      <div inert={Boolean(saveState || newCollection || authOpen)}>
         <DesktopNavigation
           view={view}
           places={places}
@@ -155,10 +316,66 @@ function App() {
           onCollection={changeCollection}
           onSave={() => setSaveState('entry')}
           onNotice={setNotice}
+          onAccount={
+            cloudEnabled
+              ? () => {
+                  if (session) setNotice(`Signed in as ${session.email}`)
+                  else {
+                    setAuthReason('')
+                    setAuthOpen(true)
+                  }
+                }
+              : undefined
+          }
         />
         <main className="workspace" id="main-content">
           {view !== 'detail' && !view.startsWith('list_') && (
-            <MobileHeader view={view} onView={navigate} onNotice={setNotice} />
+            <MobileHeader
+              view={view}
+              onView={navigate}
+              onNotice={setNotice}
+              onAccount={
+                cloudEnabled
+                  ? () => {
+                      if (!session) setAuthOpen(true)
+                      else setNotice(`Signed in as ${session.email}`)
+                    }
+                  : undefined
+              }
+            />
+          )}
+          {cloudEnabled && view === 'list' && (
+            <section
+              className="cloud-list-status"
+              aria-label="Cloud storage status"
+            >
+              {!session ? (
+                <p>Sign in to keep your saved places across visits.</p>
+              ) : (
+                <>
+                  <button
+                    disabled={cloudLoading}
+                    onClick={() => void loadPlaces()}
+                  >
+                    Refresh places
+                  </button>
+                  {cloudLoading && <p role="status">Loading your places…</p>}
+                  {cloudError && (
+                    <p role="alert" className="field-error">
+                      {cloudError}
+                    </p>
+                  )}
+                  {cursor && (
+                    <button
+                      disabled={cloudLoading}
+                      onClick={() => void loadPlaces(cursor)}
+                    >
+                      Load more places
+                    </button>
+                  )}
+                </>
+              )}
+            </section>
           )}
           {view === 'list' && (
             <PlaceList
@@ -191,9 +408,22 @@ function App() {
                 refreshTimer.current = setTimeout(() => navigate('list'), 1000)
               }}
             />
+          ) : cloudEnabled ? (
+            <section
+              className="cloud-map-placeholder"
+              aria-label="Map integration pending"
+            >
+              <div>
+                <h2>A map for your saved places</h2>
+                <p>
+                  Manage your places in the list. The interactive map is coming
+                  next.
+                </p>
+              </div>
+            </section>
           ) : (
             <MapView
-              places={view === 'empty' ? [] : mapPlaces}
+              places={view === 'empty' || cloudEnabled ? [] : mapPlaces}
               selected={mapSelected}
               mode={
                 view === 'list'
@@ -214,29 +444,39 @@ function App() {
               onDirections={directions}
             />
           )}
-          {view === 'detail' && (
-            <PlaceDetail
-              key={selected.id}
-              place={selected}
-              places={places}
-              onClose={() => navigate(returnView.current)}
-              onBookmark={() => bookmark(selected)}
-              onVisited={() =>
-                updatePlace(selected, {
-                  visited: !selected.visited,
-                  badge: selected.visited ? 'Must try' : 'Visited',
-                })
-              }
-              onShare={() => void share(selected)}
-              onDirections={() => directions(selected)}
-              onNote={(note) => {
-                updatePlace(selected, { note })
-                setNotice('Note updated for this preview.')
-              }}
-              onNotice={setNotice}
-              onSelect={(id) => setSelectedId(id)}
-            />
-          )}
+          {view === 'detail' &&
+            (!cloudEnabled || places.some((p) => p.id === selectedId)) && (
+              <PlaceDetail
+                key={selected.id}
+                place={selected}
+                places={places}
+                onClose={() => navigate(returnView.current)}
+                onBookmark={() => bookmark(selected)}
+                onVisited={() =>
+                  updatePlace(selected, {
+                    visited: !selected.visited,
+                    badge: selected.visited ? 'Must try' : 'Visited',
+                  })
+                }
+                onShare={() => void share(selected)}
+                onDirections={() => directions(selected)}
+                onNote={async (note) => updatePlace(selected, { note })}
+                onDelete={
+                  cloudEnabled
+                    ? async () => {
+                        if (!selected.saved) return
+                        await deleteSaved(selected.saved)
+                        setPlaces((items) =>
+                          items.filter((p) => p.id !== selected.id),
+                        )
+                        navigate('list')
+                      }
+                    : undefined
+                }
+                onNotice={setNotice}
+                onSelect={(id) => setSelectedId(id)}
+              />
+            )}
           {view === 'empty' && (
             <div className="mobile-empty">
               <h1>Weekend ideas</h1>
@@ -278,7 +518,70 @@ function App() {
       {saveState && (
         <SavePlace
           draft={draft}
-          onDraft={setDraft}
+          authenticated={!!session}
+          onRequireLogin={
+            cloudEnabled
+              ? (pending) => {
+                  setDraft(pending)
+                  closeSave()
+                  setResumeSave(true)
+                  setAuthReason(
+                    'Sign in to save this place. Your link and review will be kept.',
+                  )
+                  setAuthOpen(true)
+                }
+              : undefined
+          }
+          onPersist={
+            cloudEnabled
+              ? async (confirmed, note, targetCollection) => {
+                  if (!targetCollection.trim())
+                    throw new Error('Enter a collection name.')
+                  const owner = getSession()?.sub
+                  if (!owner) throw new Error('Sign in to save places.')
+                  let saved = 0
+                  const failures: string[] = []
+                  const savedCollections: string[] = []
+                  for (const [index, place] of confirmed.entries()) {
+                    // Stay below the development API's two-request-per-second limit.
+                    if (index > 0)
+                      await new Promise((resolve) => setTimeout(resolve, 550))
+                    if (getSession()?.sub !== owner)
+                      throw new Error(
+                        'Your session changed. Sign in and retry.',
+                      )
+                    try {
+                      const result = await saveConfirmed(
+                        place,
+                        note,
+                        targetCollection,
+                      )
+                      saved++
+                      const next = toUIPlace(result.item)
+                      savedCollections.push(next.collection)
+                      setPlaces((items) => [
+                        next,
+                        ...items.filter((p) => p.id !== next.id),
+                      ])
+                    } catch (e) {
+                      failures.push(
+                        `${place.displayName}: ${e instanceof Error ? e.message : 'Save failed'}`,
+                      )
+                    }
+                  }
+                  setCollections((items) => [
+                    ...new Set([...items, ...savedCollections]),
+                  ])
+                  if (savedCollections[0]) setCollection(savedCollections[0])
+                  setView('list')
+                  if (failures.length)
+                    throw new Error(
+                      `${saved} of ${confirmed.length} saved. Retry safely; already saved places will not be duplicated. ${failures.join(' ')}`,
+                    )
+                }
+              : undefined
+          }
+          onDraft={keepDraft}
           initialState={saveState}
           collections={collections}
           defaultCollection={collection}
@@ -301,6 +604,25 @@ function App() {
             navigate(
               window.matchMedia('(min-width: 768px)').matches ? 'saved' : 'map',
             )
+          }}
+        />
+      )}
+      {authOpen && (
+        <AuthModal
+          reason={authReason}
+          onClose={() => {
+            setAuthOpen(false)
+            if (resumeSave) {
+              setResumeSave(false)
+              setSaveState(draft?.state ?? 'entry')
+            }
+          }}
+          onSuccess={() => {
+            setAuthOpen(false)
+            if (resumeSave) {
+              setResumeSave(false)
+              setSaveState(draft?.state ?? 'entry')
+            }
           }}
         />
       )}

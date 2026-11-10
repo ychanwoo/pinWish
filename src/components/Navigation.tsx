@@ -1,6 +1,7 @@
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
+  onAccount?: () => void
   places: Place[]
   collections: string[]
   onNewCollection: () => void
@@ -25,6 +26,7 @@ export function DesktopNavigation({
   onCollection,
   onSave,
   onNotice,
+  onAccount,
 }: Props) {
   return (
     <>
@@ -77,9 +79,12 @@ export function DesktopNavigation({
         <button
           className="avatar desktop-avatar"
           aria-label="Your profile"
-          onClick={() => onNotice('You’re viewing the PinWish demo profile.')}
+          onClick={
+            onAccount ??
+            (() => onNotice('You’re viewing the PinWish demo profile.'))
+          }
         >
-          YW
+          {onAccount ? 'Me' : 'YW'}
         </button>
       </nav>
       <aside className="collection-sidebar">
@@ -91,7 +96,7 @@ export function DesktopNavigation({
               onNotice('Los Angeles is the sample city for this preview.')
             }
           >
-            Los Angeles, CA
+            {onAccount ? 'Saved places' : 'Los Angeles, CA'}
             <Icon name="9beee" />
           </button>
           <div className="search-input sidebar-search">
@@ -206,7 +211,8 @@ export function MobileHeader({
   view,
   onView,
   onNotice,
-}: Pick<Props, 'view' | 'onView' | 'onNotice'>) {
+  onAccount,
+}: Pick<Props, 'view' | 'onView' | 'onNotice' | 'onAccount'>) {
   return (
     <header className={`mobile-header ${view === 'map' ? 'map-header' : ''}`}>
       <Brand mobile map={view === 'map'} />
@@ -231,9 +237,12 @@ export function MobileHeader({
       <button
         className="avatar"
         aria-label="Your profile"
-        onClick={() => onNotice('You’re viewing the PinWish demo profile.')}
+        onClick={
+          onAccount ??
+          (() => onNotice('You’re viewing the PinWish demo profile.'))
+        }
       >
-        YW
+        {onAccount ? 'Me' : 'YW'}
       </button>
     </header>
   )
