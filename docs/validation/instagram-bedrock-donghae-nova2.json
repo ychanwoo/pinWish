@@ -1,0 +1,115 @@
+{
+  "checkedAt": "2026-11-10T22:03:05.196Z",
+  "shortcode": "De1gmWjkwEd",
+  "region": "us-east-1",
+  "modelId": "us.amazon.nova-2-lite-v1:0",
+  "method": "experimental_public_html_then_bedrock",
+  "fetchedImages": 10,
+  "usage": {
+    "inputTokens": 2750,
+    "outputTokens": 632,
+    "totalTokens": 3382
+  },
+  "elapsedMs": 12900,
+  "automaticAccuracyVerified": false,
+  "result": {
+    "places": [
+      {
+        "name": "동해 묵호 여행지",
+        "regionHint": "",
+        "evidence": "동해 묵호 여행지",
+        "slides": [
+          1,
+          2
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "어달삼거리",
+        "regionHint": "",
+        "evidence": "어달삼거리",
+        "slides": [
+          2
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "논골담길",
+        "regionHint": "",
+        "evidence": "논골담길",
+        "slides": [
+          2,
+          6
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "묵호다방",
+        "regionHint": "",
+        "evidence": "묵호다방",
+        "slides": [
+          3,
+          8
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "해랑전망대",
+        "regionHint": "",
+        "evidence": "해랑전망대",
+        "slides": [
+          7
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "111호 포렌트",
+        "regionHint": "",
+        "evidence": "111호 포렌트",
+        "slides": [
+          3
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "한평해번",
+        "regionHint": "",
+        "evidence": "한평해번",
+        "slides": [
+          4
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "묵호아 산물가게",
+        "regionHint": "",
+        "evidence": "묵호아 산물가게",
+        "slides": [
+          5
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "도체비골 스카이밸리 & 해랑전망대",
+        "regionHint": "",
+        "evidence": "도체비골 스카이밸리 & 해랑전망대",
+        "slides": [
+          7
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "브릭바이커스 동해",
+        "regionHint": "",
+        "evidence": "브릭바이커스 동해",
+        "slides": [
+          9
+        ],
+        "needsLocationConfirmation": true
+      }
+    ],
+    "ignoredSlides": [
+      10
+    ]
+  }
+}

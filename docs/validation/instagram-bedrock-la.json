@@ -1,0 +1,113 @@
+{
+  "checkedAt": "2026-11-10T21:53:36.098Z",
+  "shortcode": "DfFCMjzk02S",
+  "region": "us-east-1",
+  "modelId": "amazon.nova-lite-v1:0",
+  "method": "experimental_public_html_then_bedrock",
+  "fetchedImages": 12,
+  "usage": {
+    "inputTokens": 20584,
+    "outputTokens": 339,
+    "totalTokens": 20923
+  },
+  "elapsedMs": 9009,
+  "automaticAccuracyVerified": false,
+  "result": {
+    "places": [
+      {
+        "name": "Griffith Observatory",
+        "regionHint": "Los Angeles",
+        "slides": [
+          2
+        ],
+        "evidence": "Griffith Observatory",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Santa Monica Pier",
+        "regionHint": "Santa Monica",
+        "slides": [
+          3
+        ],
+        "evidence": "Santa Monica Pier",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Malibu",
+        "regionHint": "Malibu",
+        "slides": [
+          4
+        ],
+        "evidence": "Malibu",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Bradbury Building",
+        "regionHint": "Los Angeles",
+        "slides": [
+          5
+        ],
+        "evidence": "Bradbury Building",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Rodeo Drive",
+        "regionHint": "Beverly Hills",
+        "slides": [
+          6
+        ],
+        "evidence": "Rodeo Dr",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Hermosa Beach Pier",
+        "regionHint": "Hermosa Beach",
+        "slides": [
+          7
+        ],
+        "evidence": "1 Pier Ave",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Randy's Donuts",
+        "regionHint": "Inglewood",
+        "slides": [
+          8
+        ],
+        "evidence": "Randy's Donuts",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Union Station",
+        "regionHint": "Los Angeles",
+        "slides": [
+          9
+        ],
+        "evidence": "Union Station",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Gamble House",
+        "regionHint": "Pasadena",
+        "slides": [
+          10
+        ],
+        "evidence": "Gamble House",
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "Musso & Frank Grill",
+        "regionHint": "Los Angeles",
+        "slides": [
+          11
+        ],
+        "evidence": "Musso & Frank Grill",
+        "needsLocationConfirmation": true
+      }
+    ],
+    "ignoredSlides": [
+      1,
+      12
+    ]
+  }
+}

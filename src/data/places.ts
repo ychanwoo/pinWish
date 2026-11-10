@@ -1,3 +1,4 @@
+import { isUrlInput, parseInstagramLink } from '../lib/instagram'
 export type Category = 'Food' | 'Coffee' | 'Culture'
 export interface Place {
   id: string
@@ -94,6 +95,8 @@ export const saveStates = [
   'invalid',
   'not_found',
   'lookup_error',
+  'import_unavailable',
+  'import_review',
   'saving',
   'save_error',
   'duplicate',
@@ -110,19 +113,15 @@ export function resolveSample(input: string): Place | undefined {
     normalized === 'https://maps.app.goo.gl/grandcentral'
   )
     return initialPlaces[0]
+  if (isUrlInput(input)) return undefined
   return initialPlaces.find((place) =>
     normalized.includes(place.name.toLowerCase()),
   )
 }
 export function validInput(input: string): boolean {
   const trimmed = input.trim()
-  if (/^https?:\/\//i.test(trimmed)) {
-    try {
-      const url = new URL(trimmed)
-      return url.hostname.includes('.') && url.protocol === 'https:'
-    } catch {
-      return false
-    }
+  if (isUrlInput(trimmed)) {
+    return parseInstagramLink(trimmed).ok || trimmed === 'https://maps.app.goo.gl/grandcentral'
   }
   return (
     /\d+\s+\S+/.test(trimmed) ||

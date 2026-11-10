@@ -1,0 +1,71 @@
+{
+  "checkedAt": "2026-11-10T21:56:55.982Z",
+  "shortcode": "De1gmWjkwEd",
+  "region": "us-east-1",
+  "modelId": "amazon.nova-pro-v1:0",
+  "method": "experimental_public_html_then_bedrock",
+  "fetchedImages": 10,
+  "usage": {
+    "inputTokens": 17327,
+    "outputTokens": 482,
+    "totalTokens": 17809
+  },
+  "elapsedMs": 8536,
+  "automaticAccuracyVerified": false,
+  "result": {
+    "places": [
+      {
+        "name": "어달삼거리",
+        "regionHint": "Muk-ho",
+        "evidence": "어다사고리",
+        "slides": [
+          2
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "111한 어다사",
+        "regionHint": "Muk-ho",
+        "evidence": "111한 어다사",
+        "slides": [
+          3
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "이도이행지",
+        "regionHint": "Muk-ho",
+        "evidence": "이도이행지",
+        "slides": [
+          4
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "이도이행지 하리이스크",
+        "regionHint": "Muk-ho",
+        "evidence": "이도이행지 하리이스크",
+        "slides": [
+          7
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "이도이행지 이스크스크",
+        "regionHint": "Muk-ho",
+        "evidence": "이도이행지 이스크스크",
+        "slides": [
+          9
+        ],
+        "needsLocationConfirmation": true
+      }
+    ],
+    "ignoredSlides": [
+      1,
+      5,
+      6,
+      8,
+      10
+    ]
+  }
+}

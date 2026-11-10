@@ -2805,3 +2805,13 @@ a {
 .place-facts .open-dot {
   background: var(--pw-text-muted);
 }
+
+.import-candidates ol { padding-left: 1.5rem; }
+.import-candidates li { margin-block: 1rem; overflow-wrap: anywhere; }
+.import-candidates p { margin-block: .5rem; }
+.import-candidates small { color: var(--muted, #666); }
+
+.import-candidates button { color: var(--brand); text-decoration: underline; padding: .3rem; }
+.import-candidates button:disabled { opacity: .5; cursor: not-allowed; }
+.candidate-edit { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.candidate-edit label, .candidate-edit input { width: 100%; }

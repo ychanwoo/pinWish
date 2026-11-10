@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-11-10T21:51:56.884Z",
+  "method": "unauthenticated_public_html",
+  "results": [
+    {
+      "shortcode": "DfLAnjLEx2G",
+      "status": 200,
+      "bytesRead": 884785,
+      "truncated": false,
+      "observedMediaMarkers": {
+        "carousel_media": true,
+        "edge_sidecar_to_children": false,
+        "image_versions2": true,
+        "display_url": false
+      },
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 646
+    },
+    {
+      "shortcode": "De1gmWjkwEd",
+      "status": 200,
+      "bytesRead": 727444,
+      "truncated": false,
+      "observedMediaMarkers": {
+        "carousel_media": true,
+        "edge_sidecar_to_children": false,
+        "image_versions2": true,
+        "display_url": false
+      },
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 461
+    },
+    {
+      "shortcode": "DfFCMjzk02S",
+      "status": 200,
+      "bytesRead": 872580,
+      "truncated": false,
+      "observedMediaMarkers": {
+        "carousel_media": true,
+        "edge_sidecar_to_children": false,
+        "image_versions2": true,
+        "display_url": false
+      },
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 562
+    }
+  ]
+}

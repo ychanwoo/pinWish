@@ -301,3 +301,27 @@ test('search and category filters keep map pins aligned with cards', async ({
   await expect(page.locator('.place-card')).toHaveCount(1)
   await expect(page.locator('.map-pin')).toHaveCount(1)
 })
+
+test('real Instagram posts never resolve to demo places and retain the draft', async ({ page }, info) => {
+  const link = 'https://www.instagram.com/p/De1gmWjkwEd/?img_index=10&caption=Maru%20Coffee'
+  await page.goto('/?state=entry')
+  const input = page.getByLabel('Link or address', { exact: true })
+  await input.fill(link)
+  await page.getByRole('button', { name: 'Find place', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Instagram import is not connected yet')
+  await expect(page.locator('.resolved-place')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Open original Instagram post' })).toHaveAttribute('href', 'https://www.instagram.com/p/De1gmWjkwEd/')
+  await expect(input).toHaveValue(link)
+  await page.getByRole('button', { name: info.project.name === 'mobile' ? 'Back to places' : 'Close save dialog', exact: true }).click()
+  await page.getByRole('button', { name: info.project.name === 'mobile' ? 'Save a place' : 'Add pin', exact: true }).click()
+  await expect(input).toHaveValue(link)
+  await expect(page.getByRole('alert')).toContainText('Instagram import is not connected yet')
+})
+
+test('unrelated hosts cannot trigger sample place matching', async ({ page }) => {
+  await page.goto('/?state=entry')
+  await page.getByLabel('Link or address', { exact: true }).fill('https://instagram.com.evil.test/p/Maru%20Coffee/')
+  await page.getByRole('button', { name: 'Find place', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Use a link from instagram.com')
+  await expect(page.locator('.resolved-place')).toHaveCount(0)
+})

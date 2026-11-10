@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-11-10T21:53:58.910Z",
+  "shortcode": "De1gmWjkwEd",
+  "region": "us-east-1",
+  "modelId": "amazon.nova-lite-v1:0",
+  "method": "experimental_public_html_then_bedrock",
+  "fetchedImages": 10,
+  "usage": {
+    "inputTokens": 17327,
+    "outputTokens": 85,
+    "totalTokens": 17412
+  },
+  "elapsedMs": 5715,
+  "automaticAccuracyVerified": false,
+  "result": {
+    "places": [
+      {
+        "name": "Mukóho",
+        "regionHint": "city",
+        "slides": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "evidence": "Mukóho",
+        "needsLocationConfirmation": true
+      }
+    ],
+    "ignoredSlides": [
+      3
+    ]
+  }
+}

@@ -1,0 +1,507 @@
+[
+  {
+    "file": "docs/validation/instagram-bedrock-la.json",
+    "shortcode": "DfFCMjzk02S",
+    "modelId": "amazon.nova-lite-v1:0",
+    "expectedHeadings": 10,
+    "headingMatches": 0,
+    "identityMatches": 9,
+    "ignoredSlidesMatch": true,
+    "unexpectedCandidates": [
+      {
+        "name": "Malibu",
+        "slides": [
+          4
+        ]
+      }
+    ],
+    "passed": false,
+    "scope": "These manually reviewed samples only; not general accuracy or coordinate validation.",
+    "rows": [
+      {
+        "slide": 2,
+        "expected": "그리피스 천문대",
+        "actual": [
+          "Griffith Observatory"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 3,
+        "expected": "산타모니카 피어",
+        "actual": [
+          "Santa Monica Pier"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 4,
+        "expected": "포인트 둠",
+        "actual": [
+          "Malibu"
+        ],
+        "headingMatch": false,
+        "identityMatch": false
+      },
+      {
+        "slide": 5,
+        "expected": "브래드버리 빌딩",
+        "actual": [
+          "Bradbury Building"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 6,
+        "expected": "로데오 드라이브",
+        "actual": [
+          "Rodeo Drive"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 7,
+        "expected": "허모사 비치 피어",
+        "actual": [
+          "Hermosa Beach Pier"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 8,
+        "expected": "랜디스 도넛",
+        "actual": [
+          "Randy's Donuts"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 9,
+        "expected": "유니언 역",
+        "actual": [
+          "Union Station"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 10,
+        "expected": "갬블 하우스",
+        "actual": [
+          "Gamble House"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      },
+      {
+        "slide": 11,
+        "expected": "무소 앤 프랭크 그릴",
+        "actual": [
+          "Musso & Frank Grill"
+        ],
+        "headingMatch": false,
+        "identityMatch": true
+      }
+    ]
+  },
+  {
+    "file": "docs/validation/instagram-bedrock-donghae-qwen-batched.json",
+    "shortcode": "De1gmWjkwEd",
+    "modelId": "qwen.qwen3-vl-235b-a22b",
+    "expectedHeadings": 8,
+    "headingMatches": 8,
+    "identityMatches": 8,
+    "ignoredSlidesMatch": true,
+    "unexpectedCandidates": [],
+    "passed": true,
+    "scope": "These manually reviewed samples only; not general accuracy or coordinate validation.",
+    "rows": [
+      {
+        "slide": 2,
+        "expected": "어달삼거리",
+        "actual": [
+          "어달삼거리"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 3,
+        "expected": "111호 프로젝트",
+        "actual": [
+          "111호 프로젝트"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 4,
+        "expected": "하평해변",
+        "actual": [
+          "하평해변"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 5,
+        "expected": "무코야 선물가게",
+        "actual": [
+          "무코야 선물가게"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 6,
+        "expected": "논골담길",
+        "actual": [
+          "논골담길"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 7,
+        "expected": "도째비골 스카이밸리&해랑전망대",
+        "actual": [
+          "도째비골 스카이밸리&해랑전망대"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 8,
+        "expected": "묵호다방",
+        "actual": [
+          "묵호다방"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 9,
+        "expected": "브릭베이커스 동해",
+        "actual": [
+          "브릭베이커스 동해"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      }
+    ]
+  },
+  {
+    "file": "docs/validation/instagram-bedrock-la-qwen-batched.json",
+    "shortcode": "DfFCMjzk02S",
+    "modelId": "qwen.qwen3-vl-235b-a22b",
+    "expectedHeadings": 10,
+    "headingMatches": 9,
+    "identityMatches": 9,
+    "ignoredSlidesMatch": true,
+    "unexpectedCandidates": [
+      {
+        "name": "포인트 듑",
+        "slides": [
+          4
+        ]
+      }
+    ],
+    "passed": false,
+    "scope": "These manually reviewed samples only; not general accuracy or coordinate validation.",
+    "rows": [
+      {
+        "slide": 2,
+        "expected": "그리피스 천문대",
+        "actual": [
+          "그리피스 천문대"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 3,
+        "expected": "산타모니카 피어",
+        "actual": [
+          "산타모니카 피어"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 4,
+        "expected": "포인트 둠",
+        "actual": [
+          "포인트 듑"
+        ],
+        "headingMatch": false,
+        "identityMatch": false
+      },
+      {
+        "slide": 5,
+        "expected": "브래드버리 빌딩",
+        "actual": [
+          "브래드버리 빌딩"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 6,
+        "expected": "로데오 드라이브",
+        "actual": [
+          "로데오 드라이브"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 7,
+        "expected": "허모사 비치 피어",
+        "actual": [
+          "허모사 비치 피어"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 8,
+        "expected": "랜디스 도넛",
+        "actual": [
+          "랜디스 도넛"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 9,
+        "expected": "유니언 역",
+        "actual": [
+          "유니언 역"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 10,
+        "expected": "갬블 하우스",
+        "actual": [
+          "갬블 하우스"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 11,
+        "expected": "무소 앤 프랭크 그릴",
+        "actual": [
+          "무소 앤 프랭크 그릴"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      }
+    ]
+  },
+  {
+    "file": "docs/validation/instagram-local-api-donghae-qwen-repeat.json",
+    "shortcode": "De1gmWjkwEd",
+    "modelId": "qwen.qwen3-vl-235b-a22b",
+    "expectedHeadings": 8,
+    "headingMatches": 8,
+    "identityMatches": 8,
+    "ignoredSlidesMatch": true,
+    "unexpectedCandidates": [],
+    "passed": true,
+    "scope": "These manually reviewed samples only; not general accuracy or coordinate validation.",
+    "rows": [
+      {
+        "slide": 2,
+        "expected": "어달삼거리",
+        "actual": [
+          "어달삼거리"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 3,
+        "expected": "111호 프로젝트",
+        "actual": [
+          "111호 프로젝트"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 4,
+        "expected": "하평해변",
+        "actual": [
+          "하평해변"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 5,
+        "expected": "무코야 선물가게",
+        "actual": [
+          "무코야 선물가게"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 6,
+        "expected": "논골담길",
+        "actual": [
+          "논골담길"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 7,
+        "expected": "도째비골 스카이밸리&해랑전망대",
+        "actual": [
+          "도째비골 스카이밸리&해랑전망대"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 8,
+        "expected": "묵호다방",
+        "actual": [
+          "묵호다방"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 9,
+        "expected": "브릭베이커스 동해",
+        "actual": [
+          "브릭베이커스 동해"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      }
+    ]
+  },
+  {
+    "file": "docs/validation/instagram-local-api-la-qwen-repeat.json",
+    "shortcode": "DfFCMjzk02S",
+    "modelId": "qwen.qwen3-vl-235b-a22b",
+    "expectedHeadings": 10,
+    "headingMatches": 9,
+    "identityMatches": 9,
+    "ignoredSlidesMatch": true,
+    "unexpectedCandidates": [
+      {
+        "name": "포인트 듑",
+        "slides": [
+          4
+        ]
+      }
+    ],
+    "passed": false,
+    "scope": "These manually reviewed samples only; not general accuracy or coordinate validation.",
+    "rows": [
+      {
+        "slide": 2,
+        "expected": "그리피스 천문대",
+        "actual": [
+          "그리피스 천문대"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 3,
+        "expected": "산타모니카 피어",
+        "actual": [
+          "산타모니카 피어"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 4,
+        "expected": "포인트 둠",
+        "actual": [
+          "포인트 듑"
+        ],
+        "headingMatch": false,
+        "identityMatch": false
+      },
+      {
+        "slide": 5,
+        "expected": "브래드버리 빌딩",
+        "actual": [
+          "브래드버리 빌딩"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 6,
+        "expected": "로데오 드라이브",
+        "actual": [
+          "로데오 드라이브"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 7,
+        "expected": "허모사 비치 피어",
+        "actual": [
+          "허모사 비치 피어"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 8,
+        "expected": "랜디스 도넛",
+        "actual": [
+          "랜디스 도넛"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 9,
+        "expected": "유니언 역",
+        "actual": [
+          "유니언 역"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 10,
+        "expected": "갬블 하우스",
+        "actual": [
+          "갬블 하우스"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      },
+      {
+        "slide": 11,
+        "expected": "무소 앤 프랭크 그릴",
+        "actual": [
+          "무소 앤 프랭크 그릴"
+        ],
+        "headingMatch": true,
+        "identityMatch": true
+      }
+    ]
+  }
+]
