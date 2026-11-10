@@ -58,11 +58,12 @@ export function validateExtraction(result, count) {
   const merged = new Map()
   for (const place of result.places) {
     if (!place || typeof place.name !== 'string' || !place.name.trim() || place.name.length > 200 || typeof place.regionHint !== 'string' || place.regionHint.length > 200 || typeof place.evidence !== 'string' || !place.evidence.trim() || place.evidence.length > 1000 || !Array.isArray(place.slides) || !place.slides.length || !place.slides.every(validSlide)) throw new Error('invalid_model_output')
+    if (place.locationHint !== undefined && (typeof place.locationHint !== 'string' || place.locationHint.length > 200 || /[\p{Cc}]/u.test(place.locationHint))) throw new Error('invalid_model_output')
     if (place.slides.some(n => result.ignoredSlides.includes(n))) throw new Error('invalid_model_output')
-    const key = `${place.name.trim().normalize('NFKC').toLowerCase()}|${place.regionHint.trim().normalize('NFKC').toLowerCase()}`
+    const key = `${place.name.trim().normalize('NFKC').toLowerCase()}|${place.regionHint.trim().normalize('NFKC').toLowerCase()}|${(place.locationHint ?? '').trim().normalize('NFKC').toLowerCase()}`
     const existing = merged.get(key)
     if (existing) existing.slides = [...new Set([...existing.slides, ...place.slides])].sort((a,b) => a-b)
-    else merged.set(key, { name: place.name.trim(), regionHint: place.regionHint.trim(), evidence: place.evidence, slides: [...new Set(place.slides)], needsLocationConfirmation: true })
+    else merged.set(key, { ...(place.locationHint === undefined ? {} : { locationHint: place.locationHint.trim() }), name: place.name.trim(), regionHint: place.regionHint.trim(), evidence: place.evidence, slides: [...new Set(place.slides)], needsLocationConfirmation: true })
   }
   const places = [...merged.values()]
   const covered = new Set([...result.ignoredSlides, ...places.flatMap(p => p.slides)])

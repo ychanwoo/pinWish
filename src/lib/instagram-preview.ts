@@ -4,7 +4,7 @@ export interface InstagramPreview {
   fetchedImages: number
   // `name` is the original extracted name, never overwritten by a user correction.
   // Confirmed country/localized names are intentionally absent from an OCR response.
-  result: { places: { name: string; regionHint: string; slides: number[]; evidence: string; needsLocationConfirmation: true; correctedName?: string }[]; ignoredSlides: number[] }
+  result: { places: { name: string; regionHint: string; locationHint?: string; slides: number[]; evidence: string; needsLocationConfirmation: true; correctedName?: string }[]; ignoredSlides: number[] }
 }
 export function isInstagramPreview(value: unknown): value is InstagramPreview {
   if (!value || typeof value !== 'object') return false
@@ -16,6 +16,7 @@ export function isInstagramPreview(value: unknown): value is InstagramPreview {
   if (!p.result.places.every(place => place &&
     typeof place.name === 'string' && place.name.trim().length > 0 && place.name.length <= 200 &&
     typeof place.regionHint === 'string' && place.regionHint.length <= 200 &&
+    (place.locationHint === undefined || (typeof place.locationHint === 'string' && place.locationHint.length <= 200 && !/[\p{Cc}]/u.test(place.locationHint))) &&
     typeof place.evidence === 'string' && place.evidence.trim().length > 0 && place.evidence.length <= 1000 &&
     place.needsLocationConfirmation === true && Array.isArray(place.slides) && place.slides.length > 0 &&
     place.slides.every(n => validSlide(n) && !p.result.ignoredSlides.includes(n)))) return false
