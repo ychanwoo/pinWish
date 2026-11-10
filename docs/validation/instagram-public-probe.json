@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-11-10T21:50:52.966Z",
+  "method": "unauthenticated_public_html",
+  "results": [
+    {
+      "shortcode": "DfLAnjLEx2G",
+      "status": 200,
+      "bytesRead": 755291,
+      "truncated": false,
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 564
+    },
+    {
+      "shortcode": "De1gmWjkwEd",
+      "status": 200,
+      "bytesRead": 727446,
+      "truncated": false,
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 387
+    },
+    {
+      "shortcode": "DfFCMjzk02S",
+      "status": 200,
+      "bytesRead": 872576,
+      "truncated": false,
+      "hasPreviewMetadata": true,
+      "outcome": "html_received_media_access_unverified",
+      "carouselAccessVerified": false,
+      "elapsedMs": 610
+    }
+  ]
+}

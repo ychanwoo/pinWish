@@ -1,0 +1,6 @@
+{
+  "checkedAt": "2026-11-10T22:05:37.794Z",
+  "outcome": "failed",
+  "errorType": "ValidationException",
+  "reason": "AWS access or model request failed; raw error omitted."
+}

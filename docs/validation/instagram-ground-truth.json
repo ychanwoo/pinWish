@@ -1,0 +1,239 @@
+{
+  "reviewedAt": "2026-11-10",
+  "method": "Manual visual transcription of original downloaded slides, independent of model output. Video slides: static poster only, NOT full video review. Ground truth is used only by the offline evaluator, never by runtime extraction. Names and English identity aliases only; locations and business metadata are not verified.",
+  "samples": [
+    {
+      "shortcode": "De1gmWjkwEd",
+      "url": "https://www.instagram.com/p/De1gmWjkwEd/",
+      "slideCount": 10,
+      "photoSlides": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "videoSlides": [],
+      "ignoredSlides": [
+        1,
+        10
+      ],
+      "expected": [
+        {
+          "slide": 2,
+          "heading": "어달삼거리",
+          "aliases": []
+        },
+        {
+          "slide": 3,
+          "heading": "111호 프로젝트",
+          "aliases": []
+        },
+        {
+          "slide": 4,
+          "heading": "하평해변",
+          "aliases": []
+        },
+        {
+          "slide": 5,
+          "heading": "무코야 선물가게",
+          "aliases": []
+        },
+        {
+          "slide": 6,
+          "heading": "논골담길",
+          "aliases": []
+        },
+        {
+          "slide": 7,
+          "heading": "도째비골 스카이밸리&해랑전망대",
+          "aliases": []
+        },
+        {
+          "slide": 8,
+          "heading": "묵호다방",
+          "aliases": []
+        },
+        {
+          "slide": 9,
+          "heading": "브릭베이커스 동해",
+          "aliases": []
+        }
+      ]
+    },
+    {
+      "shortcode": "DfFCMjzk02S",
+      "url": "https://www.instagram.com/p/DfFCMjzk02S/",
+      "slideCount": 12,
+      "photoSlides": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "videoSlides": [],
+      "ignoredSlides": [
+        1,
+        12
+      ],
+      "expected": [
+        {
+          "slide": 2,
+          "heading": "그리피스 천문대",
+          "aliases": [
+            "Griffith Observatory"
+          ]
+        },
+        {
+          "slide": 3,
+          "heading": "산타모니카 피어",
+          "aliases": [
+            "Santa Monica Pier"
+          ]
+        },
+        {
+          "slide": 4,
+          "heading": "포인트 둠",
+          "aliases": [
+            "Point Dume"
+          ]
+        },
+        {
+          "slide": 5,
+          "heading": "브래드버리 빌딩",
+          "aliases": [
+            "Bradbury Building"
+          ]
+        },
+        {
+          "slide": 6,
+          "heading": "로데오 드라이브",
+          "aliases": [
+            "Rodeo Drive"
+          ]
+        },
+        {
+          "slide": 7,
+          "heading": "허모사 비치 피어",
+          "aliases": [
+            "Hermosa Beach Pier"
+          ]
+        },
+        {
+          "slide": 8,
+          "heading": "랜디스 도넛",
+          "aliases": [
+            "Randy’s Donuts"
+          ]
+        },
+        {
+          "slide": 9,
+          "heading": "유니언 역",
+          "aliases": [
+            "Union Station"
+          ]
+        },
+        {
+          "slide": 10,
+          "heading": "갬블 하우스",
+          "aliases": [
+            "Gamble House"
+          ]
+        },
+        {
+          "slide": 11,
+          "heading": "무소 앤 프랭크 그릴",
+          "aliases": [
+            "Musso & Frank Grill"
+          ]
+        }
+      ]
+    },
+    {
+      "shortcode": "DfLAnjLEx2G",
+      "url": "https://www.instagram.com/p/DfLAnjLEx2G/",
+      "slideCount": 10,
+      "photoSlides": [
+        1,
+        2,
+        5,
+        6,
+        8,
+        10
+      ],
+      "videoSlides": [
+        3,
+        4,
+        7,
+        9
+      ],
+      "ignoredSlides": [
+        1,
+        10
+      ],
+      "expected": [
+        {
+          "slide": 2,
+          "heading": "Golden Gate Bridge",
+          "aliases": [],
+          "review": "photo"
+        },
+        {
+          "slide": 3,
+          "heading": "Cable Car",
+          "aliases": [],
+          "review": "video_poster_only"
+        },
+        {
+          "slide": 4,
+          "heading": "Mission Dolores Park",
+          "aliases": [],
+          "review": "video_poster_only"
+        },
+        {
+          "slide": 5,
+          "heading": "Chinatown",
+          "aliases": [],
+          "review": "photo"
+        },
+        {
+          "slide": 6,
+          "heading": "Ferry Building",
+          "aliases": [],
+          "review": "photo"
+        },
+        {
+          "slide": 7,
+          "heading": "Lombard Street",
+          "aliases": [],
+          "review": "video_poster_only"
+        },
+        {
+          "slide": 8,
+          "heading": "Painted Ladies",
+          "aliases": [],
+          "review": "photo"
+        },
+        {
+          "slide": 9,
+          "heading": "PIER 39",
+          "aliases": [],
+          "review": "video_poster_only"
+        }
+      ]
+    }
+  ]
+}

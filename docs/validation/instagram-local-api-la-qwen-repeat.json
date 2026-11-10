@@ -1,0 +1,123 @@
+{
+  "httpStatus": 200,
+  "source": {
+    "originalUrl": "https://www.instagram.com/p/DfFCMjzk02S/?img_index=1",
+    "canonicalUrl": "https://www.instagram.com/p/DfFCMjzk02S/",
+    "shortcode": "DfFCMjzk02S",
+    "kind": "p",
+    "selectedSlide": 1,
+    "identity": "instagram:DfFCMjzk02S"
+  },
+  "checkedAt": "2026-11-10T22:09:41.719Z",
+  "shortcode": "DfFCMjzk02S",
+  "region": "us-east-1",
+  "modelId": "qwen.qwen3-vl-235b-a22b",
+  "method": "experimental_public_html_then_bedrock",
+  "fetchedImages": 12,
+  "modelRequests": 4,
+  "usage": {
+    "inputTokens": 20186,
+    "outputTokens": 634,
+    "totalTokens": 20820
+  },
+  "elapsedMs": 27502,
+  "automaticAccuracyVerified": false,
+  "result": {
+    "places": [
+      {
+        "name": "그리피스 천문대",
+        "regionHint": "Los Angeles",
+        "evidence": "그리피스 천문대",
+        "slides": [
+          2
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "산타모니카 피어",
+        "regionHint": "Santa Monica",
+        "evidence": "산타모니카 피어",
+        "slides": [
+          3
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "포인트 듑",
+        "regionHint": "Malibu, CA",
+        "evidence": "포인트 듑",
+        "slides": [
+          4
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "브래드버리 빌딩",
+        "regionHint": "Los Angeles, CA",
+        "evidence": "브래드버리 빌딩",
+        "slides": [
+          5
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "로데오 드라이브",
+        "regionHint": "Beverly Hills, CA",
+        "evidence": "로데오 드라이브",
+        "slides": [
+          6
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "허모사 비치 피어",
+        "regionHint": "Hermosa Beach, CA",
+        "evidence": "허모사 비치 피어",
+        "slides": [
+          7
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "랜디스 도넛",
+        "regionHint": "Inglewood, CA",
+        "evidence": "랜디스 도넛",
+        "slides": [
+          8
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "유니언 역",
+        "regionHint": "Los Angeles, CA",
+        "evidence": "유니언 역",
+        "slides": [
+          9
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "갬블 하우스",
+        "regionHint": "Pasadena, CA",
+        "evidence": "갬블 하우스",
+        "slides": [
+          10
+        ],
+        "needsLocationConfirmation": true
+      },
+      {
+        "name": "무소 앤 프랭크 그릴",
+        "regionHint": "Los Angeles, CA",
+        "evidence": "무소 앤 프랭크 그릴",
+        "slides": [
+          11
+        ],
+        "needsLocationConfirmation": true
+      }
+    ],
+    "ignoredSlides": [
+      1,
+      12
+    ]
+  }
+}

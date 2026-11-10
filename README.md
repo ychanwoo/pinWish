@@ -29,7 +29,7 @@ Official instructions: https://developers.figma.com/docs/figma-mcp-server/remote
 
 A personal access token is only needed for a separate REST API or third-party integration. Never place a token in React source, a `VITE_` environment variable, or a tracked JSON file. Browser-visible environment variables are public. This starter does not need any API keys.
 
-This is an interactive UI preview. Places, notes, collections, and bookmarks are held in memory and reset on reload. AWS services, authentication, Instagram parsing, persistent storage, and a live map provider are not connected. The map is the illustrative image from Figma; its controls only manipulate the preview. Directions opens Google Maps in a new tab using the sample address.
+This is an interactive UI preview. Places, notes, collections, and bookmarks are held in memory and reset on reload. Authentication, persistent storage and a live map provider are not connected. Instagram photo analysis is available only through the opt-in local API backed by AWS Bedrock described below. The map is the illustrative image from Figma; its controls only manipulate the preview. Directions opens Google Maps in a new tab using the sample address.
 
 ## Project layout
 
@@ -43,7 +43,7 @@ This is an interactive UI preview. Places, notes, collections, and bookmarks are
 - `.vscode/mcp.json`: shared Figma MCP connection configuration.
 - `.github/workflows/ci.yml`: lint and build checks.
 
-`node_modules/` and `dist/` are generated locally and excluded from Git. Add feature components and API modules when implementing those features; AWS infrastructure and backend code will be added when the architecture is defined.
+`node_modules/` and `dist/` are generated locally and excluded from Git. Add feature components and API modules when implementing those features; The experimental local backend lives in `scripts/instagram/`; production AWS infrastructure is still to be added.
 
 ## Local UI review
 
@@ -84,3 +84,20 @@ npm run test:e2e
 ```
 
 Tests cover desktop/mobile search, invalid input, duplicate detection, failed-save retry, draft retention, cancelled lookup, detail pin switching, note editing and cancellation, collection isolation, filter/map synchronization, image loading, and horizontal overflow across the state previews. `npm run check` remains the lint/typecheck/production-build check.
+
+## Experimental Instagram validation (issue #3)
+
+Real Instagram links are separated from demo place lookup. URL validation is not a claim that a post exists or is accessible. An opt-in local backend can retrieve photo carousels from public HTML and send the images to Amazon Bedrock for candidate extraction. The default AWS Bedrock Qwen3-VL model reads photo batches and preserves original-language names. Manual comparison passed 8/8 Donghae headings twice; LA remains 9/10 because of one Hangul error. Candidate names can be corrected while original OCR evidence and photo links remain available. Mixed-video posts are explicitly unsupported, and no candidate is saved to the map.
+
+See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. Production cloud hosting/backend resources are not deployed.
+
+```sh
+npm run test:unit
+npm run test:import-ui
+```
+
+`test:import-ui` uses synthetic API fixtures and makes no AWS calls. `npm run extract:instagram -- DfFCMjzk02S` is an explicit, billable live experiment. The local API caps requests at three per process.
+
+### Place display names
+
+Extraction preserves the original `name` and `evidence`; user changes are stored separately as `correctedName`. The shared `getPlaceDisplayName` policy selects Korean names for confirmed South Korean locations (`KR`) and English names for other confirmed countries, falling back to the correction/original when the requested localized name is unavailable. The country must come from confirmed place-search results, never from the language of an Instagram post. Location search is not connected yet, so current candidates continue to show their original or user-corrected names. No automatic translation or sample-specific spelling replacement is performed.
