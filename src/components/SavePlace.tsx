@@ -1,3 +1,6 @@
+import { isInstagramPreview, importErrorMessages, type InstagramPreview } from '../lib/instagram-preview'
+import { getPlaceDisplayName } from '../lib/place-name'
+import { isUrlInput, parseInstagramLink } from '../lib/instagram'
 import { useEffect, useRef, useState } from 'react'
 import {
   initialPlaces,
@@ -17,6 +20,8 @@ export interface SaveDraft {
   collection: string
   resolved: Place
   manual: boolean
+  preview?: InstagramPreview | null
+  importError?: string
 }
 interface Props {
   draft: SaveDraft | null
@@ -73,6 +78,11 @@ export function SavePlace({
   const [manual, setManual] = useState(
     draft?.manual ?? initialState === 'not_found',
   )
+  const [preview, setPreview] = useState<InstagramPreview | null>(draft?.preview ?? null)
+  const [editingCandidate, setEditingCandidate] = useState<number | null>(null)
+  const [candidateName, setCandidateName] = useState('')
+  const [importError, setImportError] = useState(draft?.importError ?? '')
+  const abortImport = useRef<AbortController | null>(null)
   const [clipboardMessage, setClipboardMessage] = useState('')
   const dialog = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -94,6 +104,8 @@ export function SavePlace({
             collection,
             resolved,
             manual,
+            preview,
+            importError,
           },
     )
     onClose()
@@ -112,6 +124,7 @@ export function SavePlace({
   ].includes(state)
   const cancelPending = () => {
     request.current += 1
+    abortImport.current?.abort()
     clearTimeout(timer.current)
   }
   useEffect(() => {
@@ -125,7 +138,7 @@ export function SavePlace({
       if (e.key === 'Tab') {
         const elements = [
           ...(dialog.current?.querySelectorAll<HTMLElement>(
-            'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]',
+            'a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]',
           ) ?? []),
         ].filter((el) => el.getClientRects().length > 0)
         const first = elements[0],
@@ -149,20 +162,61 @@ export function SavePlace({
     }
     document.addEventListener('keydown', escape)
     return () => {
+      abortImport.current?.abort()
       clearTimeout(timer.current)
       request.current += 1
       document.removeEventListener('keydown', escape)
       previous?.focus()
     }
   }, [onClose])
-  const lookup = () => {
-    const value = manual ? address : input
+  const lookup = async () => {
+    const value = (manual ? address : input).trim()
+    cancelPending()
     if (!validInput(value)) {
       setState('invalid')
       inputRef.current?.focus()
       return
     }
-    cancelPending()
+    // Only the explicitly labelled demo URL may resolve to a sample record.
+    if (isUrlInput(value) && value !== sampleLink && value !== 'https://maps.app.goo.gl/grandcentral') {
+      setManual(false)
+      setPreview(null)
+      setImportError('')
+      if (import.meta.env.VITE_ENABLE_INSTAGRAM_PREVIEW !== 'true') {
+        setState('import_unavailable')
+        return
+      }
+      const id = request.current
+      const controller = new AbortController()
+      abortImport.current = controller
+      setState('resolving')
+      const deadline = setTimeout(() => controller.abort(), 110000)
+      try {
+        const response = await fetch('/api/instagram/preview', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: value }), signal: controller.signal,
+        })
+        const data = await response.json()
+        if (id !== request.current) return
+        if (!response.ok || !isInstagramPreview(data)) {
+          setImportError(importErrorMessages[data?.code] ?? 'The analysis could not be verified. No places have been saved. Your link is kept.')
+          setState('import_unavailable')
+          return
+        }
+        // Accept only extraction fields. A model/provider cannot mark its own names as
+        // user-corrected or attach a confirmed country/localized name to bypass review.
+        setPreview({ ...data, result: { ...data.result, places: data.result.places.map(place => ({
+          name: place.name, regionHint: place.regionHint, slides: place.slides,
+          evidence: place.evidence, needsLocationConfirmation: true,
+        })) } })
+        setState('import_review')
+      } catch {
+        if (id !== request.current) return
+        setImportError('The analysis service is unavailable or timed out. Your link is kept. Start the local API to test this experimental flow.')
+        setState('import_unavailable')
+      } finally { clearTimeout(deadline) }
+      return
+    }
     const id = request.current
     setState('resolving')
     timer.current = setTimeout(() => {
@@ -234,21 +288,34 @@ export function SavePlace({
   const editOriginal = () => {
     cancelPending()
     setManual(false)
+    setPreview(null)
+    setImportError('')
     setState('entry')
   }
+  const instagramSource = parseInstagramLink(input)
   const messages: Partial<Record<SaveState, [string, string]>> = {
-    resolving: [
+    resolving: instagramSource.ok && input.trim() !== sampleLink ? [
+      'Reading post photos…',
+      'Extracting place names for review. This can take up to 95 seconds; addresses are not being verified yet.',
+    ] : [
       'Finding this place…',
       'Checking the link for a location. You can cancel and enter an address instead.',
     ],
     invalid: [
       'Check your link or address',
-      'Enter a complete https:// link or a street address. Your input has been kept.',
+      isUrlInput(manual ? address : input)
+        ? (() => { const result = parseInstagramLink(manual ? address : input); return result.ok ? 'Check your input.' : result.message })()
+        : 'Enter a supported Instagram post link or a sample place name. Your input has been kept.',
     ],
     not_found: [
       'We couldn’t identify the place',
-      'The post may be private or may not include a location. Enter the place name and street address instead.',
+      'No matching demo place was found. This preview does not perform live place search or determine whether a post is private.',
     ],
+    import_unavailable: [
+      importError ? 'Couldn’t analyze this post' : 'Instagram import is not connected yet',
+      importError || 'Your link format is valid. We have not retrieved the post or its photos. No places have been added. You can open the original post or keep this link for later.',
+    ],
+    import_review: ['Review extracted place names', 'Experimental results: names may be missing or incorrect. Locations have not been verified and nothing has been saved to your map.'],
     lookup_error: [
       'Couldn’t check this link',
       'Check your connection and try again. Your link is still here.',
@@ -267,7 +334,7 @@ export function SavePlace({
     ],
     success: ['Place saved', `${resolved.name} is now in ${collection}.`],
   }
-  const error = ['invalid', 'not_found', 'lookup_error', 'save_error'].includes(
+  const error = ['invalid', 'not_found', 'lookup_error', 'save_error', 'import_unavailable'].includes(
     state,
   )
   const message = messages[state]
@@ -325,7 +392,7 @@ export function SavePlace({
             e.preventDefault()
             if (!busy && !confirmed) {
               if (hasPlace) save()
-              else lookup()
+              else void lookup()
             }
           }}
         >
@@ -346,6 +413,51 @@ export function SavePlace({
                 <p>{message[1]}</p>
               </div>
             )}
+            {state === 'import_unavailable' && instagramSource.ok && (
+              <div className="field-help">
+                <p>One post can contain several photos. The selected photo number does not limit the intended import.</p>
+                <a href={instagramSource.source.canonicalUrl} target="_blank" rel="noopener noreferrer">Open original Instagram post</a>
+              </div>
+            )}
+            {state === 'import_review' && preview && (
+              <section aria-label="Extracted place candidates" className="import-candidates">
+                <p>{preview.fetchedImages} photos analyzed · {preview.result.places.length} place candidates</p>
+                <p className="field-help">Original names are shown until locations are confirmed.</p>
+                {preview.result.places.length === 0 && <p>No readable place names were extracted. This does not mean the post contains no places. Review the original post.</p>}
+                <ol>{preview.result.places.map((place, index) => (
+                  <li key={`${place.name}-${index}`}>
+                    {editingCandidate === index ? (
+                      <div className="candidate-edit">
+                        <label htmlFor={`candidate-name-${index}`}>Place name</label>
+                        <input id={`candidate-name-${index}`} className="link-input" value={candidateName} maxLength={200}
+                          onChange={event => setCandidateName(event.target.value)} />
+                        <button type="button" disabled={!candidateName.trim()} onClick={() => {
+                          setPreview({ ...preview, result: { ...preview.result, places: preview.result.places.map((p, i) =>
+                            i === index ? { ...p, correctedName: candidateName.trim() } : p) } })
+                          setEditingCandidate(null)
+                        }}>Keep name correction</button>
+                        <button type="button" onClick={() => setEditingCandidate(null)}>Cancel correction</button>
+                      </div>
+                    ) : <>
+                      <strong>{getPlaceDisplayName({ sourceName: place.name, correctedName: place.correctedName })}</strong>{' '}
+                      <button type="button" aria-label={`Edit candidate ${index + 1} name`} onClick={() => {
+                        setCandidateName(getPlaceDisplayName({ sourceName: place.name, correctedName: place.correctedName })); setEditingCandidate(index)
+                      }}>Edit name</button>
+                      {place.correctedName && <small> · Name edited by you; location still unverified</small>}
+                    </>}
+                    <p>{place.regionHint || 'Region needs confirmation'} · Photos {place.slides.join(', ')}</p>
+                    <small>Read from photo: {place.evidence}</small>
+                    {place.correctedName && <p className="field-help">Originally extracted name: {place.name}</p>}
+                    {instagramSource.ok && <p>{place.slides.map(slide => (
+                      <a key={slide} href={`${instagramSource.source.canonicalUrl}?img_index=${slide}`} target="_blank" rel="noopener noreferrer">Review photo {slide}{' '}</a>
+                    ))}</p>}
+                  </li>
+                ))}</ol>
+                {preview.result.ignoredSlides.length > 0 && <p>No candidate extracted from photos {preview.result.ignoredSlides.join(', ')}. These may be covers, promotions or unreadable text; check the original.</p>}
+                <p>Location search and saving these candidates will be connected in the next step.</p>
+                {instagramSource.ok && <a href={instagramSource.source.canonicalUrl} target="_blank" rel="noopener noreferrer">Open original Instagram post</a>}
+              </section>
+            )}
             {!confirmed && (
               <>
                 <label className="field-label" htmlFor="place-input">
@@ -361,7 +473,7 @@ export function SavePlace({
                     placeholder="Paste a link or enter an address"
                     maxLength={2048}
                     value={manual && !hasPlace ? address : input}
-                    readOnly={busy || hasPlace}
+                    readOnly={busy || hasPlace || state === 'import_review'}
                     disabled={state === 'saving'}
                     aria-invalid={state === 'invalid' || state === 'not_found'}
                     aria-describedby={message ? 'save-status' : undefined}
@@ -373,7 +485,7 @@ export function SavePlace({
                   <button
                     className="desktop-paste"
                     type="button"
-                    disabled={busy || hasPlace}
+                    disabled={busy || hasPlace || state === 'import_review'}
                     onClick={() => void paste()}
                   >
                     <Icon name="61e58" />
@@ -395,8 +507,7 @@ export function SavePlace({
                   We’ll ask you to confirm the location before saving.
                 </p>
                 <p className="field-help">
-                  Your original link stays with the place so you can revisit the
-                  post.
+                  UI demo: sample places only. Instagram photo import and cloud saving are not connected yet.
                 </p>
               </>
             )}
@@ -497,7 +608,7 @@ export function SavePlace({
             <button
               className="primary"
               type={confirmed ? 'button' : 'submit'}
-              disabled={busy}
+              disabled={busy || state === 'import_review'}
               onClick={confirmed ? () => onView(resolved) : undefined}
             >
               {state === 'ready' && (
@@ -505,9 +616,9 @@ export function SavePlace({
                   <Icon name="41542" />
                 </span>
               )}
-              {action}
+              {state === 'import_review' ? 'Location confirmation pending' : action}
             </button>
-            {['resolving', 'not_found', 'lookup_error', 'success'].includes(
+            {['resolving', 'not_found', 'lookup_error', 'import_unavailable', 'import_review', 'success'].includes(
               state,
             ) && (
               <button
