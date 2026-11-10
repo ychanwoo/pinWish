@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1166.0",
+    "@aws-sdk/client-geo-places": "^3.1166.0",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^24.19.2",
