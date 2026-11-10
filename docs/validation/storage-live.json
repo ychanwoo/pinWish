@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-11-10T22:47:05.100Z",
+  "stack": "pinwish-storage-dev",
+  "region": "us-east-1",
+  "checks": [
+    "Unauthenticated request rejected",
+    "Idempotent duplicate create",
+    "Second account cannot read/update/delete first account record",
+    "Update persisted and stale version rejected",
+    "Record survives a new sign-in",
+    "Refresh-token authentication works",
+    "Pagination works and foreign-owner cursor rejected"
+  ],
+  "accountCreation": "Temporary admin-created users with message SUPPRESS; no email sent",
+  "emailDeliveryVerified": false
+}

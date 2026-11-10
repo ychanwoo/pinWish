@@ -10,7 +10,8 @@ interface Props {
   onVisited: () => void
   onShare: () => void
   onDirections: () => void
-  onNote: (note: string) => void
+  onNote: (note: string) => void | Promise<boolean>
+  onDelete?: () => Promise<void>
   onNotice: (value: string) => void
   onSelect: (id: string) => void
 }
@@ -25,7 +26,12 @@ export function PlaceDetail({
   onNote,
   onNotice,
   onSelect,
+  onDelete,
 }: Props) {
+  const [deleting, setDeleting] = useState(false),
+    [deleteBusy, setDeleteBusy] = useState(false),
+    [deleteError, setDeleteError] = useState(''),
+    [noteBusy, setNoteBusy] = useState(false)
   const [editing, setEditing] = useState(false)
   const [note, setNote] = useState(place.note)
   const [photo, setPhoto] = useState(0)
@@ -139,7 +145,14 @@ export function PlaceDetail({
                   srcSet={asset('acf8a.png')}
                 />
               )}
-              <img src={asset(photos[photo])} alt={`Inside ${place.name}`} />
+              <img
+                src={asset(photos[photo])}
+                alt={
+                  place.saved
+                    ? `No photo available for ${place.name}`
+                    : `Inside ${place.name}`
+                }
+              />
             </picture>
             {place.id.split(':')[0] === 'grand-central' && (
               <span className="photo-caption">DTLA Landmark · Est. 1917</span>
@@ -224,10 +237,16 @@ export function PlaceDetail({
             </div>
             {editing ? (
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault()
-                  onNote(note)
-                  setEditing(false)
+                  if (noteBusy) return
+                  setNoteBusy(true)
+                  try {
+                    const ok = await onNote(note)
+                    if (ok !== false) setEditing(false)
+                  } finally {
+                    setNoteBusy(false)
+                  }
                 }}
               >
                 <textarea
@@ -237,7 +256,9 @@ export function PlaceDetail({
                   maxLength={1000}
                   onChange={(e) => setNote(e.target.value)}
                 />
-                <button className="primary small">Save note</button>
+                <button disabled={noteBusy} className="primary small">
+                  {noteBusy ? 'Saving…' : 'Save note'}
+                </button>
               </form>
             ) : (
               <p>
@@ -292,20 +313,38 @@ export function PlaceDetail({
             <div>
               <dt>Origin</dt>
               <dd>
-                <button
-                  onClick={() =>
-                    onNotice(
-                      'This is a sample saved place. Live source links will be connected with the backend.',
-                    )
-                  }
-                >
-                  Saved from Google Maps link <Icon name="a21ff" />
-                </button>
+                {place.saved ? (
+                  Object.values(place.saved.sources).map((source) => (
+                    <a
+                      key={source.canonicalUrl + source.slides.join(',')}
+                      href={source.originalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Instagram · photos {source.slides.join(', ')} ·{' '}
+                      {source.correctedName || source.extractedName}
+                    </a>
+                  ))
+                ) : (
+                  <button
+                    onClick={() =>
+                      onNotice(
+                        'This is a sample saved place. Live source links will be connected with the backend.',
+                      )
+                    }
+                  >
+                    Saved from Google Maps link <Icon name="a21ff" />
+                  </button>
+                )}
               </dd>
             </div>
             <div>
               <dt>Date Saved</dt>
-              <dd>Saved on Oct 14, 2025</dd>
+              <dd>
+                {place.saved
+                  ? `Saved on ${new Date(place.saved.createdAt).toLocaleDateString()}`
+                  : 'Saved on Oct 14, 2025'}
+              </dd>
             </div>
             <div>
               <dt>Address</dt>
@@ -319,6 +358,46 @@ export function PlaceDetail({
               </dd>
             </div>
           </dl>
+          {onDelete && (
+            <div className="delete-place">
+              {deleting ? (
+                <>
+                  <p>Delete this saved place and its source references?</p>
+                  {deleteError && (
+                    <p role="alert" className="field-error">
+                      {deleteError}
+                    </p>
+                  )}
+                  <button
+                    disabled={deleteBusy}
+                    onClick={() => setDeleting(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={deleteBusy}
+                    onClick={async () => {
+                      setDeleteBusy(true)
+                      setDeleteError('')
+                      try {
+                        await onDelete()
+                      } catch (e) {
+                        setDeleteError(
+                          e instanceof Error ? e.message : 'Delete failed.',
+                        )
+                      } finally {
+                        setDeleteBusy(false)
+                      }
+                    }}
+                  >
+                    {deleteBusy ? 'Deleting…' : 'Confirm delete'}
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setDeleting(true)}>Delete place</button>
+              )}
+            </div>
+          )}
           <div className="detail-tags">
             <p className="eyebrow">Tags</p>
             <div>

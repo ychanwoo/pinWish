@@ -29,7 +29,7 @@ Official instructions: https://developers.figma.com/docs/figma-mcp-server/remote
 
 A personal access token is only needed for a separate REST API or third-party integration. Never place a token in React source, a `VITE_` environment variable, or a tracked JSON file. Browser-visible environment variables are public. This starter does not need any API keys.
 
-This is an interactive UI preview. Places, notes, collections, and bookmarks are held in memory and reset on reload. Authentication, persistent storage and a live map provider are not connected. Instagram photo analysis is available only through the opt-in local API backed by AWS Bedrock described below. The map is the illustrative image from Figma; its controls only manipulate the preview. Directions opens Google Maps in a new tab using the sample address.
+Without cloud configuration, this remains an interactive UI preview with in-memory sample data. With the cloud settings below, Cognito and DynamoDB provide authentication and persistent saved places. A live map provider is not connected. Instagram photo analysis is available only through the opt-in local API backed by AWS Bedrock described below. The map is the illustrative image from Figma; its controls only manipulate the preview. Directions opens Google Maps in a new tab using the sample address.
 
 ## Project layout
 
@@ -89,7 +89,7 @@ Tests cover desktop/mobile search, invalid input, duplicate detection, failed-sa
 
 Real Instagram links are separated from demo place lookup. URL validation is not a claim that a post exists or is accessible. An opt-in local backend can retrieve photo carousels from public HTML and send the images to Amazon Bedrock for candidate extraction. The default AWS Bedrock Qwen3-VL model reads photo batches and preserves original-language names. Manual comparison passed 8/8 Donghae headings twice; LA remains 9/10 because of one Hangul error. Candidate names can be corrected while original OCR evidence and photo links remain available. Mixed-video posts are explicitly unsupported, and no candidate is saved to the map.
 
-See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. Production cloud hosting/backend resources are not deployed.
+See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. The import/search backend and frontend hosting are not deployed; the separate authenticated storage API is deployed as described below.
 
 ```sh
 npm run test:unit
@@ -130,3 +130,21 @@ For Korean-containing name/region input, the server asks Bedrock for an English 
 Optional server setting `PINWISH_QUERY_MODEL` overrides the query model; otherwise it uses `PINWISH_BEDROCK_MODEL` or the existing Qwen3-VL default. Requires `bedrock:InvokeModel` permission on that model, in addition to the Places-only policy template. No credentials belong in browser variables. Confirmed English labels come from AWS place details, not the generated search guess; provider localization fallback remains possible.
 
 Live original LA OCR validation: 9/10 inputs produced English queries with relevant candidates. The misread `포인트 듑` was left for review rather than silently guessed. Search results remain candidates, not automatic venue confirmations. See [live evidence](docs/validation/english-query-live.json).
+
+## Accounts and persistent saved places (issue #13)
+
+The configured local app now has a top-right **Sign in** button, separate Sign in/Create account views, inline red email-validation errors, verification/resend-code and password-reset flows. Creating an account opens email verification; successful verification returns to Sign in with the email retained. If an unverified user tries to sign in later, the verification screen opens again. No Google login is configured.
+
+**Keep me signed in for 7 days** is optional. Checked sessions survive browser reopening for at most seven days; unchecked sessions use tab-session storage. Signing out clears locally visible private data. The browser renews expired access tokens through Cognito without extending the seven-day deadline.
+
+Submitting an Instagram link while signed out opens the login modal and retains the draft. Once signed in, confirm locations and use **Save confirmed places**. Saved records survive refresh and a new sign-in. Notes, visited state and bookmarks persist; detail view includes original Instagram source links and an explicitly confirmed delete action. Retries preserve confirmed drafts, and repeated saves do not duplicate the same provider ID. The map is deliberately a labeled placeholder in cloud mode until the next map-integration task.
+
+```sh
+npm run cloud:configure  # read public identifiers from pinwish-storage-dev
+npm run dev:api         # terminal 1: existing local import/place-search API
+npm run dev             # terminal 2: frontend with .env.local cloud settings
+```
+
+A development stack named `pinwish-storage-dev` is deployed in us-east-1. It contains Cognito, API Gateway, Lambda and DynamoDB; the frontend and import/search API remain local. See [infrastructure and API documentation](infra/README.md) for permissions, reproducible deployment, session behavior, costs, limits and cleanup. The generated configuration `.env.local` is ignored by Git.
+
+`npm run test:cloud-ui` uses mocked Cognito/storage responses. Existing demo/import tests explicitly disable cloud configuration so they cannot operate against your live account. Live verification results are in [storage-live.json](docs/validation/storage-live.json) and [storage-browser-live.json](docs/validation/storage-browser-live.json). Real email delivery still needs confirmation through your own signup; automated test accounts suppressed outgoing email.

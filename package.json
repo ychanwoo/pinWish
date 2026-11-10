@@ -15,15 +15,20 @@
     "probe:instagram": "node scripts/instagram/run-probe.mjs",
     "extract:instagram": "node scripts/instagram/run-extraction.mjs",
     "dev:api": "node --experimental-strip-types scripts/instagram/dev-server.mjs",
-    "test:import-ui": "playwright test --config playwright.import.config.ts"
+    "test:import-ui": "playwright test --config playwright.import.config.ts",
+    "test:cloud-ui": "playwright test --config playwright.cloud.config.ts",
+    "infra:build": "node scripts/cloud/build-template.mjs",
+    "cloud:configure": "node scripts/cloud/configure-local.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1166.0",
     "@fontsource-variable/inter": "^5.3.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1166.0",
+    "@aws-sdk/client-dynamodb": "^3.1166.0",
     "@aws-sdk/client-geo-places": "^3.1166.0",
     "@playwright/test": "^1.64.1",
     "@tailwindcss/vite": "^4.3.3",
@@ -37,6 +42,6 @@
     "vite": "^8.3.5"
   },
   "engines": {
-    "node": "^20.19.0 || >=22.12.0"
+    "node": ">=22.14.0"
   }
 }

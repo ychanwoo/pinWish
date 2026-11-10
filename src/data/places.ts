@@ -1,6 +1,8 @@
+import type { SavedPlace } from '../lib/storage-api'
 import { isUrlInput, parseInstagramLink } from '../lib/instagram'
-export type Category = 'Food' | 'Coffee' | 'Culture'
+export type Category = 'Food' | 'Coffee' | 'Culture' | 'Other'
 export interface Place {
+  saved?: SavedPlace
   id: string
   name: string
   kind: string
@@ -104,7 +106,13 @@ export const saveStates = [
 ] as const
 export type SaveState = (typeof saveStates)[number]
 export type View =
-  'list' | 'map' | 'detail' | 'empty' | 'saved' | 'list_loading' | 'list_error'
+  | 'list'
+  | 'map'
+  | 'detail'
+  | 'empty'
+  | 'saved'
+  | 'list_loading'
+  | 'list_error'
 export const sampleLink = 'https://www.instagram.com/p/example/'
 export function resolveSample(input: string): Place | undefined {
   const normalized = input.toLowerCase()
@@ -121,7 +129,10 @@ export function resolveSample(input: string): Place | undefined {
 export function validInput(input: string): boolean {
   const trimmed = input.trim()
   if (isUrlInput(trimmed)) {
-    return parseInstagramLink(trimmed).ok || trimmed === 'https://maps.app.goo.gl/grandcentral'
+    return (
+      parseInstagramLink(trimmed).ok ||
+      trimmed === 'https://maps.app.goo.gl/grandcentral'
+    )
   }
   return (
     /\d+\s+\S+/.test(trimmed) ||
