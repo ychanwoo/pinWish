@@ -38,3 +38,6 @@ coverage/
 # Browser test artifacts
 playwright-report/
 test-results/
+
+# Generated CloudFormation artifact
+infra/generated/
