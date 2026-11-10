@@ -31,10 +31,10 @@ API default throttling is 2 requests/second, burst 5. The UI spaces batch saves 
 
 Partition key: `USER#<JWT sub>`. Sort key: `PLACE#<SHA256(provider:placeId)>`.
 
-- `POST /places`: `{place: ConfirmedPlace, note, collection}`. Stores a schema-validated user-confirmed place. This is not a new server geocoding/identity verification step; upstream search is responsible for place lookup. Server derives owner and IDs, not the request body.
+- `POST /places`: `{place: ConfirmedPlace, note, collection}`. Stores a schema-validated provider-matched place. This is not a new server geocoding/identity verification step; upstream search is responsible for place lookup. Server derives owner and IDs, not the request body.
 - Same owner + provider ID means one saved place, regardless of collection. Additional original post/slide combinations merge into `sources`; repeated identical submissions are idempotent. Existing note, collection and other user edits are preserved. Different provider IDs for the same physical venue are not automatically merged.
 - Source key hashes canonical Instagram URL plus unique sorted slide numbers. Retains original URL, source spelling, correction, evidence and slide references. Maximum 30 source entries per place; source deletion is not included in this branch.
-- `GET /places?limit=20&cursor=...`: at most 50 rows, consistent reads, opaque cursor scoped to the authenticated owner. Key-order pagination, not global date sorting. The UI's search/filter/counts apply to loaded pages; use Load more for additional records.
+- `GET /places?limit=20&cursor=...`: at most 50 rows, consistent reads, opaque cursor scoped to the authenticated owner. Key-order pagination, not global date sorting. The UI loads all pages before publishing the list/map snapshot so filters and counts cover all saved records.
 - `GET /places/{id}` returns one owned record, otherwise 404.
 - `PATCH /places/{id}`: `{version, note?, collection?, visited?, bookmarked?}`. No owner, provider, coordinates or source mutations. Conditional writes prevent stale overwrites; conflict returns 409, requiring refresh and retry.
 - `DELETE /places/{id}`: `{version}`. Explicit UI confirmation and conditional deletion. Deleting a place removes its source references.
@@ -73,3 +73,26 @@ aws cloudformation delete-stack --stack-name pinwish-storage-dev --region us-eas
 ```
 
 The table and user pool use `Retain` to prevent accidental loss during stack changes. Deleting the stack removes its API/Lambda/role/logs/app client, but does not remove the retained table or user pool. After deliberately confirming that data/accounts are no longer needed, delete those two resources using their recorded identifiers in the AWS console (or DynamoDB delete-table / Cognito delete-user-pool). Do not recreate the same stack expecting automatic adoption of retained resources. No cleanup deletion of this deployed development stack was performed during implementation.
+
+### Interactive map
+
+The template also creates an Amazon Location Maps V2 API key, restricted to
+`geo-maps:GetTile` on the regional default provider. Style, glyph and sprite
+endpoints accompany map rendering; do not add their operation names as unsupported
+API-key permission entries. There is no V1 Map resource or place index to provision.
+
+`MapReferers` defaults to `http://localhost:5173/*` and
+`http://127.0.0.1:5173/*`. Add the exact HTTPS frontend origin when deploying;
+other local ports are not enabled. `MapKeyExpiry` defaults to January 1, 2027 UTC,
+after the class demo. Renew deliberately if keeping the service running.
+`npm run cloud:configure` retrieves the key directly into ignored `.env.local`;
+it never prints the key. The key is public in browser requests, not an AWS secret.
+Referrer restrictions limit browser use, but are not user authentication or a
+hard cost cap. Private saved records continue to require Cognito authentication.
+
+Map tiles are usage-billed. Keep the existing AWS budget alert enabled, avoid
+unattended map reloads, and remove the map key after the demo. A recently used key
+may require explicit `ForceDelete` during teardown; review that action before
+using it. No Places/Routes/storage permissions are granted to this key.
+
+Documentation: https://docs.aws.amazon.com/location/latest/developerguide/using-apikeys.html

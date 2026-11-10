@@ -1,0 +1,36 @@
+{
+  "refererChecks": {
+    "allowed": 200,
+    "denied": 403
+  },
+  "testedAt": "2026-11-10T23:11:55.231Z",
+  "realAWSMap": true,
+  "accountAndPlaces": "mocked fixtures; no accounts or records written",
+  "mapResponseCategories": [
+    "styles",
+    "tiles",
+    "glyphs"
+  ],
+  "httpFailures": [],
+  "pageErrors": [],
+  "retryVisible": 0,
+  "detail": "Griffith Observatory",
+  "productionPreview": {
+    "refererChecks": {
+      "allowed": 200,
+      "denied": 403
+    },
+    "testedAt": "2026-11-10T23:12:09.416Z",
+    "realAWSMap": true,
+    "accountAndPlaces": "mocked fixtures; no accounts or records written",
+    "mapResponseCategories": [
+      "styles",
+      "tiles",
+      "glyphs"
+    ],
+    "httpFailures": [],
+    "pageErrors": [],
+    "retryVisible": 0,
+    "detail": "Griffith Observatory"
+  }
+}

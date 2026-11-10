@@ -1,0 +1,402 @@
+{
+  "testedAt": "2026-11-10T23:34:23.413Z",
+  "mode": "real Instagram extraction, Bedrock, Amazon Location, Cognito, DynamoDB and map",
+  "lookups": [
+    {
+      "query": "그리피스 천문대",
+      "conversion": {
+        "originalQuery": "그리피스 천문대",
+        "searchQuery": "Griffith Observatory",
+        "searchRegion": "2800 E Observatory Rd, Los Angeles, CA 90027",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAntbE_lf5GwGQOmVHbLi3PkmHMaDZOh6buuSyN3_Rwf_2DqyWXwfDn4Uf8U0emOkrGMl8pU6D-hYIOFAZ83hjGKZywRlw197wR3HUTMw9jb005wMyc7wRNNUTkfOz2Y_dD4gMjQ27M2u-bef7RmzqJ9NHccgp",
+        "name": "Griffith Observatory",
+        "address": "Griffith Observatory, 2800 E Observatory Ave, Los Angeles, CA 90027, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.30039,
+          "latitude": 34.11838
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Griffith Observatory",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "산타모니카 피어",
+      "conversion": {
+        "originalQuery": "산타모니카 피어",
+        "searchQuery": "Santa Monica Pier",
+        "searchRegion": "200 Santa Monica Pier, Santa Monica, CA 90401",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUA3qMyVsfvABTHHXfgf7M9_yyzjvp9PrD2bqSr_LKX3dE_VIvL4O_dgNGgT6zOj2J1yBGtjd1DEpsQ0OCzikpdhOz-YCR24OhqL5Lli8UkkyI549KUbzwDv-7GTvZs9nFdCmJ2lG2y1mJCXzIgLJfrWK5Iicd9",
+        "name": "Santa Monica Pier",
+        "address": "Santa Monica Pier, 200 Santa Monica Pier, Santa Monica, CA 90401, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.49762,
+          "latitude": 34.0087
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Santa Monica Pier",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "포인트 듑",
+      "conversion": {
+        "originalQuery": "포인트 듑",
+        "searchQuery": "Point Dume",
+        "searchRegion": "Westward Beach Rd, Malibu, CA 90265",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAIXpwFqLpC-sMNNjYSwfKYKDIJb7il2mdpjQA2w37RGRjEH7qMwY2a6R39r-xT0PrhizVqqbC-NwtOIo3gLridd1Nc-7VxI3t2ffoYmYSpM4mUarhR7ccODW_LYMnZGDaFgCXQA8Z1rJD3WTVekO1GDqH2X2e",
+        "name": "Point Dume State Beach",
+        "address": "Point Dume State Beach, 6800 Westward Beach Rd, Malibu, CA 90265-4166, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.817,
+          "latitude": 34.01155
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Point Dume State Beach",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "브래드버리 빌딩",
+      "conversion": {
+        "originalQuery": "브래드버리 빌딩",
+        "searchQuery": "Bradbury Building",
+        "searchRegion": "304 S Broadway, Los Angeles, CA 90013",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAA6AITcJGECCXsZX59smmX1yY-pBj1s91jBEP0yHx1JLojEfRE3ns1-VwscaUN1p_ZU96a_myOeJJG-HU_QE0vgUHjp-l7zWHoF-sQ2evhMAOwbi3jBromM6n9j3qgOofGtD7eypqaCNosR7QnPrXwhrmvXJ9",
+        "name": "Blue Bottle Coffee (Blue Bottle Coffee - Bradbury)",
+        "address": "Blue Bottle Coffee, 300 S Broadway, Los Angeles, CA 90013-1208, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.24797,
+          "latitude": 34.0508
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Blue Bottle Coffee (Blue Bottle Coffee - Bradbury)",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "Bradbury Building",
+      "conversion": {
+        "originalQuery": "Bradbury Building",
+        "searchQuery": "Bradbury Building",
+        "searchRegion": "Los Angeles, CA",
+        "status": "unchanged"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAccN2EgNwnAujpCZtL2j_mBQc2xpbnnlrHqwASaHQ2VnjkD4yccb5eALn2d6bv2r9xtBQxXK6TKbZpu4x6_tF1JWC9-6xj4I-LpitC2nPOM4vB8jgF52ty_1m5dIOcVrTT0qkqXFDKJuv0KOkFEod8YF_sQTO",
+        "name": "Bradbury Building",
+        "address": "Bradbury Building, 304 S Broadway, Los Angeles, CA 90013-1025, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.24793,
+          "latitude": 34.05076
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Bradbury Building",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "로데오 드라이브",
+      "conversion": {
+        "originalQuery": "로데오 드라이브",
+        "searchQuery": "Rodeo Drive",
+        "searchRegion": "Rodeo Dr, Beverly Hills, CA 90210",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAZfgdicIkbMZX4vO7VJDIFlcW2rUYhmZz43sdlQJc-TSTJOBLxewRfv-7SpIzqi-jB_0VaCSa90BpW4i257ofsfS-8xPEl01wnsBqCjvZKgKAbqnkbQi_Tjr6p_fsrNAVYfnN715IwPLw9foXDyFzirwFT3O3",
+        "name": "Rodeo Drive (Rodeo Drive Beverly Hills)",
+        "address": "Rodeo Drive, N Rodeo Dr, Beverly Hills, CA 90210, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.40375,
+          "latitude": 34.06978
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Rodeo Drive (Rodeo Drive Beverly Hills)",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "허모사 비치 피어",
+      "conversion": {
+        "originalQuery": "허모사 비치 피어",
+        "searchQuery": "Hermosa Beach Pier",
+        "searchRegion": "1 Pier Ave, Hermosa Beach, CA 90254",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAupMNqOvHUkvv7PcBjPyIAyV4jZ3uK3CevBnxkmbUd0CuwtbunZYOM9CUBhbupAnt3jpQYWFIpWXXWN-F46Dj5xVIppVse5LGGQ5v7xdzNfvqQCrPqLLuq4bq4bosy-1hBVZFl5SXdtbREHoL4H6vvPIOig2i",
+        "name": "Hermosa Beach (Hermosa Beach Pier)",
+        "address": "Hermosa Beach, 1 Pier Ave, Hermosa Beach, CA 90254-3731, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.40185,
+          "latitude": 33.86194
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Hermosa Beach (Hermosa Beach Pier)",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "랜디스 도넛",
+      "conversion": {
+        "originalQuery": "랜디스 도넛",
+        "searchQuery": "Randys Donuts",
+        "searchRegion": "805 W Manchester Blvd, Inglewood, CA 90301",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAdVvzkCzV9zqbYs5zzCDlV9-lACrUFX0Yospkze0Nm13tsiDFhYQF9r5uZlT3WxHsFhURrnbiJRlW8KirwWSLzKJEgu45gl051bzfpVWqxEjMZ7Qajw8qGLaU25F6WfUnwB_twJ3MjAfbILqBJShYs5IctJ6m",
+        "name": "RANDY'S DONUTS",
+        "address": "RANDY'S DONUTS, 805 W Manchester Blvd, Inglewood, CA 90301-1524, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.37045,
+          "latitude": 33.96185
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "RANDY'S DONUTS",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "유니언 역",
+      "conversion": {
+        "originalQuery": "유니언 역",
+        "searchQuery": "Union Station",
+        "searchRegion": "800 N Alameda St, Los Angeles, CA 90012",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAS-1-kzQOpqXrdoBJEh0VBVqudEovdR8QBTUeyJVm_SFelvNOZV1NJpumddl4Hai70n2jOfs2w-J8nzd_eezPjoTh_CQ-osImKUsUeNn7RBMnKVciKnjxUWZcphpwGei-ICpnr9cShlIKy-39mPtmCmjaGanh",
+        "name": "Union Station",
+        "address": "Union Station, 800 N Alameda St, Los Angeles, CA 90012-2178, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.23649,
+          "latitude": 34.05635
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Union Station",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "갬블 하우스",
+      "conversion": {
+        "originalQuery": "갬블 하우스",
+        "searchQuery": "Gamble House",
+        "searchRegion": "4 Westmoreland Pl, Pasadena, CA 91103",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUA_qiTE8GMx9JrXnZb0Ee9ePDEwFtjwsI5HBWqH1C2hWA6mmvLvBTrT4aH9ZKsDWfnjuAeU3fP3nUa3LwokVVuEVLZFWxJcEVVbQHDEMsixAMQ_6fy_PYr1N_hNSZpkI5Vl30E9hDE426iOU4BEF8UUtxKI0Ir",
+        "name": "The Gamble House",
+        "address": "The Gamble House, 4 Westmoreland Pl, Pasadena, CA 91103, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.1609,
+          "latitude": 34.15167
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "The Gamble House",
+        "koreanName": null
+      },
+      "status": 200
+    },
+    {
+      "query": "무소 앤 프랭크 그릴",
+      "conversion": {
+        "originalQuery": "무소 앤 프랭크 그릴",
+        "searchQuery": "Muss & Frank Grill",
+        "searchRegion": "6667 Hollywood Blvd, Los Angeles, CA 90028",
+        "status": "translated"
+      },
+      "top": {
+        "provider": "amazon-location",
+        "placeId": "AQAAAFUAdK548j-XKlLAGvtqri9nfv1zbHfT25YgVJyn9pB6xflTQxwXwldN3c5KpoNNXqnhMFhqcO2sFYmSIK0q9mYfZVhU1QLUht-bKXUtGkQ4iBlYS74fZwvsTF7eWj816a7aV6wVdh0LeFXr1EGg4OTXXPgEzTqd",
+        "name": "Musso & Frank Grill",
+        "address": "Musso & Frank Grill, 6667 Hollywood Blvd, Los Angeles, CA 90028-6220, United States",
+        "countryCode": "US",
+        "countryName": "United States",
+        "coordinates": {
+          "longitude": -118.33539,
+          "latitude": 34.10185
+        },
+        "placeType": "PointOfInterest",
+        "englishName": "Musso & Frank Grill",
+        "koreanName": null
+      },
+      "status": 200
+    }
+  ],
+  "saved": [
+    {
+      "id": "7e6b5dc40509be1014de2b5b472ed6608632e2a8d9ae83253ba7f935329e1cc7",
+      "name": "Griffith Observatory",
+      "address": "Griffith Observatory, 2800 E Observatory Ave, Los Angeles, CA 90027, United States",
+      "coordinates": {
+        "longitude": -118.30039,
+        "latitude": 34.11838
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "5d0bedd227d5d3f403ba5a72fd6062c77b307d93dcad2840207c750987b75e00",
+      "name": "Santa Monica Pier",
+      "address": "Santa Monica Pier, 200 Santa Monica Pier, Santa Monica, CA 90401, United States",
+      "coordinates": {
+        "longitude": -118.49762,
+        "latitude": 34.0087
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "08ea1feed2b4ff368c7f1142d79bd53e8463e379b7c91b72c6c10da40fca8c3b",
+      "name": "Point Dume State Beach",
+      "address": "Point Dume State Beach, 6800 Westward Beach Rd, Malibu, CA 90265-4166, United States",
+      "coordinates": {
+        "longitude": -118.817,
+        "latitude": 34.01155
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "1db811a3f954ce98e3afc0928d4d5d511adf5c034c4d20d3f0e5089b76fa97c9",
+      "name": "Bradbury Building",
+      "address": "Bradbury Building, 304 S Broadway, Los Angeles, CA 90013-1025, United States",
+      "coordinates": {
+        "longitude": -118.24793,
+        "latitude": 34.05076
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "bd3a5eaac2a2d88c522fe9825ca71a8a35221155cdcbf1c052ca4208ebd9a416",
+      "name": "Rodeo Drive",
+      "address": "Rodeo Drive, N Rodeo Dr, Beverly Hills, CA 90210, United States",
+      "coordinates": {
+        "longitude": -118.40375,
+        "latitude": 34.06978
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "a3960c853e8f854894f7c7c42367b7e68b1ef0e7a9dfdf39cad79f3e9a53bfde",
+      "name": "Hermosa Beach",
+      "address": "Hermosa Beach, 1 Pier Ave, Hermosa Beach, CA 90254-3731, United States",
+      "coordinates": {
+        "longitude": -118.40185,
+        "latitude": 33.86194
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "b8e15ec0737b76c7b6308771c7044a8a496552b94c71ae0ddf37d6462a6acb36",
+      "name": "RANDY'S DONUTS",
+      "address": "RANDY'S DONUTS, 805 W Manchester Blvd, Inglewood, CA 90301-1524, United States",
+      "coordinates": {
+        "longitude": -118.37045,
+        "latitude": 33.96185
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "d5fcdb968cda1e70409a860cbdb4e11305f863e43d461d992520eb00158cd213",
+      "name": "Union Station",
+      "address": "Union Station, 800 N Alameda St, Los Angeles, CA 90012-2177, United States",
+      "coordinates": {
+        "longitude": -118.23649,
+        "latitude": 34.05635
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "0f2e764737c626ba3f64ae375f5946630e75fc197f23c71b3120fe29395e5a88",
+      "name": "The Gamble House",
+      "address": "The Gamble House, 4 Westmoreland Pl, Pasadena, CA 91103, United States",
+      "coordinates": {
+        "longitude": -118.1609,
+        "latitude": 34.15167
+      },
+      "sourcePreserved": true
+    },
+    {
+      "id": "79dd9821de8b2bfe1511771e8826b55fcfd74ee8b66644592a0d1b193715da53",
+      "name": "Musso & Frank Grill",
+      "address": "Musso & Frank Grill, 6667 Hollywood Blvd, Los Angeles, CA 90028-6220, United States",
+      "coordinates": {
+        "longitude": -118.33539,
+        "latitude": 34.10185
+      },
+      "sourcePreserved": true
+    }
+  ],
+  "cleanup": true,
+  "extraction": {
+    "status": 200,
+    "photos": 12,
+    "candidates": 10
+  },
+  "remainingText": "",
+  "hangulVisible": false,
+  "mapOptions": 10,
+  "reloadPersisted": true,
+  "deletedTestRecords": 10,
+  "reviewNotes": [
+    "All 10 source slides resolved; cover/end ignored.",
+    "Point Dume resolved with original OCR evidence preserved and printed address context.",
+    "Bradbury Building matched after regional fallback, not Blue Bottle Coffee in the same building.",
+    "Randy’s Donuts matched 805 W Manchester Blvd from the source image.",
+    "Provider detail title Hermosa Beach corresponds to the search result Hermosa Beach Pier at 1 Pier Ave.",
+    "A successful live sample is not a guarantee for every post or future provider response."
+  ]
+}

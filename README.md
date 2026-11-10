@@ -27,9 +27,13 @@ Open this folder in VS Code. Open `.vscode/mcp.json`, click Start above the Figm
 
 Official instructions: https://developers.figma.com/docs/figma-mcp-server/remote-server-installation/#vs-code
 
-A personal access token is only needed for a separate REST API or third-party integration. Never place a token in React source, a `VITE_` environment variable, or a tracked JSON file. Browser-visible environment variables are public. This starter does not need any API keys.
+A personal access token is only needed for a separate REST API or third-party integration. Never place a token in React source, a `VITE_` environment variable, or a tracked JSON file. Browser-visible environment variables are public. The Figma connection does not need a personal API key; the live application uses the public map key described below.
 
-Without cloud configuration, this remains an interactive UI preview with in-memory sample data. With the cloud settings below, Cognito and DynamoDB provide authentication and persistent saved places. A live map provider is not connected. Instagram photo analysis is available only through the opt-in local API backed by AWS Bedrock described below. The map is the illustrative image from Figma; its controls only manipulate the preview. Directions opens Google Maps in a new tab using the sample address.
+Without cloud configuration, the app is an in-memory UI preview. Cloud mode uses
+Cognito, API Gateway/Lambda/DynamoDB and an Amazon Location map. Instagram image
+analysis and place search use AWS Bedrock/Location through the local development
+API. The frontend and import/search API are not deployed yet. Directions opens
+Google Maps externally; in-app route calculation is not implemented.
 
 ## Project layout
 
@@ -43,7 +47,7 @@ Without cloud configuration, this remains an interactive UI preview with in-memo
 - `.vscode/mcp.json`: shared Figma MCP connection configuration.
 - `.github/workflows/ci.yml`: lint and build checks.
 
-`node_modules/` and `dist/` are generated locally and excluded from Git. Add feature components and API modules when implementing those features; The experimental local backend lives in `scripts/instagram/`; production AWS infrastructure is still to be added.
+`node_modules/` and `dist/` are generated locally and excluded from Git. The experimental import backend lives in `scripts/instagram/`; deployed storage/map infrastructure is generated from `scripts/cloud/`.
 
 ## Local UI review
 
@@ -63,7 +67,7 @@ Start with `npm run dev` and open the URL printed by Vite (normally http://local
 
 All save states are available through `?state=`: `entry`, `resolving`, `ready`, `invalid`, `not_found`, `lookup_error`, `saving`, `save_error`, `duplicate`, `success`. Direct links to pending states are intentionally held for visual inspection. Pending states reached through interaction complete after a short mock delay. State URLs are review entry points; interaction does not rewrite the URL.
 
-### Try the save flow
+### Try the demo save flow (cloud configuration disabled)
 
 1. Click **Save a place** (mobile) or **Add pin** (desktop).
 2. Enter `https://www.instagram.com/p/example/`, `https://maps.app.goo.gl/grandcentral`, or a sample place name such as `Maru Coffee`.
@@ -74,7 +78,10 @@ The mock resolver recognizes only the supplied sample places. Other well-formed 
 
 Use `/?state=ready&scenario=save_error` to simulate one failed save followed by a successful retry. Use `/?state=entry&scenario=lookup_error` to simulate one failed lookup. Draft fields survive retries. `?scenario=not_found` exercises manual lookup fallback. Clipboard buttons use the browser clipboard API and display a fallback message when permission is denied.
 
-Sidebar counts, collection selection, search results, and map pins follow the in-memory sample records. Desktop detail pins switch the dossier without closing it; the map remains an illustrative image, not geographic positioning or automatic panning. Notes can be edited or cancelled, and saved edits survive navigation within this page session. Opening hours are unverified; coordinates, dates, and imagery remain design samples. The sample map remains separate from the live place-confirmation flow below. Persistence, transit layers and account settings belong to follow-up work.
+Demo records and edits reset on reload and its map is an illustrative image.
+Cloud mode instead loads persisted records, synchronizes filters with real map
+pins, and persists note/bookmark/visited edits. Collections are not yet independent
+persisted entities, and copied private place URLs are not public sharing links.
 
 ## Browser checks
 
@@ -87,7 +94,17 @@ Tests cover desktop/mobile search, invalid input, duplicate detection, failed-sa
 
 ## Experimental Instagram validation (issue #3)
 
-Real Instagram links are separated from demo place lookup. URL validation is not a claim that a post exists or is accessible. An opt-in local backend can retrieve photo carousels from public HTML and send the images to Amazon Bedrock for candidate extraction. The default AWS Bedrock Qwen3-VL model reads photo batches and preserves original-language names. Manual comparison passed 8/8 Donghae headings twice; LA remains 9/10 because of one Hangul error. Candidate names can be corrected while original OCR evidence and photo links remain available. Mixed-video posts are explicitly unsupported, and no candidate is saved to the map.
+Real Instagram links are separated from demo lookup. The opt-in local backend
+retrieves public photo carousels and sends image batches to Amazon Bedrock. It
+preserves original headings and printed address hints, converts overseas searches
+to English, retrieves Amazon Location matches, and automatically saves resolved
+places in authenticated cloud mode. Cover/end slides are ignored. Mixed-video
+posts and detailed South Korean place lookup remain unsupported.
+
+The latest LA live check resolved and saved all 10 candidates from 12 photos,
+including regional fallback for an address search that returned a building tenant.
+See [current validation](docs/validation/automatic-import.md). Earlier feasibility
+reports record historical extraction-only results, not current end-to-end behavior.
 
 See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. The import/search backend and frontend hosting are not deployed; the separate authenticated storage API is deployed as described below.
 
@@ -100,12 +117,17 @@ npm run test:import-ui
 
 ### Place display names
 
-Extraction preserves the original `name` and `evidence`; user changes are stored separately as `correctedName`. The shared `getPlaceDisplayName` policy selects Korean names for confirmed South Korean locations (`KR`) and English names for other confirmed countries, falling back to the correction/original when the requested localized name is unavailable. The country must come from confirmed place-search results, never from the language of an Instagram post. The opt-in import review now connects to Amazon Location search and details. Explicit confirmation applies the provider name while preserving OCR evidence. Amazon Location does not support detailed South Korean places; those candidates cannot be confirmed with this provider. Korean overseas search queries are automatically converted to English through Bedrock; original OCR text is never rewritten. There are no sample-specific runtime substitutions.
+Extraction preserves original names, evidence, printed addresses and slide references.
+Overseas visible labels use English. Automatic matching checks provider names and
+can retry at city/state scope when exact-address results are unrelated. Uncertain
+matches remain unplotted; coordinates always come from AWS place details. Original
+Korean evidence remains in stored source metadata. KR labels are supported by the
+display policy, but this provider's detailed KR lookup remains unsupported.
 
 
 ## Place search and confirmation (issue #11)
 
-The import review supports searching by name/region/country, comparing addresses, selecting a match, and explicitly confirming fresh AWS place details. Each photo heading can have multiple locations or be skipped. Confirmation retains the provider ID, coordinates, country, original Instagram URL, slide numbers, OCR evidence and user correction. Closing/reopening retains this draft; refreshing clears it. **Done reviewing does not save to the database or place pins on the map.**
+The import now searches extracted names automatically, compares provider names and retrieves fresh AWS details for a matching result, and saves located places as a batch in cloud mode. There is no per-place confirmation step. The original Instagram URL, slide numbers and OCR evidence remain in source data; overseas labels use English and Korean OCR evidence is not displayed. Closing during lookup cancels requests and retains the draft. Failed locations do not prevent the successful ones from saving. In demo mode the same lookup runs without account storage.
 
 ```sh
 # Terminal 1: AWS credentials remain server-side (normal AWS credential chain)
@@ -116,7 +138,7 @@ VITE_ENABLE_INSTAGRAM_PREVIEW=true npm run dev
 
 Requires Bedrock access for new imports and Korean query conversion and `geo-places:SearchText` / `geo-places:GetPlace` for locations. The scoped policy template is [docs/aws/place-search-policy.json](docs/aws/place-search-policy.json); no IAM role or cloud deployment is created by these commands. Export server settings in your shell; the Node API does not automatically load Vite `.env` files.
 
-**Known limits:** Automatic English conversion can be uncertain or wrong, especially when OCR misspells a name. The UI shows the search query; correct it and inspect the address when needed. English localization may fall back to the provider's default name. South Korea detailed POI/address coverage is unsupported, and country-center results are rejected. Same-name branches require explicit review. Duplicate protection uses provider IDs, so distinct IDs for the same physical venue still require review.
+**Known limits:** Automatic ranking can choose an unintended same-name branch, and OCR/translation can be wrong. Matches are automatic, not human-verified. Unresolved locations remain out of the map and can be retried. South Korea detailed POI/address coverage remains unsupported; country-center results are rejected. Duplicate protection uses provider IDs, so distinct IDs for one physical venue may still yield separate pins.
 
 The local API caps Instagram imports at 3 and place API requests at 100 per process, with separate concurrency limits. Restarting resets these limits; they are not an AWS billing cap. AWS calls are billable and use Storage intended use. This loopback development API is not a public production API.
 
@@ -127,9 +149,9 @@ See [the implementation and live validation report](docs/validation/place-confir
 
 For Korean-containing name/region input, the server asks Bedrock for an English search query and region, then searches Amazon Location. English-only input bypasses the model. Explicit KR country filters remain unsupported. Uncertain/malformed output or a model outage falls back to the original input with an explanatory message; cancellation still stops the request. Successful conversions are cached by query, region and country for 15 minutes (at most 100 entries). Each uncached conversion makes one billable Bedrock request within the existing place-request quota.
 
-Optional server setting `PINWISH_QUERY_MODEL` overrides the query model; otherwise it uses `PINWISH_BEDROCK_MODEL` or the existing Qwen3-VL default. Requires `bedrock:InvokeModel` permission on that model, in addition to the Places-only policy template. No credentials belong in browser variables. Confirmed English labels come from AWS place details, not the generated search guess; provider localization fallback remains possible.
+Optional server setting `PINWISH_QUERY_MODEL` overrides the query model; otherwise it uses `PINWISH_BEDROCK_MODEL` or the existing Qwen3-VL default. Requires `bedrock:InvokeModel` permission on that model, in addition to the Places-only policy template. No credentials belong in browser variables. English labels prefer AWS place details; an English query can serve as the display fallback when the provider lacks an English title. Original source text remains untouched.
 
-Live original LA OCR validation: 9/10 inputs produced English queries with relevant candidates. The misread `포인트 듑` was left for review rather than silently guessed. Search results remain candidates, not automatic venue confirmations. See [live evidence](docs/validation/english-query-live.json).
+Historical original LA OCR validation: 9/10 inputs produced English queries with relevant candidates. That earlier run left the misread photo-4 heading unresolved. The current flow uses its printed address as context and resolved it in the latest live validation. That earlier report measured search candidates, not the accuracy of the new automatic matching flow. See [live evidence](docs/validation/english-query-live.json).
 
 ## Accounts and persistent saved places (issue #13)
 
@@ -137,7 +159,7 @@ The configured local app now has a top-right **Sign in** button, separate Sign i
 
 **Keep me signed in for 7 days** is optional. Checked sessions survive browser reopening for at most seven days; unchecked sessions use tab-session storage. Signing out clears locally visible private data. The browser renews expired access tokens through Cognito without extending the seven-day deadline.
 
-Submitting an Instagram link while signed out opens the login modal and retains the draft. Once signed in, confirm locations and use **Save confirmed places**. Saved records survive refresh and a new sign-in. Notes, visited state and bookmarks persist; detail view includes original Instagram source links and an explicitly confirmed delete action. Retries preserve confirmed drafts, and repeated saves do not duplicate the same provider ID. The map is deliberately a labeled placeholder in cloud mode until the next map-integration task.
+Submitting an Instagram link while signed out opens the login modal and retains the draft. Once signed in, submit the post link. Located places are automatically saved and shown on the map; no per-place confirmation is required. Saved records survive refresh and a new sign-in. Notes, visited state and bookmarks persist; detail view includes original Instagram source links and an explicitly confirmed delete action. Retries preserve confirmed drafts, and repeated saves do not duplicate the same provider ID. Cloud mode displays the actual Amazon Location map.
 
 ```sh
 npm run cloud:configure  # read public identifiers from pinwish-storage-dev
@@ -148,3 +170,25 @@ npm run dev             # terminal 2: frontend with .env.local cloud settings
 A development stack named `pinwish-storage-dev` is deployed in us-east-1. It contains Cognito, API Gateway, Lambda and DynamoDB; the frontend and import/search API remain local. See [infrastructure and API documentation](infra/README.md) for permissions, reproducible deployment, session behavior, costs, limits and cleanup. The generated configuration `.env.local` is ignored by Git.
 
 `npm run test:cloud-ui` uses mocked Cognito/storage responses. Existing demo/import tests explicitly disable cloud configuration so they cannot operate against your live account. Live verification results are in [storage-live.json](docs/validation/storage-live.json) and [storage-browser-live.json](docs/validation/storage-browser-live.json). Real email delivery still needs confirmation through your own signup; automated test accounts suppressed outgoing email.
+
+## Live saved-place map
+
+Cloud mode now uses Amazon Location Maps V2 with MapLibre. After provisioning the
+stack, run `npm run cloud:configure`, restart `npm run dev`, and use port 5173.
+Continue running `npm run dev:api` separately for Instagram extraction/place search.
+No Google Maps key is needed. Directions still opens the external Google Maps
+website; in-app route calculation is not part of this change.
+
+All saved-record pages load before publishing the map/list snapshot. Search,
+collection and unvisited filters determine the pins. Click a pin or use the
+accessible **Places on map** selector to open its dossier and center the map.
+**Show all** fits the current filtered pins. Nearby pins cluster; click a cluster
+to zoom in. The selector also reaches places at identical coordinates. On mobile,
+use **Map** to open the map and the detail Back button to return.
+
+Missing configuration, WebGL failure, map request failures and storage failures
+show separate recovery guidance. Invalid coordinates stay in the list and are
+not plotted. Demo mode still uses the Figma illustration.
+
+Run `npm run test:map-ui` for isolated map integration checks (local style fixture,
+mock accounts/storage). See `docs/validation/interactive-map.md` for live results.
