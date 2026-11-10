@@ -388,45 +388,14 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
     .getByLabel('Link or address', { exact: true })
     .fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
-  for (let i = 1; i <= 2; i++) {
-    const candidate = page.getByRole('listitem', {
-      name: `Place candidate ${i}`,
-      exact: true,
-    })
-    await candidate.locator('summary').click()
-    await candidate
-      .getByRole('button', { name: 'Search locations', exact: true })
-      .click()
-    await candidate
-      .getByRole('button', {
-        name: `Select Museum ${i === 1 ? 'A' : 'B'}`,
-        exact: true,
-      })
-      .click()
-    await candidate
-      .getByRole('button', { name: 'Confirm this location', exact: true })
-      .click()
-  }
-  await page
-    .getByRole('button', { name: 'Save confirmed places', exact: true })
-    .click()
   await expect(page.getByRole('alert')).toContainText('1 of 2 saved')
-  await expect(
-    page.getByText(
-      'Location confirmed for this session. Not saved to the map.',
-      { exact: true },
-    ),
-  ).toHaveCount(2)
   await page
-    .getByRole('button', { name: 'Save confirmed places', exact: true })
+    .getByRole('button', { name: 'Add to map', exact: true })
     .click()
-  await expect(
-    page
-      .getByRole('status')
-      .filter({ hasText: 'Confirmed places saved to your account' }),
-  ).toBeVisible()
+  await expect(page.getByRole('button', { name: 'View map', exact: true })).toBeVisible()
   expect(records.size).toBe(2)
-  await page.getByRole('button', { name: 'Done', exact: true }).click()
+  await page.getByRole('button', { name: 'View map', exact: true }).click()
+  await page.getByRole('button', { name: 'Your places', exact: true }).click()
   await expect(page.locator('.place-card')).toHaveCount(2)
 })
 
@@ -538,4 +507,35 @@ test('unverified sign-in resumes verification and allows retrying a wrong code',
   await expect(modal.getByRole('heading')).toHaveText('Welcome back')
   await expect(modal.getByLabel('Email', { exact: true })).toHaveValue('unverified@example.com')
   await expect(modal.getByRole('button', { name: 'Verify email', exact: true })).toHaveCount(0)
+})
+
+test('a Korean overseas post automatically saves and opens its English map pin without confirmation', async ({ page }) => {
+  await setup(page)
+  const match = { provider: 'amazon-location', placeId: 'museum-id', name: 'Museum', englishName: 'Museum', koreanName: null, address: record.address, countryCode: 'US', countryName: 'United States', coordinates: record.coordinates, placeType: 'PointOfInterest', selectionToken: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
+  await page.route('**/api/instagram/preview', r => r.fulfill({ json: { fetchedImages: 1, result: { places: [{ name: '박물관', evidence: '박물관', regionHint: 'Los Angeles', slides: [1], needsLocationConfirmation: true }], ignoredSlides: [] } } }))
+  await page.route('**/api/places/search', r => r.fulfill({ json: { matches: [match], excludedResults: 0, unsupportedCountries: [], attribution: 'AWS', queryConversion: { originalQuery: '박물관', searchQuery: 'Museum', searchRegion: 'Los Angeles', status: 'translated' } } }))
+  await page.route('**/api/places/details', r => r.fulfill({ json: { place: { ...match, retrievedAt: new Date().toISOString() } } }))
+  let saves = 0
+  let original = ''
+  await page.route('https://storage.example.test/**', r => {
+    if (r.request().method() === 'POST') {
+      saves++
+      const place = r.request().postDataJSON().place
+      original = place.source.extractedName
+      return r.fulfill({ json: { item: { ...record, sources: { source: { ...record.sources.source, extractedName: original, evidence: original } } } } })
+    }
+    return r.fulfill({ json: { items: saves ? [record] : [], cursor: null } })
+  })
+  await page.goto('/')
+  await login(page)
+  await page.getByRole('button', { name: 'Add pin', exact: true }).click()
+  await page.getByLabel('Link or address', { exact: true }).fill('https://www.instagram.com/p/Example/')
+  await page.getByRole('button', { name: 'Find place', exact: true }).click()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByLabel('Select a saved place on the map').locator('option')).toHaveCount(2)
+  expect(saves).toBe(1)
+  expect(original).toBe('박물관')
+  await page.getByLabel('Select a saved place on the map').selectOption(record.id)
+  await expect(page.locator('#place-heading')).toHaveText('Museum')
+  expect(await page.locator('body').innerText()).not.toMatch(/\p{Script=Hangul}/u)
 })

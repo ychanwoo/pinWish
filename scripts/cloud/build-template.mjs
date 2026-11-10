@@ -6,6 +6,11 @@ const template = {
   AWSTemplateFormatVersion: '2010-09-09',
   Description: 'PinWish authenticated place storage (development)',
   Parameters: {
+    MapKeyExpiry: { Type: 'String', Default: '2027-01-01T00:00:00Z' },
+    MapReferers: {
+      Type: 'CommaDelimitedList',
+      Default: 'http://localhost:5173/*,http://127.0.0.1:5173/*',
+    },
     AllowedOrigins: {
       Type: 'CommaDelimitedList',
       Default:
@@ -13,6 +18,24 @@ const template = {
     },
   },
   Resources: {
+    MapKey: {
+      Type: 'AWS::Location::APIKey',
+      Properties: {
+        KeyName: sub('${AWS::StackName}-map'),
+        Description:
+          'Browser map rendering only; restricted to approved web origins',
+        ExpireTime: ref('MapKeyExpiry'),
+        Restrictions: {
+          AllowActions: ['geo-maps:GetTile'],
+          AllowResources: [
+            sub(
+              'arn:${AWS::Partition}:geo-maps:${AWS::Region}::provider/default',
+            ),
+          ],
+          AllowReferers: ref('MapReferers'),
+        },
+      },
+    },
     UserPool: {
       Type: 'AWS::Cognito::UserPool',
       DeletionPolicy: 'Retain',
@@ -201,6 +224,7 @@ const template = {
     },
   },
   Outputs: {
+    MapKeyName: { Value: ref('MapKey') },
     ApiUrl: {
       Value: sub('https://${Api}.execute-api.${AWS::Region}.amazonaws.com'),
     },

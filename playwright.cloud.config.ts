@@ -9,6 +9,7 @@ export default defineConfig({
     url: 'http://127.0.0.1:5176',
     reuseExistingServer: false,
     env: {
+      VITE_MAP_API_KEY: '',
       VITE_AWS_REGION: 'us-east-1',
       VITE_COGNITO_CLIENT_ID: 'test-client',
       VITE_STORAGE_API_URL: 'https://storage.example.test',

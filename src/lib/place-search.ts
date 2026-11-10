@@ -26,6 +26,8 @@ export interface LocationTarget {
   query: string
   region: string
   countryCode: string
+  displayQuery?: string
+  autoError?: string
   status: 'pending' | 'skipped' | 'confirmed'
   confirmed?: ConfirmedPlace
 }
@@ -59,7 +61,7 @@ export function isPlaceDetails(value: unknown): value is { place: PlaceMatch & {
   return isPlaceMatch(r.place) && typeof r.place.retrievedAt === 'string' && Number.isFinite(Date.parse(r.place.retrievedAt))
 }
 export function confirmPlace(place: PlaceMatch & { retrievedAt: string }, source: ConfirmedPlace['source']): ConfirmedPlace {
-  // This is a local review record, not a persisted map pin. Only the explicit confirm action calls it.
+  // This is a local review record, not a persisted map pin. The caller may use explicit selection or automatic provider matching.
   return {
     provider: place.provider, placeId: place.placeId, name: place.name, address: place.address,
     countryCode: place.countryCode, countryName: place.countryName, coordinates: { ...place.coordinates },

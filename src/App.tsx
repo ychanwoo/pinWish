@@ -1,3 +1,5 @@
+import { lazy, Suspense } from 'react'
+const LiveMap = lazy(() => import('./components/LiveMap'))
 import { AuthModal } from './components/AuthModal'
 import {
   cloudEnabled,
@@ -104,13 +106,32 @@ function App() {
     setCloudError('')
     try {
       const result = await listSaved(next)
-      if (getSession()?.sub !== owner || generation !== loadGeneration.current)
+      const seen = new Set<string>()
+      while (result.cursor) {
+        if (
+          getSession()?.sub !== owner ||
+          generation !== loadGeneration.current
+        )
+          return
+        if (seen.has(result.cursor))
+          throw new Error('Could not finish loading places. Please retry.')
+        seen.add(result.cursor)
+        const page = await listSaved(result.cursor)
+        result.items.push(...page.items)
+        result.cursor = page.cursor
+      }
+      if (
+        getSession()?.sub !== owner ||
+        generation !== loadGeneration.current
+      )
         return
       const incoming = result.items.map(toUIPlace)
       setPlaces((previous) =>
         next
           ? [
-              ...previous.filter((p) => !incoming.some((i) => i.id === p.id)),
+              ...previous.filter(
+                (p) => !incoming.some((i) => i.id === p.id),
+              ),
               ...incoming,
             ]
           : incoming,
@@ -126,8 +147,13 @@ function App() {
             : incoming[0].collection,
         )
     } catch (e) {
-      if (getSession()?.sub === owner && generation === loadGeneration.current)
-        setCloudError(e instanceof Error ? e.message : 'Could not load places.')
+      if (
+        getSession()?.sub === owner &&
+        generation === loadGeneration.current
+      )
+        setCloudError(
+          e instanceof Error ? e.message : 'Could not load places.',
+        )
     } finally {
       if (generation === loadGeneration.current) setCloudLoading(false)
     }
@@ -138,6 +164,8 @@ function App() {
     loadGeneration.current++
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
+    setCollections(['LA weekend', 'Weekend ideas'])
+    setSelectedId('')
     setCursor(null)
     setCloudError('')
     setCloudLoading(false)
@@ -214,7 +242,9 @@ function App() {
         }
         const result = await patchSaved(place.saved, allowed)
         setPlaces((items) =>
-          items.map((p) => (p.id === place.id ? toUIPlace(result.item) : p)),
+          items.map((p) =>
+            p.id === place.id ? toUIPlace(result.item) : p,
+          ),
         )
         setNotice('Changes saved.')
         return true
@@ -359,7 +389,9 @@ function App() {
                   >
                     Refresh places
                   </button>
-                  {cloudLoading && <p role="status">Loading your places…</p>}
+                  {cloudLoading && (
+                    <p role="status">Loading your places…</p>
+                  )}
                   {cloudError && (
                     <p role="alert" className="field-error">
                       {cloudError}
@@ -405,22 +437,30 @@ function App() {
               onMap={() => navigate('map')}
               onRetry={() => {
                 navigate('list_loading')
-                refreshTimer.current = setTimeout(() => navigate('list'), 1000)
+                refreshTimer.current = setTimeout(
+                  () => navigate('list'),
+                  1000,
+                )
               }}
             />
           ) : cloudEnabled ? (
-            <section
-              className="cloud-map-placeholder"
-              aria-label="Map integration pending"
+            <Suspense
+              fallback={
+                <section className="map-view" aria-label="Loading map">
+                  Loading map…
+                </section>
+              }
             >
-              <div>
-                <h2>A map for your saved places</h2>
-                <p>
-                  Manage your places in the list. The interactive map is coming
-                  next.
-                </p>
-              </div>
-            </section>
+              <LiveMap
+                key={session?.sub ?? 'guest'}
+                places={mapPlaces}
+                selectedId={selectedId}
+                onSelect={openDetail}
+                loading={cloudLoading}
+                loadError={cloudError}
+                onRetryPlaces={() => void loadPlaces()}
+              />
+            </Suspense>
           ) : (
             <MapView
               places={view === 'empty' || cloudEnabled ? [] : mapPlaces}
@@ -481,7 +521,10 @@ function App() {
             <div className="mobile-empty">
               <h1>Weekend ideas</h1>
               <p>No places in this collection yet.</p>
-              <button className="primary" onClick={() => setSaveState('entry')}>
+              <button
+                className="primary"
+                onClick={() => setSaveState('entry')}
+              >
                 Save a place
               </button>
             </div>
@@ -510,7 +553,9 @@ function App() {
               >
                 Undo
               </button>
-              <button onClick={() => openDetail(selected)}>View place</button>
+              <button onClick={() => openDetail(selected)}>
+                View place
+              </button>
             </div>
           )}
         </main>
@@ -545,7 +590,9 @@ function App() {
                   for (const [index, place] of confirmed.entries()) {
                     // Stay below the development API's two-request-per-second limit.
                     if (index > 0)
-                      await new Promise((resolve) => setTimeout(resolve, 550))
+                      await new Promise((resolve) =>
+                        setTimeout(resolve, 550),
+                      )
                     if (getSession()?.sub !== owner)
                       throw new Error(
                         'Your session changed. Sign in and retry.',
@@ -572,7 +619,9 @@ function App() {
                   setCollections((items) => [
                     ...new Set([...items, ...savedCollections]),
                   ])
-                  if (savedCollections[0]) setCollection(savedCollections[0])
+                  if (savedCollections[0])
+                    setCollection(savedCollections[0])
+                  setSelectedId('')
                   setView('list')
                   if (failures.length)
                     throw new Error(
@@ -602,7 +651,9 @@ function App() {
           onMap={() => {
             closeSave()
             navigate(
-              window.matchMedia('(min-width: 768px)').matches ? 'saved' : 'map',
+              window.matchMedia('(min-width: 768px)').matches && !cloudEnabled
+                ? 'saved'
+                : 'map',
             )
           }}
         />
@@ -629,7 +680,10 @@ function App() {
       {notice && (
         <div className="notice-toast" role="status">
           <span>{notice}</span>
-          <button aria-label="Dismiss message" onClick={() => setNotice('')}>
+          <button
+            aria-label="Dismiss message"
+            onClick={() => setNotice('')}
+          >
             ×
           </button>
         </div>

@@ -30,3 +30,14 @@ test('deduplicates exact names within a region and never accepts coordinates fro
   assert.equal(r.places[0].lat, undefined)
   assert.equal(r.places[0].needsLocationConfirmation, true)
 })
+test('preserves printed addresses and keeps same-name branches separate', () => {
+  const result = validateExtraction({ places: [
+    { ...place, locationHint: '100 First St' },
+    { ...place, locationHint: '200 Second St', slides: [3] },
+  ], ignoredSlides: [1] }, 3)
+  assert.equal(result.places.length, 2)
+  assert.equal(result.places[0].locationHint, '100 First St')
+  for (const locationHint of [42, 'x'.repeat(201), 'bad\naddress']) {
+    assert.throws(() => validateExtraction({ places: [{ ...place, locationHint }], ignoredSlides: [1] }, 2), /invalid_model_output/)
+  }
+})

@@ -1,4 +1,4 @@
-import { PlaceConfirmation } from './PlaceConfirmation'
+import { AutomaticPlaces } from './AutomaticPlaces'
 import type {
   ConfirmedPlace,
   CandidateLocationDraft,
@@ -8,7 +8,6 @@ import {
   importErrorMessages,
   type InstagramPreview,
 } from '../lib/instagram-preview'
-import { getPlaceDisplayName } from '../lib/place-name'
 import { isUrlInput, parseInstagramLink } from '../lib/instagram'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -69,7 +68,9 @@ export function SavePlace({
   onRequireLogin,
   authenticated,
 }: Props) {
-  const [state, setState] = useState<SaveState>(draft?.state ?? initialState)
+  const [state, setState] = useState<SaveState>(
+    draft?.state ?? initialState,
+  )
   const [input, setInput] = useState(
     draft?.input ??
       (initialState === 'entry'
@@ -80,11 +81,15 @@ export function SavePlace({
   )
   const [address, setAddress] = useState(
     draft?.address ??
-      (initialState === 'not_found' ? 'Grand Central Market, Los Angeles' : ''),
+      (initialState === 'not_found'
+        ? 'Grand Central Market, Los Angeles'
+        : ''),
   )
   const [note, setNote] = useState(
     draft?.note ??
-      (initialState === 'entry' ? '' : 'Try the carnitas at Villa Morelianas.'),
+      (initialState === 'entry'
+        ? ''
+        : 'Try the carnitas at Villa Morelianas.'),
   )
   const [collection, setCollection] = useState(
     draft?.collection ??
@@ -104,8 +109,7 @@ export function SavePlace({
   const [locationReviews, setLocationReviews] = useState<
     Record<number, CandidateLocationDraft>
   >(draft?.locationReviews ?? {})
-  const [editingCandidate, setEditingCandidate] = useState<number | null>(null)
-  const [candidateName, setCandidateName] = useState('')
+  const [autoBusy, setAutoBusy] = useState(false)
   const [persisting, setPersisting] = useState(false)
   const [persistError, setPersistError] = useState('')
   const [persistSuccess, setPersistSuccess] = useState(false)
@@ -147,7 +151,8 @@ export function SavePlace({
   useEffect(() => {
     closeRef.current = handleClose
   })
-  const busy = state === 'saving' || state === 'resolving' || persisting
+  const busy =
+    state === 'saving' || state === 'resolving' || persisting || autoBusy
   const confirmed = state === 'success' || state === 'duplicate'
   const hasPlace = [
     'ready',
@@ -273,6 +278,7 @@ export function SavePlace({
             places: data.result.places.map((place) => ({
               name: place.name,
               regionHint: place.regionHint,
+              locationHint: place.locationHint,
               slides: place.slides,
               evidence: place.evidence,
               needsLocationConfirmation: true,
@@ -378,7 +384,10 @@ export function SavePlace({
     setState('entry')
   }
   const instagramSource = parseInstagramLink(input)
-  const persistReview = async () => {
+  const persistReview = async (
+    reviews = locationReviews,
+    automatic = false,
+  ) => {
     const reviewDraft: SaveDraft = {
       state,
       input,
@@ -389,7 +398,7 @@ export function SavePlace({
       manual,
       preview,
       importError,
-      locationReviews,
+      locationReviews: reviews,
     }
     onDraft(reviewDraft)
     if (!authenticated && onRequireLogin) {
@@ -397,13 +406,13 @@ export function SavePlace({
       return
     }
     if (!onPersist || persisting) return
-    const confirmedPlaces = Object.values(locationReviews).flatMap((r) =>
+    const confirmedPlaces = Object.values(reviews).flatMap((r) =>
       r.targets.flatMap((t) =>
         t.status === 'confirmed' && t.confirmed ? [t.confirmed] : [],
       ),
     )
     if (!confirmedPlaces.length) {
-      setPersistError('Confirm at least one location before saving.')
+      setPersistError('At least one location must be found before adding places.')
       return
     }
     setPersisting(true)
@@ -412,6 +421,13 @@ export function SavePlace({
       await onPersist(confirmedPlaces, note, collection)
       setPersistSuccess(true)
       onDraft(null)
+      if (
+        automatic &&
+        Object.values(reviews).every((r) =>
+          r.targets.every((t) => t.status === 'confirmed'),
+        )
+      )
+        onMap()
     } catch (e) {
       setPersistError(
         e instanceof Error
@@ -470,8 +486,8 @@ export function SavePlace({
         'Your link format is valid. We have not retrieved the post or its photos. No places have been added. You can open the original post or keep this link for later.',
     ],
     import_review: [
-      'Review places and confirm locations',
-      'Check extracted names, search for the intended locations, and confirm their addresses. Your review stays in this session; nothing is saved to the map yet.',
+      persistSuccess ? 'Places added to your map' : 'Finding places for your map',
+      persistSuccess ? 'Located places are saved. You can retry any missing locations or open the map.' : 'Locations are matched automatically. Found places will be added together; unavailable locations will be listed separately.',
     ],
     lookup_error: [
       'Couldn’t check this link',
@@ -577,8 +593,8 @@ export function SavePlace({
             {state === 'import_unavailable' && instagramSource.ok && (
               <div className="field-help">
                 <p>
-                  One post can contain several photos. The selected photo number
-                  does not limit the intended import.
+                  One post can contain several photos. The selected photo
+                  number does not limit the intended import.
                 </p>
                 <a
                   href={instagramSource.source.canonicalUrl}
@@ -596,213 +612,33 @@ export function SavePlace({
             )}
             {persistSuccess && (
               <p role="status">
-                Confirmed places saved to your account. You can find them in
-                your saved places.
+                Located places were added to your map. Some locations may
+                still need another lookup.
               </p>
             )}
-            {state === 'import_review' && preview && (
-              <section
-                aria-label="Extracted place candidates"
-                className="import-candidates"
-                inert={persisting || persistSuccess}
-              >
-                <p>
-                  {preview.fetchedImages} photos analyzed ·{' '}
-                  {preview.result.places.length} place candidates
-                </p>
-                <p className="field-help">
-                  Original names are preserved. Confirmed locations use Korean
-                  names in South Korea and English elsewhere when available.
-                </p>
-                {preview.result.places.length === 0 && (
-                  <p>
-                    No readable place names were extracted. This does not mean
-                    the post contains no places. Review the original post.
-                  </p>
-                )}
-                <ol>
-                  {preview.result.places.map((place, index) => (
-                    <li
-                      key={`${place.name}-${index}`}
-                      aria-label={`Place candidate ${index + 1}`}
-                    >
-                      {editingCandidate === index ? (
-                        <div className="candidate-edit">
-                          <p>Changing this name resets its location review.</p>
-                          <label htmlFor={`candidate-name-${index}`}>
-                            Place name
-                          </label>
-                          <input
-                            id={`candidate-name-${index}`}
-                            className="link-input"
-                            value={candidateName}
-                            maxLength={200}
-                            onChange={(event) =>
-                              setCandidateName(event.target.value)
-                            }
-                          />
-                          <button
-                            type="button"
-                            disabled={!candidateName.trim()}
-                            onClick={() => {
-                              setPreview({
-                                ...preview,
-                                result: {
-                                  ...preview.result,
-                                  places: preview.result.places.map((p, i) =>
-                                    i === index
-                                      ? {
-                                          ...p,
-                                          correctedName: candidateName.trim(),
-                                        }
-                                      : p,
-                                  ),
-                                },
-                              })
-                              setLocationReviews((previous) => {
-                                const next = { ...previous }
-                                delete next[index]
-                                return next
-                              })
-                              setEditingCandidate(null)
-                            }}
-                          >
-                            Keep name correction
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditingCandidate(null)}
-                          >
-                            Cancel correction
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <strong>
-                            {locationReviews[index]?.targets.length === 1 &&
-                            locationReviews[index].targets[0].status ===
-                              'confirmed'
-                              ? locationReviews[index].targets[0].confirmed
-                                  ?.displayName
-                              : getPlaceDisplayName({
-                                  sourceName: place.name,
-                                  correctedName: place.correctedName,
-                                })}
-                          </strong>{' '}
-                          <button
-                            type="button"
-                            aria-label={`Edit candidate ${index + 1} name`}
-                            onClick={() => {
-                              setCandidateName(
-                                getPlaceDisplayName({
-                                  sourceName: place.name,
-                                  correctedName: place.correctedName,
-                                }),
-                              )
-                              setEditingCandidate(index)
-                            }}
-                          >
-                            Edit name
-                          </button>
-                          {place.correctedName && (
-                            <small>
-                              {' '}
-                              · Name edited by you; location still unverified
-                            </small>
-                          )}
-                        </>
-                      )}
-                      <p>
-                        {place.regionHint || 'Region needs confirmation'} ·
-                        Photos {place.slides.join(', ')}
-                      </p>
-                      <small>Read from photo: {place.evidence}</small>
-                      {place.correctedName && (
-                        <p className="field-help">
-                          Originally extracted name: {place.name}
-                        </p>
-                      )}
-                      {instagramSource.ok && (
-                        <PlaceConfirmation
-                          key={`${index}-${place.correctedName ?? ''}`}
-                          candidateNumber={index + 1}
-                          source={{
-                            instagram: instagramSource.source,
-                            slides: place.slides,
-                            extractedName: place.name,
-                            correctedName: place.correctedName,
-                            evidence: place.evidence,
-                          }}
-                          initialRegion={place.regionHint}
-                          value={locationReviews[index]}
-                          confirmedIds={confirmedIds}
-                          onChange={(review) =>
-                            setLocationReviews((previous) => ({
-                              ...previous,
-                              [index]: review,
-                            }))
-                          }
-                        />
-                      )}
-                      {instagramSource.ok && (
-                        <p>
-                          {place.slides.map((slide) => (
-                            <a
-                              key={slide}
-                              href={`${instagramSource.source.canonicalUrl}?img_index=${slide}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Review photo {slide}{' '}
-                            </a>
-                          ))}
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ol>
-                {preview.result.ignoredSlides.length > 0 && (
-                  <p>
-                    No candidate extracted from photos{' '}
-                    {preview.result.ignoredSlides.join(', ')}. These may be
-                    covers, promotions or unreadable text; check the original.
-                  </p>
-                )}
-                {onPersist && (
-                  <div className="cloud-save-fields">
-                    <label>
-                      Note for these places
-                      <textarea
-                        value={note}
-                        maxLength={1000}
-                        onChange={(e) => setNote(e.target.value)}
-                      />
-                    </label>
-                    <label>
-                      Collection name
-                      <input
-                        value={collection}
-                        maxLength={60}
-                        onChange={(e) => setCollection(e.target.value)}
-                      />
-                    </label>
-                  </div>
-                )}
-                <p>
-                  Confirm each location or skip it. For a photo listing multiple
-                  places, add a separate location search for each. Saving to a
-                  live map comes next.
-                </p>
-                {instagramSource.ok && (
-                  <a
-                    href={instagramSource.source.canonicalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Open original Instagram post
-                  </a>
-                )}
-              </section>
+            {state === 'import_review' && preview && instagramSource.ok && (
+              <AutomaticPlaces
+                preview={preview}
+                source={instagramSource.source}
+                value={locationReviews}
+                onChange={setLocationReviews}
+                saving={persisting}
+                saved={persistSuccess}
+                onBusy={(value) => {
+                  setAutoBusy(value)
+                  if (value) setPersistSuccess(false)
+                }}
+                onComplete={(reviews) => {
+                  setLocationReviews(reviews)
+                  if (
+                    onPersist &&
+                    Object.values(reviews).some((r) =>
+                      r.targets.some((t) => t.status === 'confirmed'),
+                    )
+                  )
+                    void persistReview(reviews, true)
+                }}
+              />
             )}
             {!confirmed && (
               <>
@@ -821,7 +657,9 @@ export function SavePlace({
                     value={manual && !hasPlace ? address : input}
                     readOnly={busy || hasPlace || state === 'import_review'}
                     disabled={state === 'saving'}
-                    aria-invalid={state === 'invalid' || state === 'not_found'}
+                    aria-invalid={
+                      state === 'invalid' || state === 'not_found'
+                    }
                     aria-describedby={message ? 'save-status' : undefined}
                     onChange={(e) => {
                       if (manual && !hasPlace) setAddress(e.target.value)
@@ -850,12 +688,15 @@ export function SavePlace({
                   Paste from clipboard
                 </button>
                 <p className="field-help">
-                  We’ll ask you to confirm the location before saving.
+                  {onPersist
+                    ? 'Found locations will be added automatically to your map. You can edit or delete them afterwards.'
+                    : 'Locations will be looked up automatically. This preview does not save to an account.'}
                 </p>
-                <p className="field-help">
-                  UI demo: sample places only. Instagram photo import and cloud
-                  saving are not connected yet.
-                </p>
+                {!onPersist && (
+                  <p className="field-help">
+                    Demo mode: account storage is not connected.
+                  </p>
+                )}
               </>
             )}
             {clipboardMessage && (
@@ -938,30 +779,55 @@ export function SavePlace({
               </>
             )}
           </div>
-          <footer className="save-footer">
+          <footer
+            className={`save-footer ${state === 'import_review' ? 'review-footer' : ''}`}
+          >
+            {state === 'import_review' &&
+              !persistSuccess &&
+              !persisting && (
+                <p className="field-help" id="map-save-help">
+                  {!reviewComplete
+                    ? 'Finding locations automatically…'
+                    : !confirmedIds.length
+                      ? 'No locations could be found. Retry the missing places or try another post.'
+                      : 'Located places are ready to add to your map.'}
+                </p>
+              )}
             {state === 'saving' && (
               <p className="field-help" role="status">
                 Saving in progress. Please wait.
               </p>
             )}
-            <button
-              type="button"
-              className="secondary desktop-cancel"
-              disabled={state === 'saving'}
-              onClick={handleClose}
-            >
-              Cancel
-            </button>
+            {state !== 'resolving' && (
+              <button
+                type="button"
+                className="secondary desktop-cancel"
+                disabled={state === 'saving' || persisting}
+                onClick={handleClose}
+              >
+                Cancel
+              </button>
+            )}
             <button
               className="primary"
               type={
                 confirmed || state === 'import_review' ? 'button' : 'submit'
               }
-              disabled={busy || (state === 'import_review' && !reviewComplete)}
+              disabled={
+                busy ||
+                (state === 'import_review' &&
+                  (!reviewComplete ||
+                    (!!onPersist && !confirmedIds.length)))
+              }
+              aria-describedby={
+                state === 'import_review' && !persistSuccess && !persisting
+                  ? 'map-save-help'
+                  : undefined
+              }
               onClick={
                 state === 'import_review'
                   ? persistSuccess
-                    ? handleClose
+                    ? onMap
                     : onPersist
                       ? () => void persistReview()
                       : handleClose
@@ -977,16 +843,16 @@ export function SavePlace({
               )}
               {state === 'import_review'
                 ? persisting
-                  ? 'Saving places…'
+                  ? 'Adding to map…'
                   : persistSuccess
-                    ? 'Done'
+                    ? 'View map'
                     : reviewComplete
                       ? onPersist
                         ? authenticated
-                          ? 'Save confirmed places'
+                          ? 'Add to map'
                           : 'Sign in to save'
-                        : 'Done reviewing'
-                      : 'Location confirmation pending'
+                        : 'Done'
+                      : 'Add to map'
                 : action}
             </button>
             {[
@@ -998,7 +864,9 @@ export function SavePlace({
               'success',
             ].includes(state) && (
               <button
-                className="secondary"
+                className={
+                  state === 'import_review' ? 'save-edit-link' : 'secondary'
+                }
                 type="button"
                 disabled={persisting}
                 onClick={
@@ -1011,7 +879,7 @@ export function SavePlace({
                 }
               >
                 {state === 'resolving'
-                  ? 'Cancel lookup'
+                  ? 'Stop searching'
                   : state === 'success'
                     ? 'Back to map'
                     : 'Edit original link'}
