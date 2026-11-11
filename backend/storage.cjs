@@ -1,3 +1,4 @@
+const { createPhotos } = require('./photos.cjs')
 const { isDeepStrictEqual } = require('node:util')
 const { createHash } = require('node:crypto')
 const {
@@ -151,6 +152,7 @@ function validatePlace(body) {
 function createHandler({
   client = new DynamoDBClient({}),
   table = process.env.TABLE_NAME,
+  photoOptions = {},
 } = {}) {
   const send = (command) => client.send(command)
   const read = async (key) =>
@@ -165,6 +167,21 @@ function createHandler({
         )
       ).Item,
     )
+  const photos = createPhotos({
+    ...photoOptions,
+    read,
+    fail,
+    write: (item, version) =>
+      send(
+        new PutItemCommand({
+          TableName: table,
+          Item: marshal(item),
+          ConditionExpression: '#v = :v',
+          ExpressionAttributeNames: { '#v': 'version' },
+          ExpressionAttributeValues: marshal({ ':v': version }),
+        }),
+      ),
+  })
   const publicItem = (item) => {
     const { pk: _pk, sk: _sk, ...rest } = item
     return rest
@@ -179,7 +196,32 @@ function createHandler({
       },
       body: JSON.stringify(data),
     })
+    if (
+      event.source === 'aws.events' &&
+      !event.requestContext &&
+      event['detail-type'] === 'Scheduled Event'
+    )
+      return photos.cleanup()
+    if (event.source === 'pinwish.photo' && !event.requestContext) {
+      if (
+        !/^USER#[a-zA-Z0-9-]{1,128}$/.test(event.key?.pk ?? '') ||
+        !/^PLACE#[a-f0-9]{64}$/.test(event.key?.sk ?? '') ||
+        typeof event.jobId !== 'string'
+      )
+        return
+      return photos.process(event.key, event.jobId)
+    }
+    const startPhoto = async (key, item) => {
+      try {
+        return (await photos.ensure(key)) ?? item
+      } catch {
+        return item
+      }
+    }
     try {
+      const photoRoute = /\/places\/[a-f0-9]{64}\/photo$/.test(
+        event.rawPath ?? '',
+      )
       const claims = event.requestContext?.authorizer?.jwt?.claims
       if (
         !claims ||
@@ -207,6 +249,8 @@ function createHandler({
         if (!body || typeof body !== 'object' || Array.isArray(body))
           fail(400, 'invalid_input')
       }
+      if (photoRoute && key)
+        return response(200, await photos.handle(method, key, body))
       if (method === 'GET' && !id) {
         const q = event.queryStringParameters ?? {}
         const limit = q.limit === undefined ? 20 : Number(q.limit)
@@ -268,7 +312,7 @@ function createHandler({
             isDeepStrictEqual(previous.sources[sourceId], value.source)
           )
             return response(200, {
-              item: publicItem(previous),
+              item: publicItem(await startPhoto(key, previous)),
               duplicate: true,
             })
           if (
@@ -317,7 +361,7 @@ function createHandler({
               }),
             )
             return response(previous ? 200 : 201, {
-              item: publicItem(item),
+              item: publicItem(await startPhoto(key, item)),
               duplicate: !!previous,
             })
           } catch (e) {
@@ -340,6 +384,7 @@ function createHandler({
         }
         if (method === 'DELETE') {
           await send(new DeleteItemCommand({ ...condition, Key: marshal(key) }))
+          await photos.remove(previous.coverPhoto?.objectKey)
           return response(200, { deleted: true })
         }
         const allowed = new Set([

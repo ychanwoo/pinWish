@@ -5,9 +5,10 @@ The reproducible CloudFormation template is generated from `scripts/cloud/build-
 ## Resources
 
 - Cognito Lite user pool and public app client (no client secret), email verification, password recovery.
-- HTTP API with Cognito JWT authorizer on all five routes. Lambda additionally requires `token_use=access`.
+- HTTP API with Cognito JWT authorizer on all six routes. Lambda additionally requires `token_use=access`.
 - One Node.js 22 Lambda using the runtime AWS SDK, and a seven-day CloudWatch log group.
 - One encrypted, on-demand DynamoDB table; Lambda can only get, query, put and delete items in this table.
+- One private encrypted S3 photo bucket and a daily EventBridge orphan-cleanup rule.
 - No VPC, NAT gateway, load balancer, always-on compute, or place index.
 
 ## Deploy
@@ -96,3 +97,40 @@ may require explicit `ForceDelete` during teardown; review that action before
 using it. No Places/Routes/storage permissions are granted to this key.
 
 Documentation: https://docs.aws.amazon.com/location/latest/developerguide/using-apikeys.html
+
+### Automatic representative photos
+
+Place saves enqueue asynchronous self-invocations of the storage Lambda. IAM
+allows invoking only that same function. Jobs use an owner/place key and a
+conditional job lease; clients cannot submit worker events through the HTTP API.
+The worker matches both names and coordinates, downloads only HTTPS images from
+Wikimedia's exact approved hosts (no redirects), limits response bytes, decodes at
+most 2.6 megapixels and re-encodes pixels to discard EXIF/GPS metadata. It preserves
+source, author and license metadata and displays attribution in the UI.
+
+`GET /places/{id}/photo` is the only photo route. It requires a Cognito access
+token and an owner-scoped record. It returns pending/not_found/unavailable or a
+ready JPEG plus the updated place. Missing photos on old records are queued on
+this request. No upload or photo-delete endpoints exist. Responses are no-store;
+browser Blob URLs are revoked on unmount. Photo errors do not undo place saves.
+
+The encrypted S3 bucket has public access blocked, ACLs disabled and HTTPS-only
+access. Lambda can read/write/delete only `photos/*` and list only that prefix.
+Objects use random keys under `photos/<owner>/<place>/`. Worker completion merges
+against the latest place version so concurrent note edits are preserved. Deleted
+places are never recreated by late jobs. Place deletion also deletes the photo.
+Daily EventBridge cleanup removes unreferenced objects older than 24 hours;
+uncertain writes are reconciled instead of deleting potentially attached photos.
+The full-prefix daily scan is suitable for this small project; revisit pagination
+and execution time before scaling. Lambda memory is 512 MB and timeout 60 seconds.
+
+`npm run infra:build` bundles the handlers, discovery and JPEG codec with esbuild;
+AWS SDK clients use the Node.js 22 Lambda runtime. The template is compact JSON to
+stay within CloudFormation's direct-body limit. Both table and bucket use Retain:
+record their output names and explicitly remove resources after the final demo.
+Deleting the stack alone does not delete retained photos.
+
+Wikimedia API requests need no API key. Coverage is not equivalent to Google
+Places Photos. Do not promise a photo for every business. Negative results retry
+after one day, transient failures after five minutes, pending leases after two
+minutes. No provider access failure is reported as a successful photo lookup.
