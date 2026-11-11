@@ -23,6 +23,12 @@ export function isInstagramPreview(value: unknown): value is InstagramPreview {
   return new Set([...p.result.ignoredSlides, ...p.result.places.flatMap(place => place.slides)]).size === p.fetchedImages
 }
 export const importErrorMessages: Record<string, string> = {
+  processing_throttled: 'The service is busy. Your input is kept; please try again shortly.',
+  processing_busy: 'Other places are being processed. Wait a moment and try again.',
+  daily_limit: 'The daily test limit has been reached. Please try again tomorrow.',
+  unauthorized: 'Please sign in again to continue.',
+  processing_timeout: 'Processing took too long. Your input is kept; please try again.',
+  processing_unavailable: 'The test service is unavailable. Your input is kept; try again when the test session is open.',
   carousel_unavailable: 'Instagram did not provide the carousel. Your link is kept; try again later.',
   partial_carousel: 'Some photos are missing. The post has not been imported.',
   unsupported_video_slide: 'This post includes video. Full video analysis is not supported in this experiment.',

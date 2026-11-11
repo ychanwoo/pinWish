@@ -8,7 +8,7 @@ export default defineConfig({
     command: 'npm run dev -- --host 127.0.0.1 --port 5176 --strictPort',
     url: 'http://127.0.0.1:5176',
     reuseExistingServer: false,
-    env: {
+    env: { VITE_PROCESSING_API_URL: '',
       VITE_MAP_API_KEY: '',
       VITE_AWS_REGION: 'us-east-1',
       VITE_COGNITO_CLIENT_ID: 'test-client',

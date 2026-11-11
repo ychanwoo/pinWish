@@ -1,3 +1,4 @@
+import { processingRequest } from '../lib/processing-api'
 import { useEffect, useRef, useState } from 'react'
 import { confirmPlace, isPlaceDetails, isPlaceSearchResponse, placeSearchErrors,
   type CandidateLocationDraft, type ConfirmedPlace, type LocationTarget, type PlaceMatch } from '../lib/place-search'
@@ -52,9 +53,9 @@ function LocationSearch({ target, source, label, onChange, confirmedIds }: {
     const abort = new AbortController(); controller.current = abort
     setStatus(kind === 'search' ? 'searching' : 'details'); setError(''); setNotice(''); setSelected(null)
     if (kind === 'search') { setMatches([]); setConversion('') }
-    const timeout = setTimeout(() => abort.abort(), 15000)
+    const timeout = setTimeout(() => abort.abort(), 60000)
     try {
-      const response = await fetch(`/api/places/${kind}`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const response = await processingRequest(`/api/places/${kind}`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body), signal: abort.signal })
       const data = await response.json()
       if (generation.current !== version) return

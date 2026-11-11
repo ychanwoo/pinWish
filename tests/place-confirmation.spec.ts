@@ -92,7 +92,7 @@ test('failed searches are retryable without re-importing or manual confirmation'
     }),
   )
   const region = await openImport(page)
-  await expect(region).toContainText('AWS credentials')
+  await expect(region).toContainText('The server cannot access place search.')
   await region.getByRole('button', { name: 'Retry missing places' }).click()
   await expect(region).toContainText(a.address)
 })

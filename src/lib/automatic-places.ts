@@ -1,3 +1,4 @@
+import { processingRequest } from './processing-api'
 import type { InstagramPreview } from './instagram-preview'
 import {
   confirmPlace,
@@ -23,11 +24,11 @@ export async function resolveCandidate(
   }
   let displayQuery = visiblePlaceText(target.query, '', '')
   async function request(kind: string, body: object) {
-    const response = await fetch(`/api/places/${kind}`, {
+    const response = await processingRequest(`/api/places/${kind}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      signal: AbortSignal.any([signal, AbortSignal.timeout(30000)]),
+      signal: AbortSignal.any([signal, AbortSignal.timeout(60000)]),
     })
     const data = await response.json()
     if (!response.ok)
