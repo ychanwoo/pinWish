@@ -1,6 +1,8 @@
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
+  sidebarOpen: boolean
+  onSidebarOpen: (open: boolean) => void
   onAccount?: () => void
   places: Place[]
   collections: string[]
@@ -15,6 +17,8 @@ interface Props {
   onNotice: (value: string) => void
 }
 export function DesktopNavigation({
+  sidebarOpen,
+  onSidebarOpen,
   places,
   collections,
   onNewCollection,
@@ -34,10 +38,10 @@ export function DesktopNavigation({
         <div>
           <button
             className="rail-button"
-            aria-label="Show collections"
-            onClick={() =>
-              document.getElementById('collections-heading')?.focus()
-            }
+            aria-label={sidebarOpen ? 'Hide collections' : 'Show collections'}
+            aria-expanded={sidebarOpen}
+            aria-controls="collection-sidebar"
+            onClick={() => onSidebarOpen(!sidebarOpen)}
           >
             <Icon name="d9b45" />
           </button>
@@ -59,7 +63,12 @@ export function DesktopNavigation({
             <button
               className="rail-button"
               aria-label="Search places"
-              onClick={() => document.getElementById('sidebar-search')?.focus()}
+              onClick={() => {
+                onSidebarOpen(true)
+                requestAnimationFrame(() =>
+                  document.getElementById('sidebar-search')?.focus(),
+                )
+              }}
             >
               <Icon name="03a25" />
             </button>
@@ -87,7 +96,11 @@ export function DesktopNavigation({
           {onAccount ? 'Me' : 'YW'}
         </button>
       </nav>
-      <aside className="collection-sidebar">
+      <aside
+        id="collection-sidebar"
+        className="collection-sidebar"
+        hidden={!sidebarOpen}
+      >
         <div className="sidebar-heading">
           <Brand />
           <button

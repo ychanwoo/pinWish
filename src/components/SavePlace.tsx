@@ -1,3 +1,4 @@
+import { processingRequest } from '../lib/processing-api'
 import { AutomaticPlaces } from './AutomaticPlaces'
 import type {
   ConfirmedPlace,
@@ -251,9 +252,9 @@ export function SavePlace({
       const controller = new AbortController()
       abortImport.current = controller
       setState('resolving')
-      const deadline = setTimeout(() => controller.abort(), 110000)
+      const deadline = setTimeout(() => controller.abort(), 155000)
       try {
-        const response = await fetch('/api/instagram/preview', {
+        const response = await processingRequest('/api/instagram/preview', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ input: value }),
@@ -289,7 +290,7 @@ export function SavePlace({
       } catch {
         if (id !== request.current) return
         setImportError(
-          'The analysis service is unavailable or timed out. Your link is kept. Start the local API to test this experimental flow.',
+          'The analysis service is unavailable or timed out. Your link is kept. Please try again when the test session is open.',
         )
         setState('import_unavailable')
       } finally {

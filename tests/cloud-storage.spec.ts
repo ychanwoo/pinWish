@@ -194,7 +194,7 @@ test('signed-out link submission prompts login and restores the original draft',
 }) => {
   await setup(page)
   await page.goto('/')
-  await page.getByRole('button', { name: 'Add pin', exact: true }).click()
+  await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page
     .getByLabel('Link or address', { exact: true })
     .fill('https://www.instagram.com/p/Example/?img_index=2')
@@ -383,7 +383,7 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
   })
   await page.goto('/')
   await login(page)
-  await page.getByRole('button', { name: 'Add pin', exact: true }).click()
+  await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page
     .getByLabel('Link or address', { exact: true })
     .fill('https://www.instagram.com/p/Example/')
@@ -528,7 +528,7 @@ test('a Korean overseas post automatically saves and opens its English map pin w
   })
   await page.goto('/')
   await login(page)
-  await page.getByRole('button', { name: 'Add pin', exact: true }).click()
+  await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page.getByLabel('Link or address', { exact: true }).fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)

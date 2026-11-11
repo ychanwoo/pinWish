@@ -59,6 +59,7 @@ const initialSave = saveStates.includes(params.get('state') as SaveState)
   : null
 function App() {
   const session = useSyncExternalStore(subscribeSession, getSession)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [authOpen, setAuthOpen] = useState(false)
   const [authReason, setAuthReason] = useState('')
   const [resumeSave, setResumeSave] = useState(false)
@@ -296,7 +297,7 @@ function App() {
     mapPlaces.find((p) => p.id === selected.id) ?? mapPlaces[0] ?? selected
   return (
     <div
-      className={`app-shell view-${view} ${saveState ? 'has-save' : ''} ${cloudEnabled ? 'cloud-enabled' : ''}`}
+      className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'} view-${view} ${saveState ? 'has-save' : ''} ${cloudEnabled ? 'cloud-enabled' : ''}`}
     >
       <a className="skip-link" href="#main-content">
         Skip to places
@@ -341,6 +342,8 @@ function App() {
       )}
       <div inert={Boolean(saveState || newCollection || authOpen)}>
         <DesktopNavigation
+          sidebarOpen={sidebarOpen}
+          onSidebarOpen={setSidebarOpen}
           view={view}
           places={places}
           collections={collections}

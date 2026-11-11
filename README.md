@@ -31,8 +31,8 @@ A personal access token is only needed for a separate REST API or third-party in
 
 Without cloud configuration, the app is an in-memory UI preview. Cloud mode uses
 Cognito, API Gateway/Lambda/DynamoDB and an Amazon Location map. Instagram image
-analysis and place search use AWS Bedrock/Location through the local development
-API. The frontend and import/search API are not deployed yet. Directions opens
+analysis and place search use AWS Bedrock/Location through authenticated cloud jobs.
+The frontend is deployed on Amplify; open a bounded AWS test window before use. Directions opens
 Google Maps externally; in-app route calculation is not implemented.
 
 ## Project layout
@@ -69,7 +69,7 @@ All save states are available through `?state=`: `entry`, `resolving`, `ready`, 
 
 ### Try the demo save flow (cloud configuration disabled)
 
-1. Click **Save a place** (mobile) or **Add pin** (desktop).
+1. Click **Save a place** near the top of the place list.
 2. Enter `https://www.instagram.com/p/example/`, `https://maps.app.goo.gl/grandcentral`, or a sample place name such as `Maru Coffee`.
 3. Confirm the location and enter a note. Choose **Weekend ideas** to save a new record; **LA weekend** already contains the five sample places and shows the duplicate state.
 4. Save and open the result. Desktop shows the map confirmation; mobile shows the full-screen success state.
@@ -106,7 +106,7 @@ including regional fallback for an address search that returned a building tenan
 See [current validation](docs/validation/automatic-import.md). Earlier feasibility
 reports record historical extraction-only results, not current end-to-end behavior.
 
-See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. The import/search backend and frontend hosting are not deployed; the separate authenticated storage API is deployed as described below.
+See [the feasibility report](docs/validation/instagram-feasibility.md) for real sample results, AWS usage, limitations and the two-terminal run instructions. No Meta API key is required for this experiment; it does require server-side AWS credentials with Bedrock invocation access. The current hosted flow uses authenticated AWS jobs; the report describes the earlier local feasibility stage. See the AWS web deployment guide below for current commands.
 
 ```sh
 npm run test:unit
@@ -130,10 +130,9 @@ display policy, but this provider's detailed KR lookup remains unsupported.
 The import now searches extracted names automatically, compares provider names and retrieves fresh AWS details for a matching result, and saves located places as a batch in cloud mode. There is no per-place confirmation step. The original Instagram URL, slide numbers and OCR evidence remain in source data; overseas labels use English and Korean OCR evidence is not displayed. Closing during lookup cancels requests and retains the draft. Failed locations do not prevent the successful ones from saving. In demo mode the same lookup runs without account storage.
 
 ```sh
-# Terminal 1: AWS credentials remain server-side (normal AWS credential chain)
-npm run dev:api
-# Terminal 2
-VITE_ENABLE_INSTAGRAM_PREVIEW=true npm run dev
+npm run cloud:configure
+npm run cloud:test:start -- 60
+npm run dev
 ```
 
 Requires Bedrock access for new imports and Korean query conversion and `geo-places:SearchText` / `geo-places:GetPlace` for locations. The scoped policy template is [docs/aws/place-search-policy.json](docs/aws/place-search-policy.json); no IAM role or cloud deployment is created by these commands. Export server settings in your shell; the Node API does not automatically load Vite `.env` files.
@@ -147,7 +146,7 @@ See [the implementation and live validation report](docs/validation/place-confir
 
 ### Automatic English search queries
 
-For Korean-containing name/region input, the server asks Bedrock for an English search query and region, then searches Amazon Location. English-only input bypasses the model. Explicit KR country filters remain unsupported. Uncertain/malformed output or a model outage falls back to the original input with an explanatory message; cancellation still stops the request. Successful conversions are cached by query, region and country for 15 minutes (at most 100 entries). Each uncached conversion makes one billable Bedrock request within the existing place-request quota.
+For Korean-containing name/region input, the server asks Bedrock for an English search query and region, then searches Amazon Location. English-only input bypasses the model. Explicit KR country filters remain unsupported. Uncertain/malformed output or a model outage falls back to the original input with an explanatory message; cancellation still stops the request. The legacy local API caches successful conversions by query, region and country for 15 minutes (at most 100 entries). Cloud workers isolate each job; a new search can make a new conversion call, while retries of the same job ID reuse its result. Each uncached conversion makes one billable Bedrock request within the existing place-request quota.
 
 Optional server setting `PINWISH_QUERY_MODEL` overrides the query model; otherwise it uses `PINWISH_BEDROCK_MODEL` or the existing Qwen3-VL default. Requires `bedrock:InvokeModel` permission on that model, in addition to the Places-only policy template. No credentials belong in browser variables. English labels prefer AWS place details; an English query can serve as the display fallback when the provider lacks an English title. Original source text remains untouched.
 
@@ -163,11 +162,11 @@ Submitting an Instagram link while signed out opens the login modal and retains 
 
 ```sh
 npm run cloud:configure  # read public identifiers from pinwish-storage-dev
-npm run dev:api         # terminal 1: existing local import/place-search API
-npm run dev             # terminal 2: frontend with .env.local cloud settings
+npm run cloud:test:start -- 60
+npm run dev             # frontend uses the deployed backend
 ```
 
-A development stack named `pinwish-storage-dev` is deployed in us-east-1. It contains Cognito, API Gateway, Lambda and DynamoDB; the frontend and import/search API remain local. See [infrastructure and API documentation](infra/README.md) for permissions, reproducible deployment, session behavior, costs, limits and cleanup. The generated configuration `.env.local` is ignored by Git.
+A development stack named `pinwish-storage-dev` is deployed in us-east-1. It contains Cognito, API Gateway, Lambda, DynamoDB and S3; Amplify hosts the frontend and a separate async worker runs imports and searches. See [infrastructure and API documentation](infra/README.md) for permissions, reproducible deployment, session behavior, costs, limits and cleanup. The generated configuration `.env.local` is ignored by Git.
 
 `npm run test:cloud-ui` uses mocked Cognito/storage responses. Existing demo/import tests explicitly disable cloud configuration so they cannot operate against your live account. Live verification results are in [storage-live.json](docs/validation/storage-live.json) and [storage-browser-live.json](docs/validation/storage-browser-live.json). Real email delivery still needs confirmation through your own signup; automated test accounts suppressed outgoing email.
 
@@ -175,7 +174,7 @@ A development stack named `pinwish-storage-dev` is deployed in us-east-1. It con
 
 Cloud mode now uses Amazon Location Maps V2 with MapLibre. After provisioning the
 stack, run `npm run cloud:configure`, restart `npm run dev`, and use port 5173.
-Continue running `npm run dev:api` separately for Instagram extraction/place search.
+Open a test window with `npm run cloud:test:start`; a separate local API is not needed.
 No Google Maps key is needed. Directions still opens the external Google Maps
 website; in-app route calculation is not part of this change.
 
@@ -216,7 +215,7 @@ failures for five minutes. Pending jobs have a two-minute lease. Source and lice
 links remain visible beside the image; resized copies retain the source license.
 
 Run `npm run dev` and sign in after deploying the updated AWS stack. Instagram
-import also requires `npm run dev:api`. Photo discovery itself runs in AWS and
+import uses the deployed processing API after `npm run cloud:configure`. Photo discovery runs in AWS and
 needs no extra user API key.
 
 ```sh
@@ -230,3 +229,11 @@ background discovery, authenticated retrieval and cleanup. Set
 `PINWISH_PHOTO_BROWSER_URL=http://127.0.0.1:5173` to also exercise the actual local
 browser UI. It deletes its test records, objects and accounts afterward. See
 [photo validation](docs/validation/place-photos.md).
+
+## Hosted web and bounded AWS tests
+
+See [AWS deployment and test sessions](docs/aws-web-deployment.md). The hosted web
+uses authenticated asynchronous AWS processing; it does not depend on a local
+Instagram API. Open a 60-minute test window with `npm run cloud:test:start`, and
+stop early with `npm run cloud:test:stop`. Paused storage may still incur charges.
+The top-left menu toggles the desktop collection sidebar; search reopens it.

@@ -1,14 +1,15 @@
-# Authenticated place storage
+# AWS application infrastructure
 
-The reproducible CloudFormation template is generated from `scripts/cloud/build-template.mjs` and `backend/storage.cjs`.
+The reproducible CloudFormation template is generated from `scripts/cloud/build-template.mjs`. See [current deployment and bounded test sessions](../docs/aws-web-deployment.md) for the full web/worker workflow. Storage contracts below remain applicable.
 
 ## Resources
 
 - Cognito Lite user pool and public app client (no client secret), email verification, password recovery.
-- HTTP API with Cognito JWT authorizer on all six routes. Lambda additionally requires `token_use=access`.
-- One Node.js 22 Lambda using the runtime AWS SDK, and a seven-day CloudWatch log group.
-- One encrypted, on-demand DynamoDB table; Lambda can only get, query, put and delete items in this table.
-- One private encrypted S3 photo bucket and a daily EventBridge orphan-cleanup rule.
+- HTTP API with Cognito JWT authorizer on storage and job routes. Lambda additionally requires `token_use=access`.
+- Node.js 22 storage, job API, async worker and pause Lambdas; seven-day CloudWatch logs.
+- Separate encrypted, on-demand places and jobs DynamoDB tables with scoped IAM permissions.
+- One private encrypted S3 photo/artifact bucket, a daily cleanup rule enabled during tests, and an automatic pause schedule.
+- Amplify static hosting is managed by the manual web deployment script.
 - No VPC, NAT gateway, load balancer, always-on compute, or place index.
 
 ## Deploy
@@ -16,17 +17,16 @@ The reproducible CloudFormation template is generated from `scripts/cloud/build-
 Use the project's AWS credentials/profile and Node 22.14+. Commands must run from the repository root.
 
 ```sh
-npm run infra:build
-aws cloudformation validate-template --template-body file://infra/generated/storage.json --region us-east-1
-aws cloudformation deploy --template-file infra/generated/storage.json --stack-name pinwish-storage-dev --capabilities CAPABILITY_IAM --region us-east-1 --no-fail-on-empty-changeset
+npm run deploy:backend  # updates the existing development stack and pauses it
+npm run deploy:web
 npm run cloud:configure
 ```
 
 `cloud:configure` writes only public region/client/API identifiers and the import feature flag to ignored `.env.local`, preserving unrelated settings. Restart Vite after changing it. Never add AWS credentials to a `VITE_` variable. `AWS_REGION` controls the configure script; the template supports deployment regions generally, while this project is verified in us-east-1.
 
-Local CORS allows localhost:5173, 127.0.0.1:5173 and 127.0.0.1:5175. Pass `AllowedOrigins` to the stack to add an exact HTTPS frontend origin for a later deployment. There is no wildcard origin or unauthenticated storage route. The frontend and Instagram/Bedrock/search development API are still local; they were not deployed in this branch.
+Local CORS allows localhost:5173, 127.0.0.1:5173 and 127.0.0.1:5175. Pass `AllowedOrigins` to the stack to add an exact HTTPS frontend origin for a later deployment. There is no wildcard origin or unauthenticated storage route. The Amplify origin is included in deployed CORS and map restrictions. Instagram/Bedrock/search run through authenticated async jobs.
 
-API default throttling is 2 requests/second, burst 5. The UI spaces batch saves and makes up to two bounded retries for HTTP 429 responses. This is not a spending cap. The existing account budget alerts should remain enabled. Cognito default email delivery has low-volume limits; configure an appropriate SES identity and delivery setup before broader use. Password-reset and confirmation messages use Cognito delivery; this branch did not alter account email identities.
+API default throttling is 5 requests/second, burst 10. The UI spaces batch saves and makes up to two bounded retries for HTTP 429 responses. This is not a spending cap. The existing account budget alerts should remain enabled. Cognito default email delivery has low-volume limits; configure an appropriate SES identity and delivery setup before broader use. Password-reset and confirmation messages use Cognito delivery; this branch did not alter account email identities.
 
 ## Data contract
 

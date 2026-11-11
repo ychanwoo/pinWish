@@ -51,6 +51,7 @@ const config = {
   VITE_AWS_REGION: values.Region,
   VITE_COGNITO_CLIENT_ID: values.UserPoolClientId,
   VITE_STORAGE_API_URL: values.ApiUrl,
+  VITE_PROCESSING_API_URL: values.ApiUrl,
   VITE_ENABLE_INSTAGRAM_PREVIEW: 'true',
 }
 const retained = existing

@@ -1,4 +1,5 @@
 // Loopback-only development API. Production requires authentication and per-user quotas.
+import { readFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import { pathToFileURL } from 'node:url'
 import { parseInstagramLink } from '../../src/lib/instagram.ts'
@@ -6,7 +7,7 @@ import { importErrorCode } from './errors.mjs'
 import { extractPlaces } from './extract-places.mjs'
 import { createPlaceService, placeError } from '../places/service.mjs'
 
-export function createDevServer({ extract = extractPlaces, placeService = createPlaceService(), importLimit = 3, placesLimit = 100 } = {}) {
+export function createDevServer({ extract = extractPlaces, placeService = createPlaceService(), importLimit = 3, placesLimit = 100, runtimeAllowed = () => true } = {}) {
   let activeImport = false, importAttempts = 0, activePlaces = 0, placeAttempts = 0
   const server = createServer(async (req, res) => {
     const reply = (status, data) => {
@@ -14,6 +15,7 @@ export function createDevServer({ extract = extractPlaces, placeService = create
       res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' })
       res.end(JSON.stringify(data))
     }
+    if (!runtimeAllowed()) return reply(503, { code: 'processing_unavailable' })
     const isImport = req.url === '/api/instagram/preview'
     const operation = req.url === '/api/places/search' ? 'search' : req.url === '/api/places/details' ? 'details' : null
     if (req.method !== 'POST' || (!isImport && !operation)) return reply(404, { code: 'not_found' })
@@ -58,5 +60,16 @@ export function createDevServer({ extract = extractPlaces, placeService = create
   return server
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  createDevServer().listen(8787, '127.0.0.1', () => console.log('PinWish local API: 127.0.0.1:8787 (3 imports / 100 place requests per process; AWS charges apply)'))
+  let window
+  try { window = JSON.parse(readFileSync('.aws-runtime.local', 'utf8')) } catch {}
+  const remaining = Date.parse(window?.until ?? '') - Date.now()
+  if (!window?.enabled || !(remaining > 0 && remaining <= 120 * 60000)) {
+    console.error('AWS test window is closed. Run npm run cloud:test:start first, or use the deployed processing API.')
+    process.exit(1)
+  }
+  const server = createDevServer({runtimeAllowed: () => {
+    try { const current = JSON.parse(readFileSync('.aws-runtime.local', 'utf8')); return current.enabled && Date.parse(current.until) > Date.now() } catch { return false }
+  }}).listen(8787, '127.0.0.1', () => console.log('PinWish local API: 127.0.0.1:8787; closes at ' + window.until))
+  const timer = setTimeout(() => { server.close(); server.closeAllConnections() }, remaining)
+  server.on('close', () => clearTimeout(timer))
 }

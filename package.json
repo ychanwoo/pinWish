@@ -19,7 +19,13 @@
     "test:cloud-ui": "playwright test --config playwright.cloud.config.ts",
     "infra:build": "node scripts/cloud/build-template.mjs",
     "cloud:configure": "node scripts/cloud/configure-local.mjs",
-    "test:map-ui": "playwright test --config playwright.map.config.ts"
+    "test:map-ui": "playwright test --config playwright.map.config.ts",
+    "deploy:backend": "node scripts/cloud/deploy-backend.mjs",
+    "deploy:web": "node scripts/cloud/deploy-web.mjs",
+    "cloud:test:start": "node scripts/cloud/runtime.mjs on",
+    "cloud:test:stop": "node scripts/cloud/runtime.mjs off",
+    "cloud:status": "node scripts/cloud/runtime.mjs status",
+    "test:processing-ui": "playwright test --config playwright.processing.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1166.0",

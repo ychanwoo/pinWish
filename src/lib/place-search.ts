@@ -73,9 +73,15 @@ export function confirmPlace(place: PlaceMatch & { retrievedAt: string }, source
   }
 }
 export const placeSearchErrors: Record<string, string> = {
+  processing_throttled: 'The service is busy. Your input is kept; please try again shortly.',
+  processing_busy: 'Other places are being processed. Wait a moment and try again.',
+  daily_limit: 'The daily test limit has been reached. Please try again tomorrow.',
+  unauthorized: 'Please sign in again to continue.',
+  processing_timeout: 'Processing took too long. Your input is kept; please try again.',
+  processing_unavailable: 'The test service is unavailable. Your input is kept; try again when the test session is open.',
   invalid_search: 'Enter a place name and check the region or country filter.',
   unsupported_country: 'Amazon Location does not support detailed places in South Korea. Keep or skip this candidate for now.',
-  places_access_denied: 'The local server cannot access Amazon Location. Check its AWS credentials and place-search permissions.',
+  places_access_denied: 'The server cannot access place search. Please try again later.',
   places_throttled: 'AWS temporarily limited requests. Your input is kept; try again shortly.',
   places_busy: 'Other searches are still running. Try again shortly.',
   places_session_limit: 'This local session reached its 100 place-request limit. Restart the API to continue testing.',

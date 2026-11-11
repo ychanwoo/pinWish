@@ -39,12 +39,13 @@ export function placeError(error) {
   if (error?.name === 'ResourceNotFoundException') return new PlaceError('place_unavailable', 404)
   return new PlaceError('places_unavailable')
 }
-export function createPlaceService({ client, region = process.env.PINWISH_PLACES_REGION ?? process.env.AWS_REGION ?? 'us-east-1', now = Date.now, queryResolver = createEnglishQueryResolver() } = {}) {
+export function createPlaceService({ client, region = process.env.PINWISH_PLACES_REGION ?? process.env.AWS_REGION ?? 'us-east-1', now = Date.now, queryResolver = createEnglishQueryResolver(), selectionStore } = {}) {
   const owned = !client
   client ??= new GeoPlacesClient({ region, maxAttempts: 1 })
-  const selections = new Map()
+  const selections = selectionStore ?? new Map()
   const ttl = 15 * 60 * 1000
   function prune() {
+    if (selectionStore) return
     for (const [key, value] of selections) if (value.expires <= now()) selections.delete(key)
   }
   async function send(command, signal) {
@@ -70,10 +71,10 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
         if (!place || seen.has(place.placeId) || (countryCode && place.countryCode !== countryCode)) continue
         seen.add(place.placeId)
         const selectionToken = randomUUID()
-        selections.set(selectionToken, { place, expires: now() + ttl })
+        await selections.set(selectionToken, { place, expires: now() + ttl })
         matches.push({ ...place, selectionToken })
       }
-      while (selections.size > 250) selections.delete(selections.keys().next().value)
+      while (!selectionStore && selections.size > 250) selections.delete(selections.keys().next().value)
       return { queryConversion, matches, excludedResults: response.ResultItems.length - matches.length,
         unsupportedCountries: response.ResultItems.some(p => p.Address?.Country?.Code2 === 'KR') ? ['KR'] : [],
         attribution: 'Search results provided by Amazon Location Service',
@@ -82,8 +83,8 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
     async details(input, signal) {
       if (!input || typeof input.selectionToken !== 'string' || !/^[0-9a-f-]{36}$/.test(input.selectionToken)) throw new PlaceError('invalid_selection', 400)
       prune()
-      const selection = selections.get(input.selectionToken)
-      if (!selection) throw new PlaceError('selection_expired', 409)
+      const selection = await selections.get(input.selectionToken)
+      if (!selection || selection.expires <= now()) throw new PlaceError('selection_expired', 409)
       // Retrieve fresh provider data. Never accept client-supplied country, name or coordinates.
       const response = await send(new GetPlaceCommand({ PlaceId: selection.place.placeId, Language: 'en', IntendedUse: 'Storage' }), signal)
       const place = normalizePlace(response, 'en')
@@ -91,6 +92,6 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
       return { place: { ...place, retrievedAt: new Date(now()).toISOString() },
         attribution: 'Place details provided by Amazon Location Service' }
     },
-    close() { queryResolver.close(); selections.clear(); if (owned) client.destroy() },
+    close() { queryResolver.close(); if (!selectionStore) selections.clear(); if (owned) client.destroy() },
   }
 }
