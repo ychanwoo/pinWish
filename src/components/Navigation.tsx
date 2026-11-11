@@ -74,17 +74,21 @@ export function DesktopNavigation({
             >
               <Icon name="03a25" />
             </button>
-            <button
-              className="rail-button"
-              aria-label="Settings"
-              onClick={() =>
-                onNotice(
-                  'This UI preview uses sample places. Account settings will be available after authentication is connected.',
-                )
-              }
-            >
-              <Icon name="d1469" />
-            </button>
+            {!persistent && (
+              <>
+                <button
+                  className="rail-button"
+                  aria-label="Settings"
+                  onClick={() =>
+                    onNotice(
+                      'This UI preview uses sample places. Account settings will be available after authentication is connected.',
+                    )
+                  }
+                >
+                  <Icon name="d1469" />
+                </button>
+              </>
+            )}
           </div>
         </div>
         <button
@@ -105,21 +109,31 @@ export function DesktopNavigation({
       >
         <div className="sidebar-heading">
           <Brand />
-          <button
-            className="city-select"
-            onClick={() =>
-              onNotice('Los Angeles is the sample city for this preview.')
-            }
-          >
-            {onAccount ? 'Saved places' : 'Los Angeles, CA'}
-            <Icon name="9beee" />
-          </button>
+          {persistent ? (
+            <p className="sidebar-scope">Your saved places</p>
+          ) : (
+            <>
+              <button
+                className="city-select"
+                onClick={() =>
+                  onNotice('Los Angeles is the sample city for this preview.')
+                }
+              >
+                {onAccount ? 'Saved places' : 'Los Angeles, CA'}
+                <Icon name="9beee" />
+              </button>
+            </>
+          )}
           <div className="search-input sidebar-search">
             <Icon name="489e6" />
             <input
               id="sidebar-search"
               aria-label="Search saved places or tags"
-              placeholder="Search saved places or tags..."
+              placeholder={
+                persistent
+                  ? 'Search saved places...'
+                  : 'Search saved places or tags...'
+              }
               value={search}
               onChange={(e) => {
                 onSearch(e.target.value)

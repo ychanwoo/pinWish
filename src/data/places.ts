@@ -106,13 +106,7 @@ export const saveStates = [
 ] as const
 export type SaveState = (typeof saveStates)[number]
 export type View =
-  | 'list'
-  | 'map'
-  | 'detail'
-  | 'empty'
-  | 'saved'
-  | 'list_loading'
-  | 'list_error'
+  'list' | 'map' | 'detail' | 'empty' | 'saved' | 'list_loading' | 'list_error'
 export const sampleLink = 'https://www.instagram.com/p/example/'
 export function resolveSample(input: string): Place | undefined {
   const normalized = input.toLowerCase()
@@ -162,7 +156,23 @@ export function placeTags(place: Place): string[] {
   )
 }
 export function matchesPlace(place: Place, search: string): boolean {
-  return `${place.name} ${place.kind} ${place.district} ${place.note} ${placeTags(place).join(' ')}`
+  return `${place.name} ${place.kind} ${place.district} ${place.address} ${place.note} ${placeTags(place).join(' ')}`
     .toLowerCase()
     .includes(search.trim().toLowerCase().replace(/^#/, ''))
+}
+
+export function filterPlaces(
+  places: Place[],
+  collection: string,
+  category: Category | 'All',
+  onlyUnvisited: boolean,
+  search: string,
+): Place[] {
+  return places.filter(
+    (p) =>
+      inCollection(p, collection) &&
+      (category === 'All' || p.category === category) &&
+      (!onlyUnvisited || !p.visited) &&
+      matchesPlace(p, search),
+  )
 }

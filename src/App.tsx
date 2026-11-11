@@ -30,8 +30,7 @@ import {
 } from 'react'
 import {
   initialPlaces,
-  inCollection,
-  matchesPlace,
+  filterPlaces,
   type Category,
   saveStates,
   type Place,
@@ -57,12 +56,15 @@ const views: View[] = [
   'list_loading',
   'list_error',
 ]
-const initialView = views.includes(params.get('view') as View)
-  ? (params.get('view') as View)
-  : 'list'
-const initialSave = saveStates.includes(params.get('state') as SaveState)
-  ? (params.get('state') as SaveState)
-  : null
+const initialView =
+  !cloudEnabled && views.includes(params.get('view') as View)
+    ? (params.get('view') as View)
+    : 'list'
+const initialSave =
+  (!cloudEnabled || params.get('state') === 'entry') &&
+  saveStates.includes(params.get('state') as SaveState)
+    ? (params.get('state') as SaveState)
+    : null
 function App() {
   const session = useSyncExternalStore(subscribeSession, getSession)
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -73,6 +75,11 @@ function App() {
   const [cloudError, setCloudError] = useState('')
   const [cursor, setCursor] = useState<string | null>(null)
   const loadGeneration = useRef(0)
+  const pendingPlaceLink = useRef(
+    cloudEnabled && params.get('view') === 'detail'
+      ? params.get('place')
+      : null,
+  )
   const [view, setView] = useState<View>(initialView)
   const [places, setPlaces] = useState<Place[]>(
     cloudEnabled ? [] : initialPlaces,
@@ -130,7 +137,9 @@ function App() {
     setCloudError('')
     try {
       const collectionResult = await listCollections()
-      collectionResult.items.sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+      collectionResult.items.sort(
+        (a, b) => Number(b.isDefault) - Number(a.isDefault),
+      )
       const result = await listSaved(next)
       if (result.collectionVersion !== collectionResult.version)
         throw new Error(
@@ -173,6 +182,19 @@ function App() {
           ? current
           : 'Saved places',
       )
+      if (pendingPlaceLink.current) {
+        const linked = incoming.find((p) => p.id === pendingPlaceLink.current)
+        pendingPlaceLink.current = null
+        if (linked) {
+          setSelectedId(linked.id)
+          setCollection(linked.collection)
+          setSearch('')
+          setCategory('All')
+          setOnlyUnvisited(false)
+          setView('detail')
+        } else
+          setNotice('This private place link is not available in your account.')
+      }
     } catch (e) {
       if (getSession()?.sub === owner && generation === loadGeneration.current)
         setCloudError(e instanceof Error ? e.message : 'Could not load places.')
@@ -353,18 +375,23 @@ function App() {
     url.searchParams.set('place', place.id)
     try {
       await navigator.clipboard.writeText(url.toString())
-      setNotice('Place link copied.')
+      setNotice(
+        place.saved
+          ? 'Private link copied. Only your account can open this place.'
+          : 'Place link copied.',
+      )
     } catch {
-      setNotice(`Copy this place link: ${url}`)
+      setNotice(
+        `${place.saved ? 'Only your account can open this private link. Copy:' : 'Copy this place link:'} ${url}`,
+      )
     }
   }
-  const mapPlaces = places.filter(
-    (p) =>
-      inCollection(p, collection) &&
-      (view === 'detail' ||
-        ((category === 'All' || p.category === category) &&
-          (!onlyUnvisited || !p.visited) &&
-          matchesPlace(p, search))),
+  const mapPlaces = filterPlaces(
+    places,
+    collection,
+    view === 'detail' ? 'All' : category,
+    view === 'detail' ? false : onlyUnvisited,
+    view === 'detail' ? '' : search,
   )
   const mapSelected =
     mapPlaces.find((p) => p.id === selected.id) ?? mapPlaces[0] ?? selected
@@ -496,6 +523,8 @@ function App() {
           )}
           {view === 'list' && (
             <PlaceList
+              loading={cloudEnabled && cloudLoading}
+              loadError={cloudEnabled ? cloudError : undefined}
               places={places}
               collections={collections}
               category={category}

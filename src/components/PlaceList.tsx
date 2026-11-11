@@ -1,8 +1,11 @@
+import { sortPlaces } from '../lib/place-presentation'
 import { useState } from 'react'
 import type { Category, Place } from '../data/places'
-import { asset, inCollection, matchesPlace } from '../data/places'
+import { asset, inCollection, filterPlaces } from '../data/places'
 import { Icon } from './Icon'
 interface Props {
+  loading?: boolean
+  loadError?: string
   persistent?: boolean
   onManageCollection?: () => void
   places: Place[]
@@ -24,6 +27,8 @@ interface Props {
   onNewCollection: () => void
 }
 export function PlaceList({
+  loading = false,
+  loadError = '',
   persistent = false,
   onManageCollection,
   places,
@@ -44,20 +49,28 @@ export function PlaceList({
   onDirections,
   onNewCollection,
 }: Props) {
-  const [sort, setSort] = useState('recent')
+  const [sort, setSort] = useState<'recent' | 'name'>('recent')
   const hasFilters =
     Boolean(search.trim()) || category !== 'All' || onlyUnvisited
-  const filtered = places.filter(
-    (p) =>
-      (category === 'All' || p.category === category) &&
-      (!onlyUnvisited || !p.visited) &&
-      inCollection(p, collection) &&
-      matchesPlace(p, search),
+  const filtered = filterPlaces(
+    places,
+    collection,
+    category,
+    onlyUnvisited,
+    search,
   )
-  const visible =
-    sort === 'name'
-      ? [...filtered].sort((a, b) => a.name.localeCompare(b.name))
-      : filtered
+  const visible = sortPlaces(filtered, sort, persistent)
+  const categories: (Category | 'All')[] = [
+    'All',
+    'Coffee',
+    'Food',
+    'Culture',
+    ...(places.some(
+      (p) => inCollection(p, collection) && p.category === 'Other',
+    )
+      ? ['Other' as const]
+      : []),
+  ]
   return (
     <section className="places-panel" aria-label="Saved places">
       <div className="list-toolbar">
@@ -148,26 +161,28 @@ export function PlaceList({
             Manage collection
           </button>
         )}
-        <div className="category-tabs">
-          {(['All', 'Coffee', 'Food', 'Culture'] as const).map((item) => (
-            <button
-              key={item}
-              className={category === item ? 'active' : ''}
-              aria-pressed={category === item}
-              onClick={() => setCategory(item)}
-            >
-              {item} (
-              {
-                places.filter(
-                  (p) =>
-                    inCollection(p, collection) &&
-                    (item === 'All' || p.category === item),
-                ).length
-              }
-              )
-            </button>
-          ))}
-        </div>
+        {!persistent && (
+          <div className="category-tabs">
+            {categories.map((item) => (
+              <button
+                key={item}
+                className={category === item ? 'active' : ''}
+                aria-pressed={category === item}
+                onClick={() => setCategory(item)}
+              >
+                {item} (
+                {
+                  places.filter(
+                    (p) =>
+                      inCollection(p, collection) &&
+                      (item === 'All' || p.category === item),
+                  ).length
+                }
+                )
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className="mobile-save">
         <button className="primary" onClick={onSave}>
@@ -182,13 +197,13 @@ export function PlaceList({
         <select
           aria-label="Sort places"
           value={sort}
-          onChange={(e) => setSort(e.target.value)}
+          onChange={(e) => setSort(e.target.value as 'recent' | 'name')}
         >
           <option value="recent">Recently added</option>
           <option value="name">Name A–Z</option>
         </select>
       </div>
-      <div className="place-cards">
+      <div className="place-cards" aria-busy={loading}>
         {visible.map((place) => (
           <article
             key={place.id}
@@ -239,20 +254,28 @@ export function PlaceList({
                 {place.visited ? 'Visited' : 'Unvisited'}
               </span>
             </div>
-            <div className="place-card-note">
-              <Icon name={place.badge === 'Visited' ? '0f8a0' : 'df9c6'} />
-              <p className="mobile-note">“{place.note}”</p>
-              <p className="desktop-note">{place.note}</p>
-            </div>
+            {place.note && (
+              <div className="place-card-note">
+                <Icon name={place.badge === 'Visited' ? '0f8a0' : 'df9c6'} />
+                <p className="mobile-note">“{place.note}”</p>
+                <p className="desktop-note">{place.note}</p>
+              </div>
+            )}
             <div className="place-card-actions">
               <button
                 aria-label={`Directions to ${place.name}`}
+                title="Opens Google Maps in a new tab"
                 onClick={() => onDirections(place)}
               >
                 <Icon name="ec9f3" />
               </button>
               <button
-                aria-label={`Share ${place.name}`}
+                aria-label={`${persistent ? 'Copy private link to' : 'Share'} ${place.name}`}
+                title={
+                  persistent
+                    ? 'Only your account can open this saved place'
+                    : undefined
+                }
                 onClick={() => onShare(place)}
               >
                 <Icon name="7088b" />
@@ -260,7 +283,17 @@ export function PlaceList({
             </div>
           </article>
         ))}
-        {!visible.length && (
+        {!visible.length && loading && (
+          <p className="list-feedback" role="status">
+            Loading your places…
+          </p>
+        )}
+        {!visible.length && !loading && loadError && (
+          <p className="list-feedback">
+            Your places could not be loaded. Use Refresh places to try again.
+          </p>
+        )}
+        {!visible.length && !loading && !loadError && (
           <div className="no-results">
             <h2>{hasFilters ? 'No matching places' : 'No places here yet'}</h2>
             <p>

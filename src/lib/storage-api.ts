@@ -1,3 +1,4 @@
+import { placeKind } from './place-presentation'
 import type { CoverPhoto } from './place-photo'
 import { visiblePlaceText } from './place-name'
 import {
@@ -157,7 +158,7 @@ export function toUIPlace(item: SavedPlace): import('../data/places').Place {
       item.countryCode,
       visiblePlaceText(item.name, item.countryCode),
     ),
-    kind: item.placeType === 'PointOfInterest' ? 'Saved place' : item.placeType,
+    kind: placeKind(item.placeType),
     district: item.countryName,
     category: 'Other',
     visited: item.visited,

@@ -2997,3 +2997,16 @@ a {
 .collection-dialog .delete-confirm { padding: 12px 18px; border: 1px solid #a63727; border-radius: 6px; background: #a63727; color: white; }
 .collection-dialog .delete-confirm:hover:not(:disabled) { background: #8c3328; }
 .collection-dialog .delete-confirm:disabled { opacity: .55; }
+
+.sidebar-scope { margin: 12px 0 16px; font-size: 13px; color: var(--pw-text-muted); }
+.private-link-hint { color: var(--pw-text-muted); font-size: 12px; line-height: 1.5; margin: 12px 0; }
+.list-feedback { padding: 28px 16px; color: var(--pw-text-muted); line-height: 1.5; }
+.cloud-enabled .filter-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cloud-enabled .filter-button.active { color: var(--pw-primary, #a63727); background: #f7ebe7; }
+.cloud-enabled .feed-heading { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 12px 16px; }
+.cloud-enabled .feed-heading select { min-width: 0; max-width: 100%; padding: 8px; border: 1px solid #d8dfd8; border-radius: 4px; background: white; }
+.cloud-enabled .detail-actions .share-action { font-size: 13px; white-space: normal; }
+@media (min-width: 768px) {
+  .cloud-enabled .feed-heading { justify-content: flex-end; }
+  .cloud-enabled .feed-heading > div { display: none; }
+}
