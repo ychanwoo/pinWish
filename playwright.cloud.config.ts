@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test'
 export default defineConfig({
   testDir: './tests',
-  testMatch: 'cloud-storage.spec.ts',
+  testMatch: ['cloud-storage.spec.ts', 'place-photos.spec.ts'],
   outputDir: 'test-results/cloud',
   use: { baseURL: 'http://127.0.0.1:5176' },
   webServer: {

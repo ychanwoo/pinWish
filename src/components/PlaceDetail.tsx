@@ -1,3 +1,5 @@
+import { PlaceCoverPhoto } from './PlaceCoverPhoto'
+import type { SavedPlace } from '../lib/storage-api'
 import { useState } from 'react'
 import { asset, placeTags, type Place } from '../data/places'
 import { Icon } from './Icon'
@@ -12,6 +14,7 @@ interface Props {
   onDirections: () => void
   onNote: (note: string) => void | Promise<boolean>
   onDelete?: () => Promise<void>
+  onPhotoUpdated?: (place: SavedPlace) => void
   onNotice: (value: string) => void
   onSelect: (id: string) => void
 }
@@ -27,6 +30,7 @@ export function PlaceDetail({
   onNotice,
   onSelect,
   onDelete,
+  onPhotoUpdated,
 }: Props) {
   const [deleting, setDeleting] = useState(false),
     [deleteBusy, setDeleteBusy] = useState(false),
@@ -133,52 +137,65 @@ export function PlaceDetail({
               <Icon name="75bc9" />
             </button>
           </div>
-          <button
-            className="detail-hero"
-            aria-label="Open place photos"
-            onClick={() => setGallery(true)}
-          >
-            <picture>
-              {place.id === 'grand-central' && (
-                <source
-                  media="(max-width: 767px)"
-                  srcSet={asset('acf8a.png')}
-                />
-              )}
-              <img
-                src={asset(photos[photo])}
-                alt={
-                  place.saved
-                    ? `No photo available for ${place.name}`
-                    : `Inside ${place.name}`
-                }
-              />
-            </picture>
-            {place.id.split(':')[0] === 'grand-central' && (
-              <span className="photo-caption">DTLA Landmark · Est. 1917</span>
-            )}
-            <span className="photo-count">
-              <span className="mobile-only">
-                <Icon name="fae89" />
-                {photos.length} photos
-              </span>
-              <span className="desktop-only">
-                {photo + 1} / {photos.length}
-              </span>
-            </span>
-          </button>
-          <div className="photo-thumbnails">
-            {photos.slice(1, 4).map((p, i) => (
+          {place.saved && onPhotoUpdated ? (
+            <PlaceCoverPhoto
+              key={place.id}
+              place={place.saved}
+              name={place.name}
+              onUpdated={onPhotoUpdated}
+            />
+          ) : (
+            <>
               <button
-                key={p}
-                aria-label={`View photo ${i + 2}`}
-                onClick={() => setPhoto(i + 1)}
+                className="detail-hero"
+                aria-label="Open place photos"
+                onClick={() => setGallery(true)}
               >
-                <img src={asset(p)} alt="" />
-                {i === 2 && <span>+4</span>}
+                <picture>
+                  {place.id === 'grand-central' && (
+                    <source
+                      media="(max-width: 767px)"
+                      srcSet={asset('acf8a.png')}
+                    />
+                  )}
+                  <img
+                    src={asset(photos[photo])}
+                    alt={
+                      place.saved
+                        ? `No photo available for ${place.name}`
+                        : `Inside ${place.name}`
+                    }
+                  />
+                </picture>
+                {place.id.split(':')[0] === 'grand-central' && (
+                  <span className="photo-caption">
+                    DTLA Landmark · Est. 1917
+                  </span>
+                )}
+                <span className="photo-count">
+                  <span className="mobile-only">
+                    <Icon name="fae89" />
+                    {photos.length} photos
+                  </span>
+                  <span className="desktop-only">
+                    {photo + 1} / {photos.length}
+                  </span>
+                </span>
               </button>
-            ))}
-          </div>
+              <div className="photo-thumbnails">
+                {photos.slice(1, 4).map((p, i) => (
+                  <button
+                    key={p}
+                    aria-label={`View photo ${i + 2}`}
+                    onClick={() => setPhoto(i + 1)}
+                  >
+                    <img src={asset(p)} alt="" />
+                    {i === 2 && <span>+4</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           <div className="detail-actions">
             <button className="directions-action" onClick={onDirections}>
               <span className="mobile-only">
@@ -322,7 +339,9 @@ export function PlaceDetail({
                       rel="noopener noreferrer"
                     >
                       Instagram · photos {source.slides.join(', ')}
-                      {place.saved?.countryCode === 'KR' ? ` · ${source.correctedName || source.extractedName}` : ''}
+                      {place.saved?.countryCode === 'KR'
+                        ? ` · ${source.correctedName || source.extractedName}`
+                        : ''}
                     </a>
                   ))
                 ) : (

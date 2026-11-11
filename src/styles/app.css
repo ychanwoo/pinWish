@@ -2875,3 +2875,22 @@ a {
 .automatic-places .retry-missing-button:focus-visible{outline:2px solid var(--pw-brand-primary);outline-offset:3px}
 .automatic-places .retry-missing-button:disabled{opacity:.5;cursor:wait}
 @media(max-width:767px){.automatic-places .retry-missing-button{width:100%;min-height:44px}}
+
+.place-cover{margin:24px 0;color:var(--pw-text-primary)}
+.cover-frame{width:100%;max-width:100%;aspect-ratio:16/9;min-height:180px;border-radius:8px;overflow:hidden;background:#eff3ee}
+.cover-frame button,.cover-frame img{width:100%;height:100%;display:block}
+.cover-frame img{object-fit:cover}
+.cover-frame button{padding:0;cursor:zoom-in}
+.cover-placeholder{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;color:#6b6660;font-size:14px}
+.cover-text-button{color:var(--pw-brand-primary);font-size:14px;text-decoration:underline;text-underline-offset:3px;min-height:36px}
+.cover-credit{font-size:12px;color:#6b6660;line-height:1.6;overflow-wrap:anywhere;margin:8px 0}
+.cover-credit a{color:var(--pw-brand-primary);text-decoration:underline}
+.cover-status{font-size:14px;margin:10px 0}
+.place-cover .field-error{margin-top:10px}
+.place-cover button:focus-visible,.place-cover summary:focus-visible{outline:2px solid var(--pw-brand-primary);outline-offset:3px}
+.cover-lightbox-close{position:absolute;top:20px;right:20px;background:white;border-radius:6px;padding:12px 18px;color:#28312a}
+/* Cloud detail has no illustrative map behind the sheet. */
+@media(max-width:767px){.cloud-enabled.view-detail .detail-panel{margin-top:0;border-radius:0}.cloud-enabled.view-detail .sheet-handle{display:none}}
+
+@media(max-width:767px){.cover-frame{height:240px;aspect-ratio:auto}}
+
