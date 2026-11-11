@@ -2980,3 +2980,20 @@ a {
     width: 100%;
   }
 }
+
+/* Collection management shares the existing quiet form and button styles. */
+.collection-manage { color: var(--muted, #675f5c); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; padding: 10px 0; text-align: left; }
+.collection-link > span:not(.count) { min-width: 0; overflow-wrap: anywhere; }
+.collection-dialog { width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow: auto; }
+.collection-dialog .collection-hint, .collection-delete-area p { color: #675f5c; font-size: 13px; line-height: 1.5; margin: 10px 0 0; }
+.collection-dialog > p { line-height: 1.6; overflow-wrap: anywhere; }
+.collection-dialog .collection-dialog-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+.collection-dialog .collection-delete-area { display: block; border-top: 1px solid #e4e7e2; margin-top: 24px; padding-top: 16px; }
+.move-collection { margin: 20px 0; }
+.move-collection label { display: block; font-size: 13px; color: #675f5c; margin-bottom: 8px; }
+.move-collection > div { display: flex; gap: 10px; }
+.move-collection select { flex: 1; min-width: 0; padding: 10px; border: 1px solid #d8dfd8; border-radius: 6px; background: white; color: inherit; }
+.move-collection button { padding: 10px 18px; }
+.collection-dialog .delete-confirm { padding: 12px 18px; border: 1px solid #a63727; border-radius: 6px; background: #a63727; color: white; }
+.collection-dialog .delete-confirm:hover:not(:disabled) { background: #8c3328; }
+.collection-dialog .delete-confirm:disabled { opacity: .55; }

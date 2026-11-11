@@ -1,6 +1,7 @@
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
+  persistent?: boolean
   sidebarOpen: boolean
   onSidebarOpen: (open: boolean) => void
   onAccount?: () => void
@@ -17,6 +18,7 @@ interface Props {
   onNotice: (value: string) => void
 }
 export function DesktopNavigation({
+  persistent = false,
   sidebarOpen,
   onSidebarOpen,
   places,
@@ -130,7 +132,7 @@ export function DesktopNavigation({
           <p className="eyebrow" id="collections-heading" tabIndex={-1}>
             Active collection
           </p>
-          {view === 'empty' ? (
+          {!persistent && view === 'empty' ? (
             <>
               <button
                 className="collection-link active"
@@ -149,50 +151,55 @@ export function DesktopNavigation({
               <p className="eyebrow other-heading">Other collections</p>
             </>
           ) : null}
-          <button
-            className={`collection-link ${view !== 'empty' && collection === 'LA weekend' ? 'active' : ''}`}
-            onClick={() => {
-              onCollection('LA weekend')
-              onView('list')
-            }}
-          >
-            <Icon name="3e06b" />
-            <span>All Curated Pins</span>
-            <span className="count">
-              {places.filter((p) => inCollection(p, 'LA weekend')).length}
-            </span>
-          </button>
-          <button
-            className={`collection-link ${collection === 'Coffee' ? 'active' : ''}`}
-            onClick={() => {
-              onCollection('Coffee')
-              onView('list')
-            }}
-          >
-            <Icon name="2623d" />
-            <span>Coffee &amp; Roasters</span>
-            <span className="count">
-              {places.filter((p) => inCollection(p, 'Coffee')).length}
-            </span>
-          </button>
-          <button
-            className={`collection-link ${collection === 'Galleries' ? 'active' : ''}`}
-            onClick={() => {
-              onCollection('Galleries')
-              onView('list')
-            }}
-          >
-            <Icon name="bd56e" />
-            <span>Architecture Walks</span>
-            <span className="count">
-              {places.filter((p) => inCollection(p, 'Galleries')).length}
-            </span>
-          </button>
+          {!persistent && (
+            <>
+              <button
+                className={`collection-link ${view !== 'empty' && collection === 'LA weekend' ? 'active' : ''}`}
+                onClick={() => {
+                  onCollection('LA weekend')
+                  onView('list')
+                }}
+              >
+                <Icon name="3e06b" />
+                <span>All Curated Pins</span>
+                <span className="count">
+                  {places.filter((p) => inCollection(p, 'LA weekend')).length}
+                </span>
+              </button>
+              <button
+                className={`collection-link ${collection === 'Coffee' ? 'active' : ''}`}
+                onClick={() => {
+                  onCollection('Coffee')
+                  onView('list')
+                }}
+              >
+                <Icon name="2623d" />
+                <span>Coffee &amp; Roasters</span>
+                <span className="count">
+                  {places.filter((p) => inCollection(p, 'Coffee')).length}
+                </span>
+              </button>
+              <button
+                className={`collection-link ${collection === 'Galleries' ? 'active' : ''}`}
+                onClick={() => {
+                  onCollection('Galleries')
+                  onView('list')
+                }}
+              >
+                <Icon name="bd56e" />
+                <span>Architecture Walks</span>
+                <span className="count">
+                  {places.filter((p) => inCollection(p, 'Galleries')).length}
+                </span>
+              </button>
+            </>
+          )}
           {collections
             .filter(
               (c) =>
-                c !== 'LA weekend' &&
-                !(view === 'empty' && c === 'Weekend ideas'),
+                persistent ||
+                (c !== 'LA weekend' &&
+                  !(view === 'empty' && c === 'Weekend ideas')),
             )
             .map((c) => (
               <button

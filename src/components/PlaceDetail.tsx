@@ -5,6 +5,8 @@ import { asset, placeTags, type Place } from '../data/places'
 import { Icon } from './Icon'
 import { useModalFocus } from '../hooks/useModalFocus'
 interface Props {
+  collections?: string[]
+  onMove?: (collection: string) => Promise<boolean>
   place: Place
   places: Place[]
   onClose: () => void
@@ -19,6 +21,8 @@ interface Props {
   onSelect: (id: string) => void
 }
 export function PlaceDetail({
+  collections,
+  onMove,
   place,
   places,
   onClose,
@@ -36,6 +40,9 @@ export function PlaceDetail({
     [deleteBusy, setDeleteBusy] = useState(false),
     [deleteError, setDeleteError] = useState(''),
     [noteBusy, setNoteBusy] = useState(false)
+  const [moveTarget, setMoveTarget] = useState(place.collection)
+  const [moveBusy, setMoveBusy] = useState(false)
+  const [moveError, setMoveError] = useState('')
   const [editing, setEditing] = useState(false)
   const [note, setNote] = useState(place.note)
   const [photo, setPhoto] = useState(0)
@@ -226,6 +233,59 @@ export function PlaceDetail({
               {place.collection}
             </span>
           </div>
+          {onMove && collections && (
+            <form
+              className="move-collection"
+              onSubmit={async (e) => {
+                e.preventDefault()
+                if (moveBusy || moveTarget === place.collection) return
+                setMoveBusy(true)
+                setMoveError('')
+                try {
+                  if (!(await onMove(moveTarget)))
+                    setMoveError(
+                      'Could not move this place. Refresh your places and try again.',
+                    )
+                } catch (e) {
+                  setMoveError(
+                    e instanceof Error
+                      ? e.message
+                      : 'Could not move this place.',
+                  )
+                } finally {
+                  setMoveBusy(false)
+                }
+              }}
+            >
+              <label htmlFor="move-collection">Collection</label>
+              <div>
+                <select
+                  id="move-collection"
+                  value={moveTarget}
+                  disabled={moveBusy}
+                  onChange={(e) => {
+                    setMoveTarget(e.target.value)
+                    setMoveError('')
+                  }}
+                >
+                  {collections.map((name) => (
+                    <option key={name}>{name}</option>
+                  ))}
+                </select>
+                <button
+                  className="secondary"
+                  disabled={moveBusy || moveTarget === place.collection}
+                >
+                  {moveBusy ? 'Moving…' : 'Move'}
+                </button>
+              </div>
+              {moveError && (
+                <p role="alert" className="field-error">
+                  {moveError}
+                </p>
+              )}
+            </form>
+          )}
           <section className="personal-note">
             <div>
               <strong>
@@ -415,7 +475,12 @@ export function PlaceDetail({
                   </button>
                 </>
               ) : (
-                <button className="delete-trigger" onClick={() => setDeleting(true)}>Delete place</button>
+                <button
+                  className="delete-trigger"
+                  onClick={() => setDeleting(true)}
+                >
+                  Delete place
+                </button>
               )}
             </div>
           )}

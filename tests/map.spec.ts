@@ -1,3 +1,4 @@
+import { collectionResponse } from './helpers/collection-fixture'
 import { test, expect, type Page } from '@playwright/test'
 const records = [
   {
@@ -20,7 +21,8 @@ const records = [
   countryName: 'United States',
   placeType: 'PointOfInterest',
   note: '',
-  collection: 'LA weekend',
+  collection: 'Saved places',
+  collectionId: 'default',
   visited: false,
   bookmarked: true,
   version: 1,
@@ -66,10 +68,10 @@ async function setup(page: Page, failMap = false) {
       }),
   )
   await page.route('https://storage.example.test/**', (route) =>
-    route.fulfill({
+    new URL(route.request().url()).pathname === '/collections' ? route.fulfill({json: collectionResponse}) : route.fulfill({
       json: route.request().url().includes('cursor=')
-        ? { items: [records[1]], cursor: null }
-        : { items: [records[0]], cursor: 'page2' },
+        ? { items: [records[1]], cursor: null, collectionVersion: 1 }
+        : { items: [records[0]], cursor: 'page2', collectionVersion: 1 },
     }),
   )
   await page.goto('/')

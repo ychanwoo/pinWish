@@ -1,3 +1,4 @@
+import { collectionResponse } from './helpers/collection-fixture'
 import { test, expect, type Page } from '@playwright/test'
 async function login(page: Page) {
   const jwt = `header.${Buffer.from(JSON.stringify({ sub: 'user-a' })).toString('base64url')}.signature`
@@ -13,7 +14,7 @@ async function login(page: Page) {
     }),
   )
   await page.route('https://storage.example.test/**', (r) =>
-    r.fulfill({ json: { items: [], cursor: null } }),
+    new URL(r.request().url()).pathname === '/collections' ? r.fulfill({json: collectionResponse}) : r.fulfill({ json: { items: [], cursor: null, collectionVersion: 1 } }),
   )
   await page.goto('/')
   await page

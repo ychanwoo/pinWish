@@ -29,6 +29,7 @@ export interface SavedPlace {
   placeType: string
   note: string
   collection: string
+  collectionId?: string
   visited: boolean
   bookmarked: boolean
   version: number
@@ -36,7 +37,27 @@ export interface SavedPlace {
   updatedAt: string
   sources: Record<string, SavedSource>
 }
+export interface SavedCollection {
+  id: string
+  name: string
+  version: number
+  isDefault: boolean
+  createdAt: string
+  updatedAt: string
+}
 const errors: Record<string, string> = {
+  collection_name_exists: 'A collection with this name already exists.',
+  invalid_collection_name: 'Use a collection name with 1–60 characters.',
+  collection_not_found:
+    'This collection no longer exists. Refresh your places and choose another collection.',
+  collection_conflict:
+    'Your collections changed in another session. Refresh your places and try again.',
+  default_collection_protected:
+    'Saved places is your default collection and cannot be renamed or deleted.',
+  collection_limit:
+    'You have reached the collection limit. Contact support before adding more collections.',
+  collection_migration_limit:
+    'Your existing collections need migration assistance. Your saved places are unchanged.',
   photo_not_found: 'Photo unavailable. Please retry later.',
   photos_unavailable: 'Photos are temporarily unavailable. Please retry.',
   conflict:
@@ -52,6 +73,7 @@ export async function storageRequest<T>(
   path: string,
   method = 'GET',
   body?: unknown,
+  resource = '/places',
 ): Promise<T> {
   const owner = getSession()?.sub
   if (!owner) throw new Error('Sign in to save your places.')
@@ -61,7 +83,7 @@ export async function storageRequest<T>(
     const token = await accessToken(force)
     if (getSession()?.sub !== owner)
       throw new Error('Your account changed. Please try again.')
-    return fetch(`${cloudConfig.apiUrl}/places${path}`, {
+    return fetch(`${cloudConfig.apiUrl}${resource}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -96,23 +118,28 @@ export async function storageRequest<T>(
   return data as T
 }
 export const listSaved = (cursor: string | null) =>
-  storageRequest<{ items: SavedPlace[]; cursor: string | null }>(
-    cursor ? `?cursor=${encodeURIComponent(cursor)}` : '',
-  )
+  storageRequest<{
+    items: SavedPlace[]
+    cursor: string | null
+    collectionVersion: number
+  }>(cursor ? `?cursor=${encodeURIComponent(cursor)}` : '')
 export const saveConfirmed = (
   place: ConfirmedPlace,
   note: string,
-  collection: string,
+  collectionId: string,
 ) =>
   storageRequest<{ item: SavedPlace; duplicate: boolean }>('', 'POST', {
     place,
     note,
-    collection,
+    collectionId,
   })
 export const patchSaved = (
   place: SavedPlace,
   changes: Partial<
-    Pick<SavedPlace, 'note' | 'collection' | 'visited' | 'bookmarked'>
+    Pick<
+      SavedPlace,
+      'note' | 'collection' | 'collectionId' | 'visited' | 'bookmarked'
+    >
   >,
 ) =>
   storageRequest<{ item: SavedPlace }>(`/${place.id}`, 'PATCH', {
@@ -144,3 +171,32 @@ export function toUIPlace(item: SavedPlace): import('../data/places').Place {
     saved: item,
   }
 }
+
+export const listCollections = () =>
+  storageRequest<{ items: SavedCollection[]; version: number }>(
+    '',
+    'GET',
+    undefined,
+    '/collections',
+  )
+export const createCollection = (id: string, name: string) =>
+  storageRequest<{ item: SavedCollection }>(
+    '',
+    'POST',
+    { id, name },
+    '/collections',
+  )
+export const renameCollection = (collection: SavedCollection, name: string) =>
+  storageRequest<{ item: SavedCollection }>(
+    `/${collection.id}`,
+    'PATCH',
+    { version: collection.version, name },
+    '/collections',
+  )
+export const deleteCollection = (collection: SavedCollection) =>
+  storageRequest<{ deleted: boolean }>(
+    `/${collection.id}`,
+    'DELETE',
+    { version: collection.version },
+    '/collections',
+  )

@@ -143,6 +143,7 @@ export function validInput(input: string): boolean {
 }
 
 export function inCollection(place: Place, collection: string): boolean {
+  if (place.saved) return place.collection === collection
   return collection === 'Coffee'
     ? place.category === 'Coffee'
     : collection === 'Galleries'
