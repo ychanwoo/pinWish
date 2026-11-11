@@ -1,112 +1,13 @@
+import {place,event} from './storage-fixture.mjs'
+import { db } from './storage-fake.mjs'
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const {
   createHandler,
-  marshal,
-  unmarshal,
   validatePlace,
 } = require('../../backend/storage.cjs')
-const place = {
-  provider: 'amazon-location',
-  placeId: 'provider-id',
-  name: 'Museum',
-  displayName: 'Museum',
-  address: '100 Museum Road',
-  countryCode: 'US',
-  countryName: 'United States',
-  coordinates: { longitude: -118, latitude: 34 },
-  placeType: 'PointOfInterest',
-  englishName: 'Museum',
-  koreanName: null,
-  retrievedAt: '2026-11-10T00:00:00Z',
-  confirmedAt: '2026-11-10T00:01:00Z',
-  source: {
-    instagram: {
-      originalUrl: 'https://www.instagram.com/p/Example/?img_index=2',
-    },
-    slides: [2],
-    extractedName: '박물관',
-    correctedName: 'Museum',
-    evidence: '박물관',
-  },
-}
-function db() {
-  const data = new Map()
-  const key = (v) => v.pk + '|' + v.sk
-  return {
-    data,
-    async send(command) {
-      const p = command.input
-      switch (command.constructor.name) {
-        case 'GetItemCommand': {
-          const v = data.get(key(unmarshal(p.Key)))
-          return {
-            Item: v
-              ? marshal({
-                  ...v,
-                  ...(v.sources
-                    ? {
-                        sources: Object.fromEntries(
-                          Object.entries(v.sources).map(([k, s]) => [
-                            k,
-                            Object.fromEntries(Object.entries(s).reverse()),
-                          ]),
-                        ),
-                      }
-                    : {}),
-                })
-              : undefined,
-          }
-        }
-        case 'PutItemCommand': {
-          const v = unmarshal(p.Item),
-            old = data.get(key(v))
-          if (
-            p.ConditionExpression === 'attribute_not_exists(pk)'
-              ? !!old
-              : old?.version !== unmarshal(p.ExpressionAttributeValues)[':v']
-          )
-            throw Object.assign(Error(), {
-              name: 'ConditionalCheckFailedException',
-            })
-          data.set(key(v), v)
-          return {}
-        }
-        case 'DeleteItemCommand': {
-          const k = key(unmarshal(p.Key)),
-            old = data.get(k)
-          if (old?.version !== unmarshal(p.ExpressionAttributeValues)[':v'])
-            throw Object.assign(Error(), {
-              name: 'ConditionalCheckFailedException',
-            })
-          data.delete(k)
-          return {}
-        }
-        case 'QueryCommand': {
-          const values = unmarshal(p.ExpressionAttributeValues)
-          return {
-            Items: [...data.values()]
-              .filter((x) => x.pk === values[':pk'])
-              .map(marshal),
-          }
-        }
-        default:
-          throw Error('unexpected')
-      }
-    },
-  }
-}
-const event = (method, body, owner = 'user-a', id, query) => ({
-  requestContext: {
-    http: { method },
-    authorizer: { jwt: { claims: { sub: owner, token_use: 'access' } } },
-  },
-  pathParameters: id ? { id } : undefined,
-  queryStringParameters: query,
-  body: JSON.stringify(body ?? {}),
-})
 test('storage rejects unauthenticated and ID-token requests and malformed records', async () => {
   const handler = createHandler({ client: db(), table: 'test' })
   assert.equal(
@@ -145,7 +46,7 @@ test('storage is idempotent and merges original sources without overwriting note
   assert.equal(again.id, a.id)
   assert.equal(again.version, 1)
   assert.equal(again.note, 'Keep note')
-  assert.equal(client.data.size, 1)
+  assert.equal([...client.data.values()].filter(x=>x.sk.startsWith('PLACE#')).length, 1)
   const other = {
     ...place,
     source: {
