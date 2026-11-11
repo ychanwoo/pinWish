@@ -1,3 +1,4 @@
+const { createSharing } = require('./sharing.cjs')
 const { createCollections } = require('./collections.cjs')
 const { createPhotos } = require('./photos.cjs')
 const { isDeepStrictEqual } = require('node:util')
@@ -194,6 +195,7 @@ function createHandler({
     unmarshal,
     fail,
   })
+  const sharing = createSharing({ read, send, table, marshal, unmarshal, collections, photos, fail })
   const publicItem = (item) => {
     const { pk: _pk, sk: _sk, ...rest } = item
     return rest
@@ -205,6 +207,8 @@ function createHandler({
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store',
         'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'no-referrer',
+        'X-Robots-Tag': 'noindex, nofollow, noarchive',
       },
       body: JSON.stringify(data),
     })
@@ -231,6 +235,11 @@ function createHandler({
       }
     }
     try {
+      const publicRoute = /^\/shared\/([^/]+)(?:\/places\/([^/]+)\/photo)?$/.exec(event.rawPath ?? '')
+      if (publicRoute) {
+        if (event.requestContext?.http?.method !== 'GET') fail(404, 'not_found')
+        return response(200, await sharing.public(publicRoute[1], publicRoute[2], event.queryStringParameters?.cursor))
+      }
       const photoRoute = /\/places\/[a-f0-9]{64}\/photo$/.test(
         event.rawPath ?? '',
       )
@@ -244,6 +253,8 @@ function createHandler({
         fail(401, 'unauthorized')
       const pk = `USER#${claims.sub}`
       const method = event.requestContext?.http?.method
+      const shareRoute = /^\/collections\/([^/]+)\/sharing$/.exec(event.rawPath ?? '')
+      if (shareRoute) return response(200, await sharing.owner(pk, method, shareRoute[1]))
       const id = event.pathParameters?.id
       const collectionRoute = /^\/collections(?:\/[^/]+)?$/.test(
         event.rawPath ?? '',

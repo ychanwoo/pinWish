@@ -183,6 +183,7 @@ const template = {
       DeletionPolicy: 'Retain',
       UpdateReplacePolicy: 'Retain',
       Properties: {
+        TimeToLiveSpecification: { AttributeName: 'expiresAt', Enabled: true },
         BillingMode: 'PAY_PER_REQUEST',
         AttributeDefinitions: [
           { AttributeName: 'pk', AttributeType: 'S' },
@@ -715,6 +716,9 @@ for (const [i, route] of [
   'POST /collections',
   'PATCH /collections/{id}',
   'DELETE /collections/{id}',
+  'GET /collections/{id}/sharing',
+  'POST /collections/{id}/sharing',
+  'DELETE /collections/{id}/sharing',
 ].entries())
   template.Resources[`Route${i}`] = {
     Type: 'AWS::ApiGatewayV2::Route',
@@ -726,6 +730,12 @@ for (const [i, route] of [
       Target: sub('integrations/${Integration}'),
     },
   }
+for (const [i, route] of ['GET /shared/{token}', 'GET /shared/{token}/places/{id}/photo'].entries()) {
+  template.Resources[`SharedRoute${i}`] = { Type: 'AWS::ApiGatewayV2::Route', Properties: { ApiId: ref('Api'), RouteKey: route, AuthorizationType: 'NONE', Target: sub('integrations/${Integration}') } }
+}
+template.Resources.SharedPermission = { Type: 'AWS::Lambda::Permission', Properties: { Action: 'lambda:InvokeFunction', FunctionName: ref('Storage'), Principal: 'apigateway.amazonaws.com', SourceArn: sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/shared/*') } }
+template.Resources.Stage.DependsOn = ['SharedRoute0', 'SharedRoute1']
+template.Resources.Stage.Properties.RouteSettings = Object.fromEntries(['GET /shared/{token}', 'GET /shared/{token}/places/{id}/photo'].map(route => [route, { ThrottlingBurstLimit: 5, ThrottlingRateLimit: 2 }]))
 await mkdir('infra/generated', { recursive: true })
 await writeFile('infra/generated/storage.json', JSON.stringify(template) + '\n')
 console.log('Built infra/generated/storage.json')
