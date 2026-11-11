@@ -177,3 +177,31 @@ test('mobile map and detail work without horizontal overflow', async ({
     ),
   ).toBe(true)
 })
+
+test('anonymous shared places render real map layers and selection without private records', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.route('https://maps.geo.us-east-1.amazonaws.com/**', route => route.fulfill({ json: { version: 8, glyphs: 'https://fonts.example.test/{fontstack}/{range}.pbf', sources: {}, layers: [{ id: 'background', type: 'background', paint: { 'background-color': '#e4ece4' } }] } }))
+  await page.route('https://fonts.example.test/**', route => route.fulfill({ body: Buffer.alloc(0) }))
+  let revoked = false
+  await page.route('https://storage.example.test/**', route => {
+    expect(route.request().headers().authorization).toBeUndefined()
+    expect(new URL(route.request().url()).pathname).toContain('/shared/')
+    return revoked ? route.fulfill({ status: 404, json: { code: 'share_unavailable' } }) : route.fulfill({ json: { name: 'Places to explore', items: records.map(p => ({ id: p.id, name: p.name, address: p.address, countryName: p.countryName, coordinates: p.coordinates, hasPhoto: false })), cursor: null } })
+  })
+  await page.goto('/#share=' + 'a'.repeat(64))
+  await expect(page.getByRole('button', { name: 'Show all', exact: true })).toBeEnabled()
+  const picker = page.getByLabel('Select a saved place on the map')
+  await expect(picker.locator('option')).toHaveCount(3)
+  await picker.selectOption(records[0].id)
+  await expect(page.locator('#shared-place-title')).toHaveText('Museum')
+  await picker.selectOption(records[1].id)
+  await expect(page.locator('#shared-place-title')).toHaveText('Pier')
+  const bounds = await page.locator('.live-map canvas').boundingBox()
+  expect(bounds!.width).toBeGreaterThan(200)
+  await page.screenshot({ path: '/tmp/pinwish-shared-map-desktop.png' })
+  await page.getByRole('button', { name: 'Close place details' }).click()
+  revoked = true
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+  await expect(page.getByRole('heading', { name: 'This link is unavailable' })).toBeVisible()
+  await expect(page.locator('.live-map canvas')).toHaveCount(0)
+})

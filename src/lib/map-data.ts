@@ -1,7 +1,7 @@
 import type { Place } from '../data/places'
 import type { FeatureCollection, Point } from 'geojson'
 export function mapCoordinates(place: Place): [number, number] | null {
-  const c = place.saved?.coordinates
+  const c = place.coordinates ?? place.saved?.coordinates
   if (
     !c ||
     !Number.isFinite(c.longitude) ||

@@ -1,3 +1,4 @@
+import { CollectionSharing } from './components/CollectionSharing'
 import { lazy, Suspense } from 'react'
 import { forgetPhoto, prefetchPhotos } from './lib/place-photo'
 const LiveMap = lazy(() => import('./components/LiveMap'))
@@ -142,6 +143,8 @@ function App() {
   const [saveState, setSaveState] = useState<SaveState | null>(initialSave)
   const [notice, setNotice] = useState('')
   const [newCollection, setNewCollection] = useState(false)
+  const sharingReturnFocus = useRef<HTMLElement | null>(null)
+  const [sharingCollection, setSharingCollection] = useState<SavedCollection | null>(null)
   const loadPlaces = useCallback(async (next: string | null = null) => {
     if (!getSession()) return
     const owner = getSession()!.sub,
@@ -221,6 +224,7 @@ function App() {
     loadGeneration.current++
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
+    setSharingCollection(null)
     setCollections(['Saved places'])
     setCatalog([])
     setCollection('Saved places')
@@ -423,7 +427,7 @@ function App() {
       {cloudEnabled && (
         <header
           className="account-bar"
-          inert={Boolean(saveState || authOpen || newCollection)}
+          inert={Boolean(saveState || authOpen || newCollection || sharingCollection)}
         >
           <span>pinWish</span>
           <div>
@@ -466,7 +470,7 @@ function App() {
           </div>
         </header>
       )}
-      <div inert={Boolean(saveState || newCollection || authOpen)}>
+      <div inert={Boolean(saveState || newCollection || authOpen || sharingCollection)}>
         <DesktopNavigation
           sidebarOpen={sidebarOpen}
           onSidebarOpen={setSidebarOpen}
@@ -477,6 +481,7 @@ function App() {
           onCollectionAction={cloudEnabled ? (name, action) => {
             const item = catalog.find(c => c.name === name)
             if (!item) return
+            if (action === 'share') { sharingReturnFocus.current = document.activeElement as HTMLElement; setSharingCollection(item); return }
             setManagedCollection(item)
             setCollectionDialogMode(action)
             setNewCollection(true)
@@ -937,8 +942,10 @@ function App() {
           </button>
         </div>
       )}
+      {sharingCollection && session && <CollectionSharing key={`${session.sub}:${sharingCollection.id}`} collection={sharingCollection} onClose={() => { setSharingCollection(null); requestAnimationFrame(() => sharingReturnFocus.current?.focus()) }} />}
       {newCollection && (
         <CollectionDialog
+          onShare={managedCollection && cloudEnabled ? () => { sharingReturnFocus.current = document.querySelector<HTMLElement>('.collection-manage'); setNewCollection(false); setSharingCollection(managedCollection) } : undefined}
           mode={collectionDialogMode}
           collection={managedCollection}
           onClose={() => setNewCollection(false)}

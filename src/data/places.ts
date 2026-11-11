@@ -2,6 +2,7 @@ import type { SavedPlace } from '../lib/storage-api'
 import { isUrlInput, parseInstagramLink } from '../lib/instagram'
 export type Category = 'Food' | 'Coffee' | 'Culture' | 'Other'
 export interface Place {
+  coordinates?: { longitude: number; latitude: number }
   saved?: SavedPlace
   id: string
   name: string

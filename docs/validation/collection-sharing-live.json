@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-11-11T22:34:40.574Z",
+  "passed": true,
+  "checks": [
+    "Only the authenticated collection owner can enable sharing",
+    "Anonymous collection reads return only approved fields",
+    "Anonymous photos use existing private S3 bytes with attribution and no object keys",
+    "Revocation, re-sharing and collection deletion invalidate the correct links"
+  ],
+  "cleanupErrors": [],
+  "temporaryUsersDeleted": 2,
+  "browserVerified": true,
+  "note": "Real deployed API and S3 checks with synthetic temporary records; no OCR or place-search calls."
+}

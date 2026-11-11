@@ -165,6 +165,19 @@ function createPhotos({
     remove,
     ensure,
     process,
+    async shared(item) {
+      if (!bucket || !item.coverPhoto) return { status: 'unavailable' }
+      const photo = item.coverPhoto
+      try {
+        const result = await s3.send(new GetObjectCommand({ Bucket: bucket, Key: photo.objectKey }))
+        const bytes = await result.Body.transformToByteArray()
+        if (bytes.length > MAX_BYTES) fail(503, 'photos_unavailable')
+        return { status: 'ready', imageBase64: Buffer.from(bytes).toString('base64'), contentType: 'image/jpeg', attribution: { author: photo.author, sourceUrl: photo.sourceUrl, license: photo.license, ...(photo.licenseUrl ? { licenseUrl: photo.licenseUrl } : {}) } }
+      } catch (error) {
+        if (error.name === 'NoSuchKey') return { status: 'unavailable' }
+        throw error
+      }
+    },
     async handle(method, key) {
       if (method !== 'GET') fail(404, 'not_found')
       if (!bucket) fail(503, 'photos_unavailable')

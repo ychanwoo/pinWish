@@ -264,3 +264,15 @@ keep existing notes and collections. No Instagram link is required.
 
 See [behavior, API and validation](docs/direct-place-search.md). Run
 `npm run test:direct-ui` for the dedicated browser checks.
+
+## Read-only collection sharing
+
+Use **Share collection** in a collection's menu (or Manage collection on mobile)
+to create a link friends can open without an account. Public views include the
+collection name, places, map and available photos. Personal notes, visited state,
+account details and original source data remain private. Owners can stop sharing;
+links also expire after 30 days or when the original collection is deleted.
+
+See [sharing behavior, privacy and testing](docs/collection-sharing.md).
+[Itinerary planning and sharing](docs/next-collection-itinerary.md) are recorded
+as the next feature and are not implemented in this branch.

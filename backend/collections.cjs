@@ -322,6 +322,6 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
       throw e
     }
   }
-  return { ensure, resolve, present, bind, route, writePlace }
+  return { ensure, resolve, present, bind, route, writePlace, update }
 }
 module.exports = { createCollections, DEFAULT_ID }

@@ -2,7 +2,7 @@ import { CollectionRow } from './CollectionRow'
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
-  onCollectionAction?: (name: string, action: 'rename' | 'delete') => void
+  onCollectionAction?: (name: string, action: 'rename' | 'delete' | 'share') => void
   canManageCollection?: (name: string) => boolean
   persistent?: boolean
   sidebarOpen: boolean

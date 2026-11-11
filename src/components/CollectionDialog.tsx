@@ -3,6 +3,7 @@ import type { SavedCollection } from '../lib/storage-api'
 import { useModalFocus } from '../hooks/useModalFocus'
 
 interface Props {
+  onShare?: () => void
   mode?: 'manage' | 'rename' | 'delete'
   collection?: SavedCollection
   onClose: () => void
@@ -11,6 +12,7 @@ interface Props {
   onDelete: (collection: SavedCollection) => Promise<void>
 }
 export function CollectionDialog({
+  onShare,
   mode = 'manage',
   collection,
   onClose,
@@ -155,6 +157,7 @@ export function CollectionDialog({
             </button>
           )}
         </div>
+        {collection && !confirmDelete && mode === 'manage' && onShare && <button type="button" className="collection-share-entry" disabled={busy} onClick={onShare}>Share collection</button>}
         {collection && !confirmDelete && mode === 'manage' && (
           <div className="collection-delete-area">
             <button
