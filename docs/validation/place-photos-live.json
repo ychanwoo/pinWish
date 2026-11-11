@@ -1,0 +1,19 @@
+{
+  "testedAt": "2026-11-11T00:03:48.484Z",
+  "services": [
+    "Cognito",
+    "API Gateway",
+    "Lambda",
+    "DynamoDB",
+    "S3"
+  ],
+  "checks": [
+    "Saving real Gamble House automatically discovers and stores its photo without opening details",
+    "Owner retrieves high-resolution decodable JPEG with author, license and source",
+    "Private S3, cross-user isolation and removed upload route verified",
+    "Real browser login and automatic photo display, mobile fit, enlargement, no upload UI and no JS errors",
+    "Deleting saved place also removes its automatic cover photo"
+  ],
+  "temporaryUsersDeleted": 2,
+  "testObjectsRemoved": true
+}

@@ -192,3 +192,41 @@ not plotted. Demo mode still uses the Figma illustration.
 
 Run `npm run test:map-ui` for isolated map integration checks (local style fixture,
 mock accounts/storage). See `docs/validation/interactive-map.md` for live results.
+
+## Automatic representative place photos
+
+The active collection prefetches up to 12 photos in the background, with paced
+requests. Reopening a place reuses its in-memory photo for up to ten minutes;
+concurrent requests for the same photo are combined. Cache storage is bounded
+to 40 entries / 24 MiB and cleared on logout/account changes. Deleting a place
+also invalidates its photo cache. Newly discovered photos still need time on
+the first lookup; cached display does not mean all first-time photos are instant.
+
+Saving a confirmed place automatically starts an AWS Lambda photo lookup. No file
+picker, upload, replacement or manual photo-entry workflow is required. The worker
+matches the place name and coordinates against Wikipedia/Wikidata, selects an
+eligible Wikimedia Commons JPEG, and stores a sanitized copy in private S3 with
+its author, license and source. The detail view loads it automatically and allows
+enlargement. Existing saved places start the same lookup when their details open.
+
+Discovery is best effort: Wikimedia does not cover every restaurant or business.
+A missing or unavailable photo never prevents a place from being saved. No random
+stock photo is substituted. Negative results are cached for one day; transient
+failures for five minutes. Pending jobs have a two-minute lease. Source and license
+links remain visible beside the image; resized copies retain the source license.
+
+Run `npm run dev` and sign in after deploying the updated AWS stack. Instagram
+import also requires `npm run dev:api`. Photo discovery itself runs in AWS and
+needs no extra user API key.
+
+```sh
+npm run test:unit
+npm run test:cloud-ui
+PINWISH_RUN_LIVE_PHOTO_TESTS=1 node scripts/cloud/validate-photos-live.mjs
+```
+
+The live check creates temporary AWS users and saves a real place to exercise
+background discovery, authenticated retrieval and cleanup. Set
+`PINWISH_PHOTO_BROWSER_URL=http://127.0.0.1:5173` to also exercise the actual local
+browser UI. It deletes its test records, objects and accounts afterward. See
+[photo validation](docs/validation/place-photos.md).
