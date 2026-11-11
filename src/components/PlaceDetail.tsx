@@ -211,7 +211,7 @@ export function PlaceDetail({
               aria-pressed={place.visited}
               onClick={onVisited}
             >
-              <Icon name="792fb" />
+              <span className="visit-status-icon" aria-hidden="true" />
               {place.visited ? 'Visited' : 'Unvisited'}
             </button>
             <button className="share-action" onClick={onShare}>
@@ -378,7 +378,7 @@ export function PlaceDetail({
             </div>
           </dl>
           {onDelete && (
-            <div className="delete-place">
+            <div className={`delete-place ${deleting ? 'is-confirming' : ''}`}>
               {deleting ? (
                 <>
                   <p>Delete this saved place and its source references?</p>
@@ -389,12 +389,14 @@ export function PlaceDetail({
                   )}
                   <button
                     disabled={deleteBusy}
+                    className="delete-cancel"
                     onClick={() => setDeleting(false)}
                   >
                     Cancel
                   </button>
                   <button
                     disabled={deleteBusy}
+                    className="delete-confirm"
                     onClick={async () => {
                       setDeleteBusy(true)
                       setDeleteError('')
@@ -413,7 +415,7 @@ export function PlaceDetail({
                   </button>
                 </>
               ) : (
-                <button onClick={() => setDeleting(true)}>Delete place</button>
+                <button className="delete-trigger" onClick={() => setDeleting(true)}>Delete place</button>
               )}
             </div>
           )}
