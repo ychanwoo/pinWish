@@ -195,7 +195,7 @@ try {
     .first()
     .click()
   await page
-    .getByLabel('Link or address', { exact: true })
+    .getByLabel('Instagram post link', { exact: true })
     .fill('https://www.instagram.com/p/DfFCMjzk02S/?img_index=1')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   // The application auto-saves all matched locations and closes the dialog.

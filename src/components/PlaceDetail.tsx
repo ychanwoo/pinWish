@@ -1,3 +1,4 @@
+import { savedDate } from '../lib/place-presentation'
 import { PlaceCoverPhoto } from './PlaceCoverPhoto'
 import type { SavedPlace } from '../lib/storage-api'
 import { useState } from 'react'
@@ -102,17 +103,21 @@ export function PlaceDetail({
           >
             <Icon name="35768" />
           </button>
-          <button
-            className="icon-button"
-            aria-label="More place options"
-            onClick={() =>
-              onNotice(
-                'Use the bookmark, visited, and note controls to update this sample place.',
-              )
-            }
-          >
-            <Icon name="447ad" />
-          </button>
+          {!place.saved && (
+            <>
+              <button
+                className="icon-button"
+                aria-label="More place options"
+                onClick={() =>
+                  onNotice(
+                    'Use the bookmark, visited, and note controls to update this sample place.',
+                  )
+                }
+              >
+                <Icon name="447ad" />
+              </button>
+            </>
+          )}
         </div>
         <div className="detail-scroll">
           <div className="detail-heading">
@@ -121,13 +126,15 @@ export function PlaceDetail({
                 <Icon name="05b16" />
                 {place.id === 'grand-central'
                   ? 'DTLA FOOD HALL'
-                  : place.category.toUpperCase()}
+                  : place.saved && place.category === 'Other'
+                    ? place.kind
+                    : place.category.toUpperCase()}
               </p>
               <h1 tabIndex={-1} id="place-heading">
                 {place.name}
-                <span className="mobile-only">
+                {!place.saved && <span className="mobile-only">
                   <Icon name="bc707" />
-                </span>
+                </span>}
               </h1>
               <p>
                 {place.kind} · {place.district}
@@ -204,7 +211,14 @@ export function PlaceDetail({
             </>
           )}
           <div className="detail-actions">
-            <button className="directions-action" onClick={onDirections}>
+            <button
+              className="directions-action"
+              onClick={onDirections}
+              aria-label={
+                place.saved ? 'Open directions in Google Maps' : undefined
+              }
+              title={place.saved ? 'Opens Google Maps in a new tab' : undefined}
+            >
               <span className="mobile-only">
                 <Icon name="de629" />
               </span>
@@ -221,18 +235,31 @@ export function PlaceDetail({
               <span className="visit-status-icon" aria-hidden="true" />
               {place.visited ? 'Visited' : 'Unvisited'}
             </button>
-            <button className="share-action" onClick={onShare}>
+            <button
+              className="share-action"
+              onClick={onShare}
+              title={
+                place.saved
+                  ? 'Only your account can open this saved place'
+                  : undefined
+              }
+            >
               <Icon name="3a7b9" />
-              Share
+              {place.saved ? 'Copy private link' : 'Share'}
             </button>
           </div>
-          <div className="mobile-collection-label">
+          {place.saved && (
+            <p className="private-link-hint">
+              Private link · available only when signed in to your account.
+            </p>
+          )}
+          {!onMove && <div className="mobile-collection-label">
             In collection:{' '}
             <span>
               <Icon name="0c15e" />
               {place.collection}
             </span>
-          </div>
+          </div>}
           {onMove && collections && (
             <form
               className="move-collection"
@@ -307,7 +334,9 @@ export function PlaceDetail({
                 ) : (
                   <>
                     <span className="desktop-only">Edit</span>
-                    <span className="mobile-only">Updated 2d ago</span>
+                    <span className="mobile-only">
+                      {place.saved ? 'Edit' : 'Updated 2d ago'}
+                    </span>
                   </>
                 )}
               </button>
@@ -339,7 +368,7 @@ export function PlaceDetail({
               </form>
             ) : (
               <p>
-                “
+                {place.note ? '“' : 'No note yet.'}
                 {place.id === 'grand-central' &&
                 note ===
                   'Try the carnitas at Villa Morelianas. Great coffee at G&B near the hill street entrance.' ? (
@@ -353,7 +382,7 @@ export function PlaceDetail({
                 ) : (
                   note
                 )}
-                ”
+                {place.note ? '”' : ''}
               </p>
             )}
           </section>
@@ -383,7 +412,8 @@ export function PlaceDetail({
               <dd>
                 <span className="collection-tag">
                   <span className="dot" />
-                  {place.collection} ›
+                  {place.collection}
+                  {!place.saved && ' ›'}
                 </span>
               </dd>
             </div>
@@ -421,7 +451,7 @@ export function PlaceDetail({
               <dt>Date Saved</dt>
               <dd>
                 {place.saved
-                  ? `Saved on ${new Date(place.saved.createdAt).toLocaleDateString()}`
+                  ? savedDate(place.saved.createdAt)
                   : 'Saved on Oct 14, 2025'}
               </dd>
             </div>
@@ -431,10 +461,7 @@ export function PlaceDetail({
             </div>
             <div>
               <dt>Operating Hours</dt>
-              <dd>
-                <span className="open-dot" />
-                Hours not verified
-              </dd>
+              <dd>Hours not available</dd>
             </div>
           </dl>
           {onDelete && (
@@ -484,14 +511,16 @@ export function PlaceDetail({
               )}
             </div>
           )}
-          <div className="detail-tags">
-            <p className="eyebrow">Tags</p>
-            <div>
-              {placeTags(place).map((t) => (
-                <span key={t}>#{t}</span>
-              ))}
+          {placeTags(place).length > 0 && (
+            <div className="detail-tags">
+              <p className="eyebrow">Tags</p>
+              <div>
+                {placeTags(place).map((t) => (
+                  <span key={t}>#{t}</span>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
           <div className="nearby-places">
             <div>
               More Saved Places
@@ -528,7 +557,7 @@ export function PlaceDetail({
         <footer className="detail-footer">
           <button className="primary" onClick={onDirections}>
             <Icon name="d7ebc" />
-            Start Walking Route
+            {place.saved ? 'Open in Google Maps' : 'Start Walking Route'}
           </button>
         </footer>
       </section>
