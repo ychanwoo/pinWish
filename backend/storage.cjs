@@ -59,7 +59,7 @@ function str(v, max, empty = false) {
     fail(400, 'invalid_input')
   return v.trim()
 }
-function validatePlace(body) {
+function validatePlace(body, direct = false) {
   if (!body || typeof body !== 'object' || Array.isArray(body))
     fail(400, 'invalid_input')
   const p = body.place
@@ -86,41 +86,44 @@ function validatePlace(body) {
     Math.abs(latitude) > 90
   )
     fail(400, 'invalid_coordinates')
-  const source = p.source
-  if (
-    !source ||
-    !Array.isArray(source.slides) ||
-    !source.slides.length ||
-    source.slides.length > 30 ||
-    source.slides.some((n) => !Number.isInteger(n) || n < 1 || n > 30)
-  )
-    fail(400, 'invalid_source')
-  const originalUrl = str(source.instagram?.originalUrl, 2048)
-  let url
-  try {
-    url = new URL(originalUrl)
-  } catch {
-    fail(400, 'invalid_source')
-  }
-  if (
-    url.protocol !== 'https:' ||
-    !['instagram.com', 'www.instagram.com'].includes(url.hostname) ||
-    url.username ||
-    url.password ||
-    url.port ||
-    !/^\/p\/[A-Za-z0-9_-]{1,64}\/?$/.test(url.pathname)
-  )
-    fail(400, 'invalid_source')
-  const canonicalUrl = `https://www.instagram.com/p/${url.pathname.split('/')[2]}/`
-  const cleanSource = {
-    originalUrl,
-    canonicalUrl,
-    slides: [...new Set(source.slides)].sort((a, b) => a - b),
-    extractedName: str(source.extractedName, 500),
-    evidence: str(source.evidence, 2000, true),
-    ...(source.correctedName
-      ? { correctedName: str(source.correctedName, 500) }
-      : {}),
+  let cleanSource = null
+  if (!direct) {
+    const source = p.source
+    if (
+      !source ||
+      !Array.isArray(source.slides) ||
+      !source.slides.length ||
+      source.slides.length > 30 ||
+      source.slides.some((n) => !Number.isInteger(n) || n < 1 || n > 30)
+    )
+      fail(400, 'invalid_source')
+    const originalUrl = str(source.instagram?.originalUrl, 2048)
+    let url
+    try {
+      url = new URL(originalUrl)
+    } catch {
+      fail(400, 'invalid_source')
+    }
+    if (
+      url.protocol !== 'https:' ||
+      !['instagram.com', 'www.instagram.com'].includes(url.hostname) ||
+      url.username ||
+      url.password ||
+      url.port ||
+      !/^\/p\/[A-Za-z0-9_-]{1,64}\/?$/.test(url.pathname)
+    )
+      fail(400, 'invalid_source')
+    const canonicalUrl = `https://www.instagram.com/p/${url.pathname.split('/')[2]}/`
+    cleanSource = {
+      originalUrl,
+      canonicalUrl,
+      slides: [...new Set(source.slides)].sort((a, b) => a - b),
+      extractedName: str(source.extractedName, 500),
+      evidence: str(source.evidence, 2000, true),
+      ...(source.correctedName
+        ? { correctedName: str(source.correctedName, 500) }
+        : {}),
+    }
   }
   const place = {
     provider: 'amazon-location',
@@ -154,6 +157,7 @@ function createHandler({
   client = new DynamoDBClient({}),
   table = process.env.TABLE_NAME,
   photoOptions = {},
+  jobsTable = process.env.JOBS_TABLE,
 } = {}) {
   const send = (command) => client.send(command)
   const read = async (key) =>
@@ -324,18 +328,62 @@ function createHandler({
         return response(200, { item: present(item) })
       }
       if (method === 'POST' && !id) {
-        const value = validatePlace(body)
+        let directOrigin
+        if (body.directSearch !== undefined) {
+          const input = body.directSearch
+          if (!input || !/^[0-9a-f-]{36}$/.test(input.detailsJobId ?? ''))
+            fail(400, 'invalid_selection')
+          const query = str(input.query, 200)
+          const region = str(input.region ?? '', 200, true)
+          if (!jobsTable) fail(503, 'storage_unavailable')
+          const result = await send(
+            new GetItemCommand({
+              TableName: jobsTable,
+              Key: marshal({ pk, sk: `JOB#${input.detailsJobId}` }),
+              ConsistentRead: true,
+            }),
+          )
+          const job = unmarshal(result.Item)
+          if (
+            !job ||
+            job.operation !== 'details' ||
+            job.status !== 'complete' ||
+            !(job.expiresAt > Date.now() / 1000)
+          )
+            fail(409, 'selection_expired')
+          let verified
+          try {
+            verified = JSON.parse(job.result).place
+          } catch {
+            fail(409, 'selection_expired')
+          }
+          if (!verified?.englishName) fail(422, 'english_name_unavailable')
+          body = {
+            ...body,
+            place: {
+              ...verified,
+              displayName: verified.englishName,
+              confirmedAt: new Date().toISOString(),
+            },
+          }
+          directOrigin = { query, region }
+        }
+        const value = validatePlace(body, !!directOrigin)
         const bound = await collections.bind(pk, body)
         const id = hash(`amazon-location:${value.place.placeId}`)
         const key = { pk, sk: `PLACE#${id}` }
-        const sourceId = hash(
-          value.source.canonicalUrl + JSON.stringify(value.source.slides),
-        )
+        const sourceId = value.source
+          ? hash(
+              value.source.canonicalUrl + JSON.stringify(value.source.slides),
+            )
+          : null
         for (let attempt = 0; attempt < 4; attempt++) {
           const previous = await read(key)
           if (
-            previous?.sources[sourceId] &&
-            isDeepStrictEqual(previous.sources[sourceId], value.source)
+            previous &&
+            (directOrigin ||
+              (previous.sources[sourceId] &&
+                isDeepStrictEqual(previous.sources[sourceId], value.source)))
           )
             return response(200, {
               item: publicItem(
@@ -348,6 +396,7 @@ function createHandler({
             })
           if (
             previous &&
+            sourceId &&
             Object.keys(previous.sources).length >= 30 &&
             !previous.sources[sourceId]
           )
@@ -369,7 +418,8 @@ function createHandler({
                 collectionId: bound.collection.id,
                 visited: false,
                 bookmarked: true,
-                sources: { [sourceId]: value.source },
+                sources: sourceId ? { [sourceId]: value.source } : {},
+                ...(directOrigin ? { searchOrigin: directOrigin } : {}),
                 version: 1,
                 createdAt: now,
                 updatedAt: now,
@@ -423,7 +473,10 @@ function createHandler({
         const bound =
           'collectionId' in body || 'collection' in body
             ? await collections.bind(pk, body)
-            : { catalog, collection: collections.resolve(catalog, previous) }
+            : {
+                catalog,
+                collection: collections.resolve(catalog, previous),
+              }
         changes.collectionId = bound.collection.id
         changes.collection = bound.collection.name
         for (const field of ['visited', 'bookmarked'])
