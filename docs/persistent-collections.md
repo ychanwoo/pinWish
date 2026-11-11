@@ -12,8 +12,8 @@ No new always-on AWS service is introduced.
   search results, list cards and map pins use the same selected collection.
 - **Manage collection** renames the selected collection or opens a deletion
   confirmation. Deleting a collection keeps its places, notes, visited state,
-  source links and cover photos in **Saved places**.
-- The default **Saved places** collection cannot be renamed or deleted.
+  source links and cover photos in the current fallback collection.
+- Every collection, including **Saved places**, can be renamed or deleted. Deleting the fallback selects another existing collection; if none remains, a fresh **Saved places** collection keeps the places. The catalog stores `defaultCollectionId`, with legacy catalogs defaulting to `default`.
 - In place detail, choose **Collection → Move**. The selected collection follows
   the moved place. Each saved place currently belongs to one collection.
 - Imports save into the selected collection using its stable ID. Re-importing an
@@ -73,7 +73,7 @@ and automatic cross-tab synchronization are outside this branch.
 The UI generates a UUID once per create dialog and reuses it on retries, including
 an ambiguous network failure after a successful write. Repeated deletion of the
 same collection/version is safe. A foreign/deleted destination returns 404;
-invalid input returns 400; duplicate names, stale writes, default protection and
+invalid input returns 400; duplicate names, stale writes and
 limits return 409. Existing place route logical IDs remain unchanged in
 CloudFormation; collection routes are appended and receive a separate, path-scoped Lambda invocation permission.
 

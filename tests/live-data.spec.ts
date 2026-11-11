@@ -172,8 +172,9 @@ for (const mobile of [false, true])
       await expect(
         page.getByRole('button', { name: 'Open in Google Maps', exact: true }),
       ).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Copy Link', exact: true })).toHaveCSS('white-space', 'nowrap')
     await page
-      .getByRole('button', { name: 'Copy private link', exact: true })
+      .getByRole('button', { name: 'Copy Link', exact: true })
       .click()
     await expect(page.locator('.notice-toast')).toContainText(
       'Only your account',
@@ -242,7 +243,7 @@ test('cloud entry accepts Instagram links and never resolves sample names as rea
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(field).toHaveAttribute('aria-invalid', 'true')
   await expect(page.getByRole('dialog')).toContainText(
-    'Direct place search is not available yet',
+    'Use Place search to add a place by name or address',
   )
   await expect(page.locator('.resolved-place')).toHaveCount(0)
 })

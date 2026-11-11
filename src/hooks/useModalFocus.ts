@@ -1,15 +1,19 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /** Trap keyboard focus while a modal is open and restore its launch control on close. */
 export function useModalFocus(open: boolean, onClose: () => void) {
   const ref = useRef<HTMLDivElement>(null)
+  // Capture before the commit marks the launch control’s container inert.
+  const [launchControl] = useState<HTMLElement | null>(() =>
+    open ? document.activeElement as HTMLElement | null : null,
+  )
   const closeRef = useRef(onClose)
   useEffect(() => {
     closeRef.current = onClose
   }, [onClose])
   useEffect(() => {
     if (!open) return
-    const previous = document.activeElement as HTMLElement | null
+    const previous = launchControl ?? document.activeElement as HTMLElement | null
     const root = ref.current
     const focusables = () =>
       [
@@ -39,8 +43,10 @@ export function useModalFocus(open: boolean, onClose: () => void) {
     document.addEventListener('keydown', handler)
     return () => {
       document.removeEventListener('keydown', handler)
-      previous?.focus()
+      queueMicrotask(() => {
+        if (previous?.isConnected && !previous.closest('[inert]')) previous.focus()
+      })
     }
-  }, [open])
+  }, [open, launchControl])
   return ref
 }

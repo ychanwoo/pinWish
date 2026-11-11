@@ -181,3 +181,33 @@ test('download URLs cannot target arbitrary hosts or internal services', () => {
     'https://upload.wikimedia.org/wikipedia/commons/a.jpg',
   )
 })
+
+test('verified entity representative photo does not need venue words in its filename', async () => {
+  const { discoverPhoto } = require('../../backend/photo-discovery.cjs')
+  let commonsTitles = ''
+  const fetcher = async (url) => {
+    const u = new URL(url), q = u.searchParams
+    let data
+    if (u.hostname === 'www.wikidata.org') data = { entities: { Q123: { claims: { P18: [{ rank: 'normal', mainsnak: { datavalue: { value: 'Campus library.jpg' } } }] } } } }
+    else if (u.hostname === 'commons.wikimedia.org') {
+      commonsTitles = q.get('titles')
+      data = { query: { pages: { 2: { title: 'File:Campus library.jpg', imageinfo: [{ mime: 'image/jpeg', width: 1024, height: 771, url: 'https://upload.wikimedia.org/wikipedia/commons/a/ab/Campus_library.jpg', descriptionurl: 'https://commons.wikimedia.org/wiki/File:Campus_library.jpg', extmetadata: { LicenseShortName: { value: 'Public domain' }, Artist: { value: 'Photographer' } } }] } } } }
+    } else data = { query: { pages: { 1: { pageid: 1, title: 'California State University, San Marcos', coordinates: [{ lat: 33.1283, lon: -117.1594 }], ...(q.get('prop').includes('images') ? { images: [{ title: 'File:Seal.svg' }], pageprops: { wikibase_item: 'Q123' } } : {}) } } } }
+    return new Response(JSON.stringify(data))
+  }
+  const found = await discoverPhoto({ name: 'California State University San Marcos', coordinates: { latitude: 33.129, longitude: -117.159 } }, { fetcher })
+  assert.equal(found.articleTitle, 'California State University, San Marcos')
+  assert.equal(found.license, 'Public domain')
+  assert.ok(commonsTitles.includes('File:Campus library.jpg'))
+})
+
+test('old negative lookup is retried once after discovery upgrade, current failures remain cached', async () => {
+  const f = fixture({ discovery: false })
+  f.item.photoLookup = { status: 'not_found', retryAt: Date.now() + 86400000 }
+  await f.photos.ensure(key)
+  assert.equal(f.jobs.length, 1)
+  await f.photos.process(key, f.jobs[0].jobId)
+  assert.equal(f.item.photoLookup.discoveryVersion, 2)
+  await f.photos.ensure(key)
+  assert.equal(f.jobs.length, 1)
+})

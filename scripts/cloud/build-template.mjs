@@ -36,7 +36,9 @@ const template = {
         'http://localhost:5173,http://127.0.0.1:5173,http://127.0.0.1:5175',
     },
   },
-  Conditions: { RuntimeOn: { 'Fn::Equals': [ref('RuntimeEnabled'), 'true'] } },
+  Conditions: {
+    RuntimeOn: { 'Fn::Equals': [ref('RuntimeEnabled'), 'true'] },
+  },
   Resources: {
     Photos: {
       Type: 'AWS::S3::Bucket',
@@ -239,6 +241,11 @@ const template = {
                 },
                 {
                   Effect: 'Allow',
+                  Action: 'dynamodb:GetItem',
+                  Resource: arn('Jobs'),
+                },
+                {
+                  Effect: 'Allow',
                   Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
                   Resource: sub('${Photos.Arn}/photos/*'),
                 },
@@ -273,7 +280,11 @@ const template = {
         MemorySize: 512,
         Timeout: 60,
         Environment: {
-          Variables: { TABLE_NAME: ref('Places'), PHOTO_BUCKET: ref('Photos') },
+          Variables: {
+            TABLE_NAME: ref('Places'),
+            PHOTO_BUCKET: ref('Photos'),
+            JOBS_TABLE: ref('Jobs'),
+          },
         },
         Code: { ZipFile: bundle.outputFiles[0].text },
       },
@@ -334,7 +345,9 @@ const template = {
         Action: 'lambda:InvokeFunction',
         FunctionName: ref('Storage'),
         Principal: 'apigateway.amazonaws.com',
-        SourceArn: sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/*/collections*'),
+        SourceArn: sub(
+          'arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/*/collections*',
+        ),
       },
     },
     Permission: {
@@ -374,7 +387,10 @@ Object.assign(template.Resources, {
         { AttributeName: 'pk', KeyType: 'HASH' },
         { AttributeName: 'sk', KeyType: 'RANGE' },
       ],
-      TimeToLiveSpecification: { AttributeName: 'expiresAt', Enabled: true },
+      TimeToLiveSpecification: {
+        AttributeName: 'expiresAt',
+        Enabled: true,
+      },
       SSESpecification: { SSEEnabled: true },
     },
   },

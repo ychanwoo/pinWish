@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-11-11T19:43:52.209Z",
+  "passed": true,
+  "checks": [
+    "English name/address search returns the intended Pasadena venue",
+    "Foreign-account and search-only job IDs cannot authorize a save",
+    "Save, reload, duplicate preservation and user isolation pass without an Instagram source",
+    "Korean overseas query is preserved and returns English Griffith Observatory results",
+    "Existing visited and delete actions work for directly saved places"
+  ],
+  "cleanupErrors": [],
+  "temporaryUsersDeleted": 2,
+  "note": "Real AWS API validation; frontend layout is validated separately with browser fixtures."
+}

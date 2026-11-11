@@ -43,10 +43,11 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
   }
   const active = (catalog) =>
     Object.values(catalog.collections).filter((c) => !c.deleted)
-  const publicCollection = (c) => ({
+  const defaultId = (catalog) => catalog.defaultCollectionId ?? DEFAULT_ID
+  const publicCollection = (c, catalog) => ({
     id: c.id,
     name: c.name,
-    isDefault: c.id === DEFAULT_ID,
+    isDefault: c.id === defaultId(catalog),
     version: c.version,
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
@@ -131,7 +132,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
       catalog.aliases[aliasKey(place.collection ?? 'Saved places')] ??
       DEFAULT_ID
     const found = validId(id) ? catalog.collections[id] : undefined
-    return found && !found.deleted ? found : catalog.collections[DEFAULT_ID]
+    return found && !found.deleted ? found : catalog.collections[defaultId(catalog)]
   }
   function present(catalog, place) {
     const c = resolve(catalog, place)
@@ -175,7 +176,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
       if (previous) {
         if (previous.deleted || previous.name !== name)
           fail(409, 'collection_conflict')
-        return publicCollection(previous)
+        return publicCollection(previous, catalog)
       }
       if (active(catalog).some((c) => normalize(c.name) === normalize(name)))
         fail(409, 'collection_name_exists')
@@ -187,7 +188,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
       const now = new Date().toISOString(),
         item = { id, name, version: 1, createdAt: now, updatedAt: now }
       catalog.collections[id] = item
-      return publicCollection(item)
+      return publicCollection(item, catalog)
     })
   }
   async function route(pk, method, id, body) {
@@ -197,7 +198,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
         data: await (async () => {
           const catalog = await ensure(pk)
           return {
-            items: active(catalog).map(publicCollection),
+            items: active(catalog).map(c => publicCollection(c, catalog)),
             version: catalog.version,
           }
         })(),
@@ -211,13 +212,12 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
     const result = await update(pk, (catalog) => {
       const current = catalog.collections[id]
       if (!current) fail(404, 'collection_not_found')
-      if (id === DEFAULT_ID) fail(409, 'default_collection_protected')
       if (
         method === 'DELETE' &&
         current.deleted &&
         body.version === current.version - 1
       )
-        return { deleted: true, defaultCollectionId: DEFAULT_ID }
+        return { deleted: true, defaultCollectionId: defaultId(catalog), defaultCollection: publicCollection(catalog.collections[defaultId(catalog)], catalog) }
       if (current.deleted) fail(404, 'collection_not_found')
       if (current.version !== body.version) fail(409, 'collection_conflict')
       if (method === 'PATCH') {
@@ -229,12 +229,23 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
         )
           fail(409, 'collection_name_exists')
         current.name = name
-      } else current.deleted = true
+      } else {
+        current.deleted = true
+        if (id === defaultId(catalog)) {
+          let fallback = active(catalog)[0]
+          if (!fallback) {
+            const now = new Date().toISOString()
+            fallback = { id: randomUUID(), name: 'Saved places', version: 1, createdAt: now, updatedAt: now }
+            catalog.collections[fallback.id] = fallback
+          }
+          catalog.defaultCollectionId = fallback.id
+        }
+      }
       current.version++
       current.updatedAt = new Date().toISOString()
       return method === 'PATCH'
-        ? { item: publicCollection(current) }
-        : { deleted: true, defaultCollectionId: DEFAULT_ID }
+        ? { item: publicCollection(current, catalog) }
+        : { deleted: true, defaultCollectionId: defaultId(catalog), defaultCollection: publicCollection(catalog.collections[defaultId(catalog)], catalog) }
     })
     return { status: 200, data: result }
   }
@@ -262,7 +273,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
           (c) => normalize(c.name) === normalize(name),
         )
       }
-    } else collection = catalog.collections[DEFAULT_ID]
+    } else collection = catalog.collections[defaultId(catalog)]
     if (!collection) fail(409, 'collection_conflict')
     return { catalog, collection }
   }
