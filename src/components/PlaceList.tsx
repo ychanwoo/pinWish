@@ -201,7 +201,7 @@ export function PlaceList({
                       : place.kind}
                 </p>
                 <span
-                  className={`place-badge ${place.badge === 'Must try' ? 'warm' : ''}`}
+                  className={`place-badge ${place.badge === 'Visited' ? 'is-visited' : place.badge === 'Must try' ? 'warm' : ''}`}
                 >
                   {place.badge === 'Visited' && <Icon name="6c92f" />}
                   {place.badge}
@@ -216,7 +216,7 @@ export function PlaceList({
                 <Icon name="faf82" />
               </button>
               <span
-                className={`desktop-visited ${place.visited ? '' : 'warm'}`}
+                className={`desktop-visited ${place.visited ? 'is-visited' : 'warm'}`}
               >
                 {place.visited ? 'Visited' : 'Unvisited'}
               </span>

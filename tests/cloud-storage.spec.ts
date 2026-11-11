@@ -447,7 +447,7 @@ test('remembered login survives a new browser context while expired credentials 
     await setup(next, [record])
     await next.goto('http://127.0.0.1:5176/')
     await expect(next.locator('.place-card-title')).toContainText('Museum')
-    await next.route('https://storage.example.test/**', (r) =>
+    await next.route('https://storage.example.test/places', (r) =>
       r.fulfill({ status: 401, json: { code: 'unauthorized' } }),
     )
     await next
@@ -467,7 +467,7 @@ test('temporary API throttling retries without losing the session', async ({
 }) => {
   await setup(page, [record])
   let calls = 0
-  await page.route('https://storage.example.test/**', (r) =>
+  await page.route('https://storage.example.test/places', (r) =>
     ++calls === 1
       ? r.fulfill({ status: 429, json: { code: 'throttled' } })
       : r.fulfill({ json: { items: [record], cursor: null } }),

@@ -1,7 +1,18 @@
-import { readFile, mkdir, writeFile } from 'node:fs/promises'
+import { build } from 'esbuild'
+import { mkdir, writeFile } from 'node:fs/promises'
 const ref = (Ref) => ({ Ref })
 const arn = (name) => ({ 'Fn::GetAtt': [name, 'Arn'] })
 const sub = (text) => ({ 'Fn::Sub': text })
+const bundle = await build({
+  entryPoints: ['backend/storage.cjs'],
+  bundle: true,
+  platform: 'node',
+  target: 'node22',
+  format: 'cjs',
+  minify: true,
+  write: false,
+  external: ['@aws-sdk/*'],
+})
 const template = {
   AWSTemplateFormatVersion: '2010-09-09',
   Description: 'PinWish authenticated place storage (development)',
@@ -18,6 +29,71 @@ const template = {
     },
   },
   Resources: {
+    Photos: {
+      Type: 'AWS::S3::Bucket',
+      DeletionPolicy: 'Retain',
+      UpdateReplacePolicy: 'Retain',
+      Properties: {
+        PublicAccessBlockConfiguration: {
+          BlockPublicAcls: true,
+          IgnorePublicAcls: true,
+          BlockPublicPolicy: true,
+          RestrictPublicBuckets: true,
+        },
+        OwnershipControls: {
+          Rules: [{ ObjectOwnership: 'BucketOwnerEnforced' }],
+        },
+        BucketEncryption: {
+          ServerSideEncryptionConfiguration: [
+            { ServerSideEncryptionByDefault: { SSEAlgorithm: 'AES256' } },
+          ],
+        },
+        LifecycleConfiguration: {
+          Rules: [
+            {
+              Id: 'AbortIncompleteUploads',
+              Status: 'Enabled',
+              AbortIncompleteMultipartUpload: { DaysAfterInitiation: 1 },
+            },
+          ],
+        },
+      },
+    },
+    PhotoPolicy: {
+      Type: 'AWS::S3::BucketPolicy',
+      Properties: {
+        Bucket: ref('Photos'),
+        PolicyDocument: {
+          Version: '2012-10-17',
+          Statement: [
+            {
+              Effect: 'Deny',
+              Principal: '*',
+              Action: 's3:*',
+              Resource: [arn('Photos'), sub('${Photos.Arn}/*')],
+              Condition: { Bool: { 'aws:SecureTransport': 'false' } },
+            },
+          ],
+        },
+      },
+    },
+    PhotoCleanup: {
+      Type: 'AWS::Events::Rule',
+      Properties: {
+        ScheduleExpression: 'rate(1 day)',
+        State: 'ENABLED',
+        Targets: [{ Arn: arn('Storage'), Id: 'PhotoCleanup' }],
+      },
+    },
+    PhotoCleanupPermission: {
+      Type: 'AWS::Lambda::Permission',
+      Properties: {
+        FunctionName: ref('Storage'),
+        Action: 'lambda:InvokeFunction',
+        Principal: 'events.amazonaws.com',
+        SourceArn: arn('PhotoCleanup'),
+      },
+    },
     MapKey: {
       Type: 'AWS::Location::APIKey',
       Properties: {
@@ -129,6 +205,13 @@ const template = {
               Statement: [
                 {
                   Effect: 'Allow',
+                  Action: 'lambda:InvokeFunction',
+                  Resource: sub(
+                    'arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-storage',
+                  ),
+                },
+                {
+                  Effect: 'Allow',
                   Action: [
                     'dynamodb:GetItem',
                     'dynamodb:PutItem',
@@ -136,6 +219,17 @@ const template = {
                     'dynamodb:DeleteItem',
                   ],
                   Resource: arn('Places'),
+                },
+                {
+                  Effect: 'Allow',
+                  Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+                  Resource: sub('${Photos.Arn}/photos/*'),
+                },
+                {
+                  Effect: 'Allow',
+                  Action: 's3:ListBucket',
+                  Resource: arn('Photos'),
+                  Condition: { StringLike: { 's3:prefix': 'photos/*' } },
                 },
                 {
                   Effect: 'Allow',
@@ -156,10 +250,12 @@ const template = {
         Runtime: 'nodejs22.x',
         Handler: 'index.handler',
         Role: arn('Role'),
-        MemorySize: 128,
-        Timeout: 15,
-        Environment: { Variables: { TABLE_NAME: ref('Places') } },
-        Code: { ZipFile: await readFile('backend/storage.cjs', 'utf8') },
+        MemorySize: 512,
+        Timeout: 60,
+        Environment: {
+          Variables: { TABLE_NAME: ref('Places'), PHOTO_BUCKET: ref('Photos') },
+        },
+        Code: { ZipFile: bundle.outputFiles[0].text },
       },
     },
     Api: {
@@ -224,6 +320,7 @@ const template = {
     },
   },
   Outputs: {
+    PhotoBucketName: { Value: ref('Photos') },
     MapKeyName: { Value: ref('MapKey') },
     ApiUrl: {
       Value: sub('https://${Api}.execute-api.${AWS::Region}.amazonaws.com'),
@@ -240,6 +337,7 @@ for (const [i, route] of [
   'GET /places/{id}',
   'PATCH /places/{id}',
   'DELETE /places/{id}',
+  'GET /places/{id}/photo',
 ].entries())
   template.Resources[`Route${i}`] = {
     Type: 'AWS::ApiGatewayV2::Route',
@@ -252,8 +350,5 @@ for (const [i, route] of [
     },
   }
 await mkdir('infra/generated', { recursive: true })
-await writeFile(
-  'infra/generated/storage.json',
-  JSON.stringify(template, null, 2) + '\n',
-)
+await writeFile('infra/generated/storage.json', JSON.stringify(template) + '\n')
 console.log('Built infra/generated/storage.json')

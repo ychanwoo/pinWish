@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { forgetPhoto, prefetchPhotos } from './lib/place-photo'
 const LiveMap = lazy(() => import('./components/LiveMap'))
 import { AuthModal } from './components/AuthModal'
 import {
@@ -182,6 +183,11 @@ function App() {
     }
     if (session?.sub) void loadPlaces()
   }, [session?.sub, loadPlaces])
+  const photoIds = session?.sub ? places.filter(p => p.saved && p.collection === collection).slice(0,12).map(p=>p.id).join('|') : ''
+  useEffect(() => {
+    if (!photoIds) return
+    return prefetchPhotos(photoIds.split('|'))
+  }, [photoIds, session?.sub])
   const changeCollection = (name: string) => {
     setCollection(name)
     setCategory('All')
@@ -498,6 +504,7 @@ function App() {
                     badge: selected.visited ? 'Must try' : 'Visited',
                   })
                 }
+                onPhotoUpdated={(saved) => setPlaces(items => items.map(p => p.id === saved.id && (p.saved?.version ?? 0) <= saved.version ? toUIPlace(saved) : p))}
                 onShare={() => void share(selected)}
                 onDirections={() => directions(selected)}
                 onNote={async (note) => updatePlace(selected, { note })}
@@ -506,6 +513,7 @@ function App() {
                     ? async () => {
                         if (!selected.saved) return
                         await deleteSaved(selected.saved)
+                        forgetPhoto(selected.id)
                         setPlaces((items) =>
                           items.filter((p) => p.id !== selected.id),
                         )

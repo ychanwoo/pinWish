@@ -1,3 +1,4 @@
+import type { CoverPhoto } from './place-photo'
 import { visiblePlaceText } from './place-name'
 import {
   accessToken,
@@ -15,6 +16,7 @@ export interface SavedSource {
   evidence: string
 }
 export interface SavedPlace {
+  coverPhoto?: CoverPhoto
   id: string
   provider: string
   placeId: string
@@ -35,6 +37,8 @@ export interface SavedPlace {
   sources: Record<string, SavedSource>
 }
 const errors: Record<string, string> = {
+  photo_not_found: 'Photo unavailable. Please retry later.',
+  photos_unavailable: 'Photos are temporarily unavailable. Please retry.',
   conflict:
     'This place changed in another session. Refresh your places and try again.',
   unauthorized: 'Your session expired. Please sign in again.',
@@ -121,7 +125,11 @@ export const deleteSaved = (place: SavedPlace) =>
 export function toUIPlace(item: SavedPlace): import('../data/places').Place {
   return {
     id: item.id,
-    name: visiblePlaceText(item.displayName, item.countryCode, visiblePlaceText(item.name, item.countryCode)),
+    name: visiblePlaceText(
+      item.displayName,
+      item.countryCode,
+      visiblePlaceText(item.name, item.countryCode),
+    ),
     kind: item.placeType === 'PointOfInterest' ? 'Saved place' : item.placeType,
     district: item.countryName,
     category: 'Other',
