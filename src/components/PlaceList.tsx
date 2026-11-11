@@ -41,6 +41,7 @@ export function PlaceList({
   onNewCollection,
 }: Props) {
   const [sort, setSort] = useState('recent')
+  const hasFilters = Boolean(search.trim()) || category !== 'All' || onlyUnvisited
   const filtered = places.filter(
     (p) =>
       (category === 'All' || p.category === category) &&
@@ -244,34 +245,29 @@ export function PlaceList({
         ))}
         {!visible.length && (
           <div className="no-results">
-            <h2>{search ? 'No matching places' : 'No places here yet'}</h2>
+            <h2>{hasFilters ? 'No matching places' : 'No places here yet'}</h2>
             <p>
-              {search
+              {hasFilters
                 ? 'Try another place name or clear your filters.'
                 : 'Save somewhere worth going.'}
             </p>
-            <button
-              className="secondary"
-              onClick={() => {
-                onSearch('')
-                setCategory('All')
-                setOnlyUnvisited(false)
-              }}
-            >
-              Clear filters
-            </button>
-            <button className="primary" onClick={onSave}>
-              Save a place
-            </button>
+            {hasFilters && (
+              <button
+                className="secondary"
+                onClick={() => {
+                  onSearch('')
+                  setCategory('All')
+                  setOnlyUnvisited(false)
+                }}
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         )}
       </div>
       <footer className="list-footer">
         <span>Saved to {collection}</span>
-        <button onClick={onSave}>
-          <Icon name="4fe93" />
-          Add pin
-        </button>
       </footer>
     </section>
   )

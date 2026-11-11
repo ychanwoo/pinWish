@@ -94,7 +94,7 @@ test('closing and reopening preserves the draft', async ({ page }, info) => {
     .click()
   await page
     .getByRole('button', {
-      name: info.project.name === 'mobile' ? 'Save a place' : 'Add pin',
+      name: 'Save a place',
       exact: true,
     })
     .click()
@@ -313,7 +313,7 @@ test('real Instagram posts never resolve to demo places and retain the draft', a
   await expect(page.getByRole('link', { name: 'Open original Instagram post' })).toHaveAttribute('href', 'https://www.instagram.com/p/De1gmWjkwEd/')
   await expect(input).toHaveValue(link)
   await page.getByRole('button', { name: info.project.name === 'mobile' ? 'Back to places' : 'Close save dialog', exact: true }).click()
-  await page.getByRole('button', { name: info.project.name === 'mobile' ? 'Save a place' : 'Add pin', exact: true }).click()
+  await page.getByRole('button', { name: 'Save a place', exact: true }).click()
   await expect(input).toHaveValue(link)
   await expect(page.getByRole('alert')).toContainText('Instagram import is not connected yet')
 })
@@ -324,4 +324,28 @@ test('unrelated hosts cannot trigger sample place matching', async ({ page }) =>
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('Use a link from instagram.com')
   await expect(page.locator('.resolved-place')).toHaveCount(0)
+})
+
+test('desktop menu collapses and restores collections without losing the selected place', async ({page}, info) => {
+  test.skip(info.project.name !== 'desktop', 'Desktop navigation')
+  await page.goto('/?view=detail')
+  const title = await page.locator('#place-heading').innerText()
+  const sidebar = page.locator('#collection-sidebar')
+  for (const width of [1280, 900]) {
+    await page.setViewportSize({width,height:1024})
+    const before = await page.locator('.workspace').boundingBox()
+    await page.getByRole('button',{name:'Hide collections',exact:true}).click()
+    await expect(sidebar).toBeHidden()
+    await expect(page.getByRole('button',{name:'Show collections',exact:true})).toHaveAttribute('aria-expanded','false')
+    await expect(page.locator('#place-heading')).toHaveText(title)
+    const after = await page.locator('.workspace').boundingBox()
+    expect(after!.width).toBeGreaterThan(before!.width)
+    await page.getByRole('button',{name:'Show collections',exact:true}).focus()
+    await page.keyboard.press('Enter')
+    await expect(sidebar).toBeVisible()
+  }
+  await page.getByRole('button',{name:'Hide collections',exact:true}).click()
+  await page.getByRole('button',{name:'Search places',exact:true}).click()
+  await expect(sidebar).toBeVisible()
+  await expect(page.locator('#sidebar-search')).toBeFocused()
 })

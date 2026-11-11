@@ -122,7 +122,7 @@ test('closing lookup cancels stale results and reopening resumes the draft', asy
   await page.getByRole('button', { name: 'Close save dialog' }).click()
   release()
   await expect(page.getByRole('dialog')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Add pin', exact: true }).click()
+  await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await expect(
     page.getByRole('region', { name: 'Extracted place candidates' }),
   ).toContainText(a.address)
