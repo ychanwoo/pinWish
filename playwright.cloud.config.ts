@@ -5,6 +5,7 @@ export default defineConfig({
     'cloud-storage.spec.ts',
     'place-photos.spec.ts',
     'collections.spec.ts',
+    'sharing.spec.ts',
     'live-data.spec.ts',
   ],
   outputDir: 'test-results/cloud',
