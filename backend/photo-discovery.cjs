@@ -186,9 +186,26 @@ async function discoverPhoto(place, { fetcher = fetch } = {}) {
   {
     const entries = await api('en.wikipedia.org', {
       pageids: String(matched.pageid),
-      prop: 'images',
+      prop: 'images|pageprops',
+      ppprop: 'wikibase_item',
       imlimit: '50',
     })
+    // P18 belongs to the name-and-coordinate verified entity, so its filename
+    // need not repeat the venue name (campus/library photos often do not).
+    const entityId = entries[0]?.pageprops?.wikibase_item
+    if (/^Q[0-9]+$/.test(entityId ?? '')) {
+      const data = JSON.parse((await boundedFetch(
+        'https://www.wikidata.org/w/api.php?' + new URLSearchParams({
+          action: 'wbgetentities', format: 'json', ids: entityId, props: 'claims',
+        }), 2_000_000, fetcher,
+      )).toString())
+      const images = (data.entities?.[entityId]?.claims?.P18 ?? [])
+        .filter(c => c.rank !== 'deprecated')
+        .map(c => c.mainsnak?.datavalue?.value)
+        .filter(v => typeof v === 'string' && /\.jpe?g$/i.test(v) && !v.includes('|'))
+        .slice(0, 3)
+      titles.push(...images.map(name => 'File:' + name))
+    }
     titles = [
       ...titles,
       ...(entries[0]?.images ?? [])
@@ -203,6 +220,7 @@ async function discoverPhoto(place, { fetcher = fetch } = {}) {
         .slice(0, 5),
     ]
   }
+  titles = [...new Set(titles)]
   if (!titles.length) return null
   const files = await api('commons.wikimedia.org', {
     titles: titles.join('|'),

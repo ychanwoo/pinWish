@@ -13,6 +13,7 @@ const {
   boundedFetch,
   imageUrl,
 } = require('./photo-discovery.cjs')
+const DISCOVERY_VERSION = 2
 const MAX_BYTES = 2 * 1024 * 1024
 const publicItem = ({ pk: _pk, sk: _sk, ...item }) => item
 function createPhotos({
@@ -40,14 +41,15 @@ function createPhotos({
     if (
       !bucket ||
       item.coverPhoto ||
-      (item.photoLookup?.retryAt ?? 0) > Date.now()
+      ((item.photoLookup?.retryAt ?? 0) > Date.now() &&
+        !(item.photoLookup?.status === 'not_found' && item.photoLookup?.discoveryVersion !== DISCOVERY_VERSION))
     )
       return item
     if (!functionName) return item
     const jobId = randomUUID()
     const pending = {
       ...item,
-      photoLookup: { status: 'pending', jobId, retryAt: Date.now() + 120000 },
+      photoLookup: { status: 'pending', jobId, discoveryVersion: DISCOVERY_VERSION, retryAt: Date.now() + 120000 },
       version: item.version + 1,
     }
     try {
@@ -143,6 +145,7 @@ function createPhotos({
         ...(photo ? { coverPhoto: photo } : {}),
         photoLookup: {
           status,
+          discoveryVersion: DISCOVERY_VERSION,
           retryAt: Date.now() + (status === 'unavailable' ? 300000 : 86400000),
         },
         version: latest.version + 1,
