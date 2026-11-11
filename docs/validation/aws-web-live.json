@@ -1,0 +1,129 @@
+{
+  "testedAt": "2026-11-11T04:50:38.078Z",
+  "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+  "checks": [
+    "Real Cognito sign-in on HTTPS Amplify origin",
+    "Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs",
+    "Cross-account job and saved-place isolation",
+    "Session and 10 saved places survive reload; sidebar toggle preserves layout",
+    "Automatic representative photo renders without upload",
+    "Mobile detail has no horizontal overflow; no uncaught browser errors"
+  ],
+  "errors": [],
+  "jobs": [
+    {
+      "operation": "import"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    },
+    {
+      "operation": "search"
+    },
+    {
+      "operation": "details"
+    }
+  ],
+  "temporaryAccountsRemaining": 0,
+  "jobUserPartitionsRemaining": 0,
+  "orphanPlaceRecords": 0,
+  "orphanPhotoObjects": 0,
+  "automatedChecks": {
+    "unit": 79,
+    "desktopMobileUI": 25,
+    "cloudStoragePhotos": 18,
+    "instagramImport": 13,
+    "map": 3,
+    "processing": 3,
+    "skippedPlatformSpecific": 3
+  },
+  "build": "passed",
+  "lint": "passed",
+  "automaticPause": {
+    "verifiedAt": "2026-11-11T04:56:44.723Z",
+    "mapPaused": true,
+    "cleanupState": "DISABLED",
+    "hostingPaused": true,
+    "apiDisabled": true,
+    "workers": {
+      "storage": 0,
+      "processing": 0,
+      "worker": 0
+    },
+    "autoPause": {
+      "state": "ENABLED",
+      "expression": "at(2026-11-11T04:54:50)"
+    },
+    "staticPageNoJavaScript": true
+  },
+  "finalState": {
+    "verifiedAt": "2026-11-11T04:58:19.575Z",
+    "mapPaused": true,
+    "cleanupState": "DISABLED",
+    "hostingPaused": true,
+    "apiDisabled": true,
+    "workers": {
+      "storage": 0,
+      "processing": 0,
+      "worker": 0
+    },
+    "autoPause": {
+      "state": "DISABLED",
+      "expression": "at(2026-11-11T04:54:50)"
+    }
+  }
+}
