@@ -134,3 +134,11 @@ Wikimedia API requests need no API key. Coverage is not equivalent to Google
 Places Photos. Do not promise a photo for every business. Negative results retry
 after one day, transient failures after five minutes, pending leases after two
 minutes. No provider access failure is reported as a successful photo lookup.
+
+### Collection catalog
+
+The storage Lambda also serves authenticated `GET/POST /collections` and
+`PATCH/DELETE /collections/{id}`. It stores a versioned per-user catalog in the
+existing Places table; no new table or always-on service is required. The IAM role
+adds `dynamodb:ConditionCheckItem` for transactional place writes. See
+[the collection design and migration notes](../docs/persistent-collections.md).
