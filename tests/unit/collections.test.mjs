@@ -209,7 +209,7 @@ test('moving a place preserves metadata, increments version, and cannot target f
   )
 })
 
-test('collection operations enforce authentication, owner isolation and default protection', async () => {
+test('collection operations enforce authentication, owner isolation', async () => {
   const { handler } = setup(),
     trip = await create(handler)
   assert.equal(
@@ -235,19 +235,7 @@ test('collection operations enforce authentication, owner isolation and default 
       ).statusCode,
       404,
     )
-    assert.equal(
-      (
-        await handler(
-          collectionEvent(
-            method,
-            { version: 1, name: 'Changed' },
-            'user-a',
-            'default',
-          ),
-        )
-      ).statusCode,
-      409,
-    )
+
   }
   assert.deepEqual(
     parsed(await handler(collectionEvent('GET', null, 'user-b'))).items.map(
@@ -313,4 +301,26 @@ test('foreign cursors cannot enumerate collections; collection rows never appear
       .statusCode,
     400,
   )
+})
+
+
+test('default collections can be renamed and deleted without losing places, including the last collection', async () => {
+  const { handler } = setup()
+  const saved = parsed(await handler(event('POST', { place, note: 'Keep me', collectionId: 'default' }))).item
+  const renamed = await handler(collectionEvent('PATCH', { version: 1, name: 'Campus' }, 'user-a', 'default'))
+  assert.equal(renamed.statusCode, 200)
+  const trip = await create(handler)
+  const removed = parsed(await handler(collectionEvent('DELETE', { version: 2 }, 'user-a', 'default')))
+  assert.equal(removed.defaultCollection.id, trip.id)
+  assert.equal(removed.defaultCollection.isDefault, true)
+  assert.equal(parsed(await handler(event('GET', null, 'user-a', saved.id))).item.collectionId, trip.id)
+  const last = parsed(await handler(collectionEvent('DELETE', { version: trip.version }, 'user-a', trip.id)))
+  assert.notEqual(last.defaultCollection.id, trip.id)
+  assert.equal(last.defaultCollection.name, 'Saved places')
+  const restored = parsed(await handler(event('GET', null, 'user-a', saved.id))).item
+  assert.equal(restored.collectionId, last.defaultCollection.id)
+  assert.equal(restored.note, 'Keep me')
+  const replay = parsed(await handler(collectionEvent('DELETE', { version: trip.version }, 'user-a', trip.id)))
+  assert.equal(replay.defaultCollection.id, last.defaultCollection.id)
+  assert.equal((await handler(collectionEvent('PATCH', { version: 1, name: 'Again' }, 'user-a', last.defaultCollection.id))).statusCode, 200)
 })
