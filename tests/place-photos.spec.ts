@@ -1,3 +1,4 @@
+import { collectionResponse } from './helpers/collection-fixture'
 import { test, expect, type Page } from '@playwright/test'
 import jpeg from 'jpeg-js'
 const photoBytes = jpeg.encode(
@@ -16,7 +17,8 @@ const record = {
   coordinates: { longitude: -118, latitude: 34 },
   placeType: 'PointOfInterest',
   note: '',
-  collection: 'LA weekend',
+  collection: 'Saved places',
+  collectionId: 'default',
   visited: false,
   bookmarked: true,
   version: 1,
@@ -59,6 +61,7 @@ async function setup(
     }),
   )
   await page.route('https://storage.example.test/**', (r) => {
+    if(new URL(r.request().url()).pathname === '/collections') return r.fulfill({json: collectionResponse})
     if (new URL(r.request().url()).pathname.endsWith('/photo')) {
       expect(r.request().method()).toBe('GET')
       requests++
@@ -78,7 +81,7 @@ async function setup(
         },
       })
     }
-    return r.fulfill({ json: { items: [record], cursor: null } })
+    return r.fulfill({ json: { items: [record], cursor: null, collectionVersion: 1 } })
   })
   await page.goto('/')
   await page

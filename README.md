@@ -80,8 +80,8 @@ Use `/?state=ready&scenario=save_error` to simulate one failed save followed by 
 
 Demo records and edits reset on reload and its map is an illustrative image.
 Cloud mode instead loads persisted records, synchronizes filters with real map
-pins, and persists note/bookmark/visited edits. Collections are not yet independent
-persisted entities, and copied private place URLs are not public sharing links.
+pins, and persists note/bookmark/visited edits. User-owned collections, including
+empty collections, persist in AWS. Copied private place URLs are not public sharing links.
 
 ## Browser checks
 
@@ -237,3 +237,10 @@ uses authenticated asynchronous AWS processing; it does not depend on a local
 Instagram API. Open a 60-minute test window with `npm run cloud:test:start`, and
 stop early with `npm run cloud:test:stop`. Paused storage may still incur charges.
 The top-left menu toggles the desktop collection sidebar; search reopens it.
+
+## Persistent collections
+
+Signed-in users can create empty collections, rename them, move saved places and
+delete collections without deleting their places. Collections survive refresh and
+sign-in. Existing collection names are migrated automatically; **Saved places** is
+the protected default. See [collection behavior, API and validation](docs/persistent-collections.md).

@@ -3,6 +3,8 @@ import type { Category, Place } from '../data/places'
 import { asset, inCollection, matchesPlace } from '../data/places'
 import { Icon } from './Icon'
 interface Props {
+  persistent?: boolean
+  onManageCollection?: () => void
   places: Place[]
   collections: string[]
   category: Category | 'All'
@@ -22,6 +24,8 @@ interface Props {
   onNewCollection: () => void
 }
 export function PlaceList({
+  persistent = false,
+  onManageCollection,
   places,
   collections,
   category,
@@ -41,7 +45,8 @@ export function PlaceList({
   onNewCollection,
 }: Props) {
   const [sort, setSort] = useState('recent')
-  const hasFilters = Boolean(search.trim()) || category !== 'All' || onlyUnvisited
+  const hasFilters =
+    Boolean(search.trim()) || category !== 'All' || onlyUnvisited
   const filtered = places.filter(
     (p) =>
       (category === 'All' || p.category === category) &&
@@ -61,7 +66,7 @@ export function PlaceList({
           <input
             aria-label="Search places"
             placeholder={
-              window.matchMedia('(min-width: 768px)').matches
+              !persistent && window.matchMedia('(min-width: 768px)').matches
                 ? 'Search places in LA...'
                 : 'Search saved places...'
             }
@@ -79,27 +84,34 @@ export function PlaceList({
         </div>
         <div className="mobile-collections">
           <div className="collection-chips">
-            <button
-              className={collection === 'LA weekend' ? 'active' : ''}
-              onClick={() => onCollection('LA weekend')}
-            >
-              <Icon name="c3cc4" />
-              LA weekend{collection === 'LA weekend' && <Icon name="9d316" />}
-            </button>
-            <button
-              className={collection === 'Coffee' ? 'active' : ''}
-              onClick={() => onCollection('Coffee')}
-            >
-              Coffee
-            </button>
-            <button
-              className={collection === 'Galleries' ? 'active' : ''}
-              onClick={() => onCollection('Galleries')}
-            >
-              Galleries
-            </button>
+            {!persistent && (
+              <>
+                <button
+                  className={collection === 'LA weekend' ? 'active' : ''}
+                  onClick={() => onCollection('LA weekend')}
+                >
+                  <Icon name="c3cc4" />
+                  LA weekend
+                  {collection === 'LA weekend' && <Icon name="9d316" />}
+                </button>
+                <button
+                  className={
+                    !persistent && collection === 'Coffee' ? 'active' : ''
+                  }
+                  onClick={() => onCollection('Coffee')}
+                >
+                  Coffee
+                </button>
+                <button
+                  className={collection === 'Galleries' ? 'active' : ''}
+                  onClick={() => onCollection('Galleries')}
+                >
+                  Galleries
+                </button>
+              </>
+            )}
             {collections
-              .filter((c) => c !== 'LA weekend')
+              .filter((c) => persistent || c !== 'LA weekend')
               .map((c) => (
                 <button
                   key={c}
@@ -122,15 +134,20 @@ export function PlaceList({
           <div>
             <Icon name="75e71" />
             <h1>
-              {collection === 'Coffee'
+              {!persistent && collection === 'Coffee'
                 ? 'Coffee & Roasters'
-                : collection === 'Galleries'
+                : !persistent && collection === 'Galleries'
                   ? 'Architecture Walks'
                   : collection}
             </h1>
           </div>
           <span className="count">{filtered.length} places</span>
         </div>
+        {onManageCollection && (
+          <button className="collection-manage" onClick={onManageCollection}>
+            Manage collection
+          </button>
+        )}
         <div className="category-tabs">
           {(['All', 'Coffee', 'Food', 'Culture'] as const).map((item) => (
             <button
@@ -159,7 +176,7 @@ export function PlaceList({
       </div>
       <div className="feed-heading">
         <div>
-          Saved in Los Angeles{' '}
+          {persistent ? collection : 'Saved in Los Angeles'}{' '}
           <span className="count">{filtered.length} places</span>
         </div>
         <select

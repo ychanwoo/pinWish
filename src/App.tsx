@@ -10,6 +10,12 @@ import {
 } from './lib/cloud-auth'
 import {
   listSaved,
+  listCollections,
+  createCollection,
+  renameCollection,
+  deleteCollection,
+  type SavedCollection,
+  type SavedPlace,
   saveConfirmed,
   patchSaved,
   deleteSaved,
@@ -39,7 +45,7 @@ import { PlaceDetail } from './components/PlaceDetail'
 import { SavePlace, type SaveDraft } from './components/SavePlace'
 import { ListState } from './components/ListState'
 import { Icon } from './components/Icon'
-import { useModalFocus } from './hooks/useModalFocus'
+import { CollectionDialog } from './components/CollectionDialog'
 import './styles/app.css'
 const params = new URLSearchParams(window.location.search)
 const views: View[] = [
@@ -78,12 +84,33 @@ function App() {
   const [category, setCategory] = useState<Category | 'All'>('All')
   const [onlyUnvisited, setOnlyUnvisited] = useState(false)
   const [collection, setCollection] = useState(
-    initialView === 'empty' ? 'Weekend ideas' : 'LA weekend',
+    cloudEnabled
+      ? 'Saved places'
+      : initialView === 'empty'
+        ? 'Weekend ideas'
+        : 'LA weekend',
   )
-  const [collections, setCollections] = useState([
-    'LA weekend',
-    'Weekend ideas',
-  ])
+  const [collections, setCollections] = useState(
+    cloudEnabled ? ['Saved places'] : ['LA weekend', 'Weekend ideas'],
+  )
+  const [catalog, setCatalog] = useState<SavedCollection[]>([])
+  const catalogRef = useRef(catalog)
+  useEffect(() => {
+    catalogRef.current = catalog
+  }, [catalog])
+  const canonicalPlace = (saved: SavedPlace) => {
+    const c =
+      catalogRef.current.find((c) => c.id === saved.collectionId) ??
+      (saved.collectionId
+        ? catalogRef.current.find((c) => c.isDefault)
+        : undefined)
+    return toUIPlace(
+      c ? { ...saved, collectionId: c.id, collection: c.name } : saved,
+    )
+  }
+  const [managedCollection, setManagedCollection] = useState<
+    SavedCollection | undefined
+  >()
   const [draft, setDraft] = useState<SaveDraft | null>(null)
   const draftOwner = useRef<string | null>(null)
   const keepDraft = (value: SaveDraft | null) => {
@@ -95,11 +122,6 @@ function App() {
   const [saveState, setSaveState] = useState<SaveState | null>(initialSave)
   const [notice, setNotice] = useState('')
   const [newCollection, setNewCollection] = useState(false)
-  const [newCollectionName, setNewCollectionName] = useState('')
-  const [collectionError, setCollectionError] = useState('')
-  const collectionDialog = useModalFocus(newCollection, () =>
-    setNewCollection(false),
-  )
   const loadPlaces = useCallback(async (next: string | null = null) => {
     if (!getSession()) return
     const owner = getSession()!.sub,
@@ -107,7 +129,13 @@ function App() {
     setCloudLoading(true)
     setCloudError('')
     try {
+      const collectionResult = await listCollections()
+      collectionResult.items.sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
       const result = await listSaved(next)
+      if (result.collectionVersion !== collectionResult.version)
+        throw new Error(
+          'Your collections changed while loading. Please refresh your places.',
+        )
       const seen = new Set<string>()
       while (result.cursor) {
         if (
@@ -119,43 +147,35 @@ function App() {
           throw new Error('Could not finish loading places. Please retry.')
         seen.add(result.cursor)
         const page = await listSaved(result.cursor)
+        if (page.collectionVersion !== collectionResult.version)
+          throw new Error(
+            'Your collections changed while loading. Please refresh your places.',
+          )
         result.items.push(...page.items)
         result.cursor = page.cursor
       }
-      if (
-        getSession()?.sub !== owner ||
-        generation !== loadGeneration.current
-      )
+      if (getSession()?.sub !== owner || generation !== loadGeneration.current)
         return
       const incoming = result.items.map(toUIPlace)
       setPlaces((previous) =>
         next
           ? [
-              ...previous.filter(
-                (p) => !incoming.some((i) => i.id === p.id),
-              ),
+              ...previous.filter((p) => !incoming.some((i) => i.id === p.id)),
               ...incoming,
             ]
           : incoming,
       )
-      setCollections((previous) => [
-        ...new Set([...previous, ...incoming.map((p) => p.collection)]),
-      ])
+      setCatalog(collectionResult.items)
+      setCollections(collectionResult.items.map((c) => c.name))
       setCursor(result.cursor)
-      if (!next && incoming.length)
-        setCollection((current) =>
-          incoming.some((p) => p.collection === current)
-            ? current
-            : incoming[0].collection,
-        )
-    } catch (e) {
-      if (
-        getSession()?.sub === owner &&
-        generation === loadGeneration.current
+      setCollection((current) =>
+        collectionResult.items.some((c) => c.name === current)
+          ? current
+          : 'Saved places',
       )
-        setCloudError(
-          e instanceof Error ? e.message : 'Could not load places.',
-        )
+    } catch (e) {
+      if (getSession()?.sub === owner && generation === loadGeneration.current)
+        setCloudError(e instanceof Error ? e.message : 'Could not load places.')
     } finally {
       if (generation === loadGeneration.current) setCloudLoading(false)
     }
@@ -166,7 +186,11 @@ function App() {
     loadGeneration.current++
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
-    setCollections(['LA weekend', 'Weekend ideas'])
+    setCollections(['Saved places'])
+    setCatalog([])
+    setCollection('Saved places')
+    setNewCollection(false)
+    setManagedCollection(undefined)
     setSelectedId('')
     setCursor(null)
     setCloudError('')
@@ -184,7 +208,13 @@ function App() {
     }
     if (session?.sub) void loadPlaces()
   }, [session?.sub, loadPlaces])
-  const photoIds = session?.sub ? places.filter(p => p.saved && p.collection === collection).slice(0,12).map(p=>p.id).join('|') : ''
+  const photoIds = session?.sub
+    ? places
+        .filter((p) => p.saved && p.collection === collection)
+        .slice(0, 12)
+        .map((p) => p.id)
+        .join('|')
+    : ''
   useEffect(() => {
     if (!photoIds) return
     return prefetchPhotos(photoIds.split('|'))
@@ -195,14 +225,39 @@ function App() {
     setOnlyUnvisited(false)
     setSearch('')
     const first = places.find((p) =>
-      name === 'Coffee'
+      !cloudEnabled && name === 'Coffee'
         ? p.category === 'Coffee'
-        : name === 'Galleries'
+        : !cloudEnabled && name === 'Galleries'
           ? p.category === 'Culture'
           : p.collection === name,
     )
     if (first) setSelectedId(first.id)
     setView('list')
+  }
+  const openNewCollection = () => {
+    if (cloudEnabled && !getSession()) {
+      setAuthReason('Sign in to create and keep your collections.')
+      setAuthOpen(true)
+      return
+    }
+    if (cloudEnabled && (!catalog.length || cloudLoading)) {
+      setNotice('Wait for your collections to load, then try again.')
+      return
+    }
+    setManagedCollection(undefined)
+    setNewCollection(true)
+  }
+  const currentCollection = catalog.find((c) => c.name === collection)
+  const manageCollection =
+    currentCollection && !currentCollection.isDefault
+      ? () => {
+          setManagedCollection(currentCollection)
+          setNewCollection(true)
+        }
+      : undefined
+  const requireOwner = (owner: string | undefined) => {
+    if (!owner || getSession()?.sub !== owner)
+      throw new Error('Your account changed. Please try again.')
   }
   const returnView = useRef<View>('list')
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -239,8 +294,18 @@ function App() {
         setNotice('Only confirmed cloud places can be updated.')
         return false
       }
+      const owner = getSession()?.sub
       try {
+        const target =
+          'collection' in changes
+            ? catalog.find((c) => c.name === changes.collection)
+            : undefined
+        if ('collection' in changes && !target)
+          throw new Error(
+            'This collection no longer exists. Refresh your places.',
+          )
         const allowed = {
+          ...(target ? { collectionId: target.id } : {}),
           ...('note' in changes ? { note: changes.note } : {}),
           ...('visited' in changes ? { visited: changes.visited } : {}),
           ...('bookmarked' in changes
@@ -248,14 +313,22 @@ function App() {
             : {}),
         }
         const result = await patchSaved(place.saved, allowed)
+        requireOwner(owner)
+        loadGeneration.current++
+        setCloudLoading(false)
         setPlaces((items) =>
-          items.map((p) =>
-            p.id === place.id ? toUIPlace(result.item) : p,
-          ),
+          items.map((p) => (p.id === place.id ? toUIPlace(result.item) : p)),
         )
+        if (target) {
+          setCollection(result.item.collection)
+          setCategory('All')
+          setSearch('')
+          setOnlyUnvisited(false)
+        }
         setNotice('Changes saved.')
         return true
       } catch (e) {
+        if (getSession()?.sub !== owner) return false
         setNotice(e instanceof Error ? e.message : 'Update failed.')
         return false
       }
@@ -317,7 +390,11 @@ function App() {
                     setDraft(null)
                     setSaveState(null)
                     setPlaces([])
-                    setCollections(['LA weekend', 'Weekend ideas'])
+                    setCollections(['Saved places'])
+                    setCatalog([])
+                    setCollection('Saved places')
+                    setNewCollection(false)
+                    setManagedCollection(undefined)
                     setSelectedId('')
                     setView('list')
                     void signOut()
@@ -347,7 +424,8 @@ function App() {
           view={view}
           places={places}
           collections={collections}
-          onNewCollection={() => setNewCollection(true)}
+          onNewCollection={openNewCollection}
+          persistent={cloudEnabled}
           onView={navigate}
           search={search}
           onSearch={setSearch}
@@ -398,9 +476,7 @@ function App() {
                   >
                     Refresh places
                   </button>
-                  {cloudLoading && (
-                    <p role="status">Loading your places…</p>
-                  )}
+                  {cloudLoading && <p role="status">Loading your places…</p>}
                   {cloudError && (
                     <p role="alert" className="field-error">
                       {cloudError}
@@ -436,7 +512,9 @@ function App() {
               onBookmark={bookmark}
               onShare={(p) => void share(p)}
               onDirections={directions}
-              onNewCollection={() => setNewCollection(true)}
+              onNewCollection={openNewCollection}
+              persistent={cloudEnabled}
+              onManageCollection={manageCollection}
             />
           )}
           {view.startsWith('list_') ? (
@@ -446,10 +524,7 @@ function App() {
               onMap={() => navigate('map')}
               onRetry={() => {
                 navigate('list_loading')
-                refreshTimer.current = setTimeout(
-                  () => navigate('list'),
-                  1000,
-                )
+                refreshTimer.current = setTimeout(() => navigate('list'), 1000)
               }}
             />
           ) : cloudEnabled ? (
@@ -499,6 +574,13 @@ function App() {
                 key={selected.id}
                 place={selected}
                 places={places}
+                collections={cloudEnabled ? collections : undefined}
+                onMove={
+                  cloudEnabled
+                    ? async (name) =>
+                        updatePlace(selected, { collection: name })
+                    : undefined
+                }
                 onClose={() => navigate(returnView.current)}
                 onBookmark={() => bookmark(selected)}
                 onVisited={() =>
@@ -507,7 +589,16 @@ function App() {
                     badge: selected.visited ? 'Must try' : 'Visited',
                   })
                 }
-                onPhotoUpdated={(saved) => setPlaces(items => items.map(p => p.id === saved.id && (p.saved?.version ?? 0) <= saved.version ? toUIPlace(saved) : p))}
+                onPhotoUpdated={(saved) =>
+                  setPlaces((items) =>
+                    items.map((p) =>
+                      p.id === saved.id &&
+                      (p.saved?.version ?? 0) <= saved.version
+                        ? canonicalPlace(saved)
+                        : p,
+                    ),
+                  )
+                }
                 onShare={() => void share(selected)}
                 onDirections={() => directions(selected)}
                 onNote={async (note) => updatePlace(selected, { note })}
@@ -515,7 +606,11 @@ function App() {
                   cloudEnabled
                     ? async () => {
                         if (!selected.saved) return
+                        const owner = getSession()?.sub
                         await deleteSaved(selected.saved)
+                        requireOwner(owner)
+                        loadGeneration.current++
+                        setCloudLoading(false)
                         forgetPhoto(selected.id)
                         setPlaces((items) =>
                           items.filter((p) => p.id !== selected.id),
@@ -532,10 +627,7 @@ function App() {
             <div className="mobile-empty">
               <h1>Weekend ideas</h1>
               <p>No places in this collection yet.</p>
-              <button
-                className="primary"
-                onClick={() => setSaveState('entry')}
-              >
+              <button className="primary" onClick={() => setSaveState('entry')}>
                 Save a place
               </button>
             </div>
@@ -564,9 +656,7 @@ function App() {
               >
                 Undo
               </button>
-              <button onClick={() => openDetail(selected)}>
-                View place
-              </button>
+              <button onClick={() => openDetail(selected)}>View place</button>
             </div>
           )}
         </main>
@@ -591,6 +681,13 @@ function App() {
           onPersist={
             cloudEnabled
               ? async (confirmed, note, targetCollection) => {
+                  const target = catalog.find(
+                    (c) => c.name === targetCollection,
+                  )
+                  if (!target)
+                    throw new Error(
+                      'This collection is no longer available. Close this dialog, refresh your places, and choose another collection.',
+                    )
                   if (!targetCollection.trim())
                     throw new Error('Enter a collection name.')
                   const owner = getSession()?.sub
@@ -601,19 +698,16 @@ function App() {
                   for (const [index, place] of confirmed.entries()) {
                     // Stay below the development API's two-request-per-second limit.
                     if (index > 0)
-                      await new Promise((resolve) =>
-                        setTimeout(resolve, 550),
-                      )
+                      await new Promise((resolve) => setTimeout(resolve, 550))
                     if (getSession()?.sub !== owner)
                       throw new Error(
                         'Your session changed. Sign in and retry.',
                       )
                     try {
-                      const result = await saveConfirmed(
-                        place,
-                        note,
-                        targetCollection,
-                      )
+                      const result = await saveConfirmed(place, note, target.id)
+                      requireOwner(owner)
+                      loadGeneration.current++
+                      setCloudLoading(false)
                       saved++
                       const next = toUIPlace(result.item)
                       savedCollections.push(next.collection)
@@ -627,11 +721,8 @@ function App() {
                       )
                     }
                   }
-                  setCollections((items) => [
-                    ...new Set([...items, ...savedCollections]),
-                  ])
-                  if (savedCollections[0])
-                    setCollection(savedCollections[0])
+                  requireOwner(owner)
+                  if (savedCollections[0]) setCollection(savedCollections[0])
                   setSelectedId('')
                   setView('list')
                   if (failures.length)
@@ -691,73 +782,89 @@ function App() {
       {notice && (
         <div className="notice-toast" role="status">
           <span>{notice}</span>
-          <button
-            aria-label="Dismiss message"
-            onClick={() => setNotice('')}
-          >
+          <button aria-label="Dismiss message" onClick={() => setNotice('')}>
             ×
           </button>
         </div>
       )}
       {newCollection && (
-        <div
-          ref={collectionDialog}
-          className="simple-overlay"
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') setNewCollection(false)
-          }}
-        >
-          <form
-            className="simple-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="collection-title"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const name = newCollectionName.trim()
-              if (!name) {
-                setCollectionError('Enter a collection name.')
-                return
-              }
+        <CollectionDialog
+          collection={managedCollection}
+          onClose={() => setNewCollection(false)}
+          onCreate={async (id, name) => {
+            if (!cloudEnabled) {
               if (
                 [...collections, 'Coffee', 'Galleries'].some(
                   (c) => c.toLowerCase() === name.toLowerCase(),
                 )
-              ) {
-                setCollectionError(
-                  'A collection with this name already exists.',
-                )
-                return
-              }
+              )
+                throw new Error('A collection with this name already exists.')
               setCollections((items) => [...items, name])
               changeCollection(name)
-              setNewCollection(false)
-              setNewCollectionName('')
-              setCollectionError('')
-            }}
-          >
-            <h2 id="collection-title">New collection</h2>
-            <label htmlFor="collection-name">Collection name</label>
-            <input
-              autoFocus
-              id="collection-name"
-              maxLength={60}
-              value={newCollectionName}
-              onChange={(e) => setNewCollectionName(e.target.value)}
-            />
-            {collectionError && <p role="alert">{collectionError}</p>}
-            <div>
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => setNewCollection(false)}
-              >
-                Cancel
-              </button>
-              <button className="primary">Create collection</button>
-            </div>
-          </form>
-        </div>
+              return
+            }
+            const owner = getSession()?.sub
+            const result = await createCollection(id, name)
+            requireOwner(owner)
+            loadGeneration.current++
+            setCloudLoading(false)
+            setCatalog((items) => [
+              ...items.filter((c) => c.id !== result.item.id),
+              result.item,
+            ])
+            setCollections((items) => [
+              ...new Set([...items, result.item.name]),
+            ])
+            changeCollection(result.item.name)
+            setNotice('Collection created.')
+          }}
+          onRename={async (item, name) => {
+            const owner = getSession()?.sub
+            const result = await renameCollection(item, name)
+            requireOwner(owner)
+            loadGeneration.current++
+            setCloudLoading(false)
+            setCatalog((items) =>
+              items.map((c) => (c.id === item.id ? result.item : c)),
+            )
+            setCollections((items) =>
+              items.map((c) => (c === item.name ? result.item.name : c)),
+            )
+            setPlaces((items) =>
+              items.map((p) =>
+                p.saved?.collectionId === item.id
+                  ? toUIPlace({ ...p.saved, collection: result.item.name })
+                  : p,
+              ),
+            )
+            changeCollection(result.item.name)
+            setNotice('Collection renamed.')
+          }}
+          onDelete={async (item) => {
+            const owner = getSession()?.sub
+            await deleteCollection(item)
+            requireOwner(owner)
+            loadGeneration.current++
+            setCloudLoading(false)
+            setCatalog((items) => items.filter((c) => c.id !== item.id))
+            setCollections((items) => items.filter((c) => c !== item.name))
+            setPlaces((items) =>
+              items.map((p) =>
+                p.saved?.collectionId === item.id
+                  ? toUIPlace({
+                      ...p.saved,
+                      collectionId: 'default',
+                      collection: 'Saved places',
+                    })
+                  : p,
+              ),
+            )
+            changeCollection('Saved places')
+            setNotice(
+              'Collection deleted. Your places were kept in Saved places.',
+            )
+          }}
+        />
       )}
     </div>
   )

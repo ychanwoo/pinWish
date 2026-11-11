@@ -1,0 +1,13 @@
+{
+  "testedAt": "2026-11-11T05:39:17.550Z",
+  "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+  "checks": [
+    "Legacy catalog migration, rename, photo response labels, stale-write protection and owner isolation",
+    "Collection deletion preserves the original DynamoDB place row and its private S3 photo",
+    "Empty collection persistence, replay-safe create, duplicate rejection and authenticated transactional place move",
+    "Deployed desktop/mobile UI: create, reload, rename, move, delete, retained place, sign-out and no overflow/browser errors"
+  ],
+  "browserErrors": [],
+  "cleanupErrors": [],
+  "passed": true
+}

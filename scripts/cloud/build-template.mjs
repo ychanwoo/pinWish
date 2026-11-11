@@ -232,6 +232,7 @@ const template = {
                     'dynamodb:GetItem',
                     'dynamodb:PutItem',
                     'dynamodb:Query',
+                    'dynamodb:ConditionCheckItem',
                     'dynamodb:DeleteItem',
                   ],
                   Resource: arn('Places'),
@@ -325,6 +326,15 @@ const template = {
           ThrottlingBurstLimit: 10,
           ThrottlingRateLimit: 5,
         },
+      },
+    },
+    CollectionPermission: {
+      Type: 'AWS::Lambda::Permission',
+      Properties: {
+        Action: 'lambda:InvokeFunction',
+        FunctionName: ref('Storage'),
+        Principal: 'apigateway.amazonaws.com',
+        SourceArn: sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/*/collections*'),
       },
     },
     Permission: {
@@ -685,6 +695,10 @@ for (const [i, route] of [
   'PATCH /places/{id}',
   'DELETE /places/{id}',
   'GET /places/{id}/photo',
+  'GET /collections',
+  'POST /collections',
+  'PATCH /collections/{id}',
+  'DELETE /collections/{id}',
 ].entries())
   template.Resources[`Route${i}`] = {
     Type: 'AWS::ApiGatewayV2::Route',

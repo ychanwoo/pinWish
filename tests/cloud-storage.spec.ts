@@ -1,3 +1,4 @@
+import { collectionResponse } from './helpers/collection-fixture'
 import { test, expect, type Page } from '@playwright/test'
 const jwt = (sub = 'user-a') =>
   `header.${Buffer.from(JSON.stringify({ sub })).toString('base64url')}.signature`
@@ -18,7 +19,8 @@ const record = {
   coordinates: { longitude: -118, latitude: 34 },
   placeType: 'PointOfInterest',
   note: 'Original note',
-  collection: 'LA weekend',
+  collection: 'Saved places',
+  collectionId: 'default',
   visited: false,
   bookmarked: true,
   version: 1,
@@ -46,7 +48,7 @@ async function setup(page: Page, records: (typeof record)[] = []) {
     },
   )
   await page.route('https://storage.example.test/**', (route) =>
-    route.fulfill({ json: { items: records, cursor: null } }),
+    new URL(route.request().url()).pathname === '/collections' ? route.fulfill({json: collectionResponse}) : route.fulfill({ json: { items: records, cursor: null, collectionVersion: 1 } }),
   )
 }
 async function login(page: Page, remember = false) {
@@ -238,6 +240,7 @@ test('cloud note edits retry after failure, visit updates persist, and deletion 
   let deleted = false
   await setup(page)
   await page.route('https://storage.example.test/**', (route) => {
+    if(new URL(route.request().url()).pathname === '/collections') return route.fulfill({json: collectionResponse})
     const method = route.request().method()
     if (method === 'PATCH') {
       if (failures-- > 0)
@@ -254,7 +257,7 @@ test('cloud note edits retry after failure, visit updates persist, and deletion 
       return route.fulfill({ json: { deleted: true } })
     }
     return route.fulfill({
-      json: { items: deleted ? [] : [current], cursor: null },
+      json: { items: deleted ? [] : [current], cursor: null, collectionVersion: 1 },
     })
   })
   await page.goto('/')
@@ -365,6 +368,7 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
   const records = new Map<string, typeof record>()
   let fail = true
   await page.route('https://storage.example.test/**', (r) => {
+    if(new URL(r.request().url()).pathname === '/collections') return r.fulfill({json: collectionResponse})
     if (r.request().method() === 'POST') {
       const p = r.request().postDataJSON().place
       if (p.placeId === 'B' && fail) {
@@ -379,7 +383,7 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
       records.set(p.placeId, item)
       return r.fulfill({ json: { item } })
     }
-    return r.fulfill({ json: { items: [...records.values()], cursor: null } })
+    return r.fulfill({ json: { items: [...records.values()], cursor: null, collectionVersion: 1 } })
   })
   await page.goto('/')
   await login(page)
@@ -470,7 +474,7 @@ test('temporary API throttling retries without losing the session', async ({
   await page.route('https://storage.example.test/places', (r) =>
     ++calls === 1
       ? r.fulfill({ status: 429, json: { code: 'throttled' } })
-      : r.fulfill({ json: { items: [record], cursor: null } }),
+      : r.fulfill({ json: { items: [record], cursor: null, collectionVersion: 1 } }),
   )
   await page.goto('/')
   await login(page)
@@ -518,13 +522,14 @@ test('a Korean overseas post automatically saves and opens its English map pin w
   let saves = 0
   let original = ''
   await page.route('https://storage.example.test/**', r => {
+    if(new URL(r.request().url()).pathname === '/collections') return r.fulfill({json: collectionResponse})
     if (r.request().method() === 'POST') {
       saves++
       const place = r.request().postDataJSON().place
       original = place.source.extractedName
       return r.fulfill({ json: { item: { ...record, sources: { source: { ...record.sources.source, extractedName: original, evidence: original } } } } })
     }
-    return r.fulfill({ json: { items: saves ? [record] : [], cursor: null } })
+    return r.fulfill({ json: { items: saves ? [record] : [], cursor: null, collectionVersion: 1 } })
   })
   await page.goto('/')
   await login(page)

@@ -1,3 +1,4 @@
+const { createCollections } = require('./collections.cjs')
 const { createPhotos } = require('./photos.cjs')
 const { isDeepStrictEqual } = require('node:util')
 const { createHash } = require('node:crypto')
@@ -182,6 +183,13 @@ function createHandler({
         }),
       ),
   })
+  const collections = createCollections({
+    send,
+    table,
+    marshal,
+    unmarshal,
+    fail,
+  })
   const publicItem = (item) => {
     const { pk: _pk, sk: _sk, ...rest } = item
     return rest
@@ -233,7 +241,11 @@ function createHandler({
       const pk = `USER#${claims.sub}`
       const method = event.requestContext?.http?.method
       const id = event.pathParameters?.id
-      if (id && !/^[a-f0-9]{64}$/.test(id)) fail(400, 'invalid_id')
+      const collectionRoute = /^\/collections(?:\/[^/]+)?$/.test(
+        event.rawPath ?? '',
+      )
+      if (!collectionRoute && id && !/^[a-f0-9]{64}$/.test(id))
+        fail(400, 'invalid_id')
       const key = id ? { pk, sk: `PLACE#${id}` } : null
       let body = {}
       if (['POST', 'PATCH', 'DELETE'].includes(method)) {
@@ -249,8 +261,20 @@ function createHandler({
         if (!body || typeof body !== 'object' || Array.isArray(body))
           fail(400, 'invalid_input')
       }
-      if (photoRoute && key)
-        return response(200, await photos.handle(method, key, body))
+      if (collectionRoute) {
+        const result = await collections.route(pk, method, id, body)
+        return response(result.status, result.data)
+      }
+      if (photoRoute && key) {
+        const result = await photos.handle(method, key, body)
+        if (result.item)
+          result.item = publicItem(
+            collections.present(await collections.ensure(pk), result.item),
+          )
+        return response(200, result)
+      }
+      const catalog = await collections.ensure(pk)
+      const present = (item) => publicItem(collections.present(catalog, item))
       if (method === 'GET' && !id) {
         const q = event.queryStringParameters ?? {}
         const limit = q.limit === undefined ? 20 : Number(q.limit)
@@ -285,7 +309,8 @@ function createHandler({
           }),
         )
         return response(200, {
-          items: (result.Items ?? []).map((x) => publicItem(unmarshal(x))),
+          items: (result.Items ?? []).map((x) => present(unmarshal(x))),
+          collectionVersion: catalog.version,
           cursor: result.LastEvaluatedKey
             ? Buffer.from(
                 JSON.stringify(unmarshal(result.LastEvaluatedKey)),
@@ -296,10 +321,11 @@ function createHandler({
       if (method === 'GET' && key) {
         const item = await read(key)
         if (!item) fail(404, 'not_found')
-        return response(200, { item: publicItem(item) })
+        return response(200, { item: present(item) })
       }
       if (method === 'POST' && !id) {
         const value = validatePlace(body)
+        const bound = await collections.bind(pk, body)
         const id = hash(`amazon-location:${value.place.placeId}`)
         const key = { pk, sk: `PLACE#${id}` }
         const sourceId = hash(
@@ -312,7 +338,12 @@ function createHandler({
             isDeepStrictEqual(previous.sources[sourceId], value.source)
           )
             return response(200, {
-              item: publicItem(await startPhoto(key, previous)),
+              item: publicItem(
+                collections.present(
+                  bound.catalog,
+                  await startPhoto(key, previous),
+                ),
+              ),
               duplicate: true,
             })
           if (
@@ -334,7 +365,8 @@ function createHandler({
                 id,
                 ...value.place,
                 note: value.note,
-                collection: value.collection,
+                collection: bound.collection.name,
+                collectionId: bound.collection.id,
                 visited: false,
                 bookmarked: true,
                 sources: { [sourceId]: value.source },
@@ -343,25 +375,11 @@ function createHandler({
                 updatedAt: now,
               }
           try {
-            await send(
-              new PutItemCommand({
-                TableName: table,
-                Item: marshal(item),
-                ConditionExpression: previous
-                  ? '#v = :v'
-                  : 'attribute_not_exists(pk)',
-                ...(previous
-                  ? {
-                      ExpressionAttributeNames: { '#v': 'version' },
-                      ExpressionAttributeValues: marshal({
-                        ':v': previous.version,
-                      }),
-                    }
-                  : {}),
-              }),
-            )
+            await collections.writePlace(bound.catalog, item, previous?.version)
             return response(previous ? 200 : 201, {
-              item: publicItem(await startPhoto(key, item)),
+              item: publicItem(
+                collections.present(bound.catalog, await startPhoto(key, item)),
+              ),
               duplicate: !!previous,
             })
           } catch (e) {
@@ -391,6 +409,7 @@ function createHandler({
           'version',
           'note',
           'collection',
+          'collectionId',
           'visited',
           'bookmarked',
         ])
@@ -401,7 +420,12 @@ function createHandler({
           fail(400, 'invalid_patch')
         const changes = {}
         if ('note' in body) changes.note = str(body.note, 1000, true)
-        if ('collection' in body) changes.collection = str(body.collection, 60)
+        const bound =
+          'collectionId' in body || 'collection' in body
+            ? await collections.bind(pk, body)
+            : { catalog, collection: collections.resolve(catalog, previous) }
+        changes.collectionId = bound.collection.id
+        changes.collection = bound.collection.name
         for (const field of ['visited', 'bookmarked'])
           if (field in body) {
             if (typeof body[field] !== 'boolean') fail(400, 'invalid_patch')
@@ -413,8 +437,10 @@ function createHandler({
           version: previous.version + 1,
           updatedAt: new Date().toISOString(),
         }
-        await send(new PutItemCommand({ ...condition, Item: marshal(item) }))
-        return response(200, { item: publicItem(item) })
+        await collections.writePlace(bound.catalog, item, body.version)
+        return response(200, {
+          item: publicItem(collections.present(bound.catalog, item)),
+        })
       }
       fail(404, 'not_found')
     } catch (e) {
