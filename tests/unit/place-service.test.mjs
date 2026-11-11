@@ -64,3 +64,17 @@ test('provider errors are actionable and sanitized; no account IDs or provider m
   }
   assert.equal(placeError(new PlaceError('invalid_selection',400)).status,400)
 })
+
+test('persistent selections work across service instances and still enforce expiry', async () => {
+  const storage = new Map()
+  let time = 1000
+  const options = { selectionStore: { async get(k) { return storage.get(k) }, async set(k,v) { storage.set(k,v) } }, now: () => time, client: { async send(c) { return c.constructor.name === 'SearchTextCommand' ? { ResultItems: [raw] } : raw } } }
+  const first = createPlaceService(options)
+  const search = await first.search(query)
+  first.close()
+  const next = createPlaceService(options)
+  assert.equal((await next.details({selectionToken:search.matches[0].selectionToken})).place.name,raw.Title)
+  time += 900000
+  await assert.rejects(next.details({selectionToken:search.matches[0].selectionToken}), /selection_expired/)
+  next.close()
+})
