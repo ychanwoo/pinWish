@@ -34,7 +34,7 @@ async function login(page: Page) {
     .first()
     .click()
   await page
-    .getByLabel('Link or address', { exact: true })
+    .getByLabel('Instagram post link', { exact: true })
     .fill('https://www.instagram.com/p/DfFCMjzk02S/')
 }
 test('authenticated cloud import is queued and polled without a local API', async ({
@@ -92,7 +92,7 @@ test('daily cloud quota errors preserve the original link', async ({
       'The daily test limit has been reached. Please try again tomorrow.',
     ),
   ).toBeVisible({ timeout: 10000 })
-  await expect(page.getByLabel('Link or address', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('Instagram post link', { exact: true })).toHaveValue(
     'https://www.instagram.com/p/DfFCMjzk02S/',
   )
 })

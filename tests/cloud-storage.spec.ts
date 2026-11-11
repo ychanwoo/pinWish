@@ -198,7 +198,7 @@ test('signed-out link submission prompts login and restores the original draft',
   await page.goto('/')
   await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page
-    .getByLabel('Link or address', { exact: true })
+    .getByLabel('Instagram post link', { exact: true })
     .fill('https://www.instagram.com/p/Example/?img_index=2')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   const modal = page.getByRole('dialog')
@@ -209,7 +209,7 @@ test('signed-out link submission prompts login and restores the original draft',
     .getByRole('button', { name: 'Sign in', exact: true })
     .last()
     .click()
-  await expect(page.getByLabel('Link or address', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('Instagram post link', { exact: true })).toHaveValue(
     'https://www.instagram.com/p/Example/?img_index=2',
   )
 })
@@ -389,7 +389,7 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
   await login(page)
   await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page
-    .getByLabel('Link or address', { exact: true })
+    .getByLabel('Instagram post link', { exact: true })
     .fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('alert')).toContainText('1 of 2 saved')
@@ -534,7 +534,7 @@ test('a Korean overseas post automatically saves and opens its English map pin w
   await page.goto('/')
   await login(page)
   await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
-  await page.getByLabel('Link or address', { exact: true }).fill('https://www.instagram.com/p/Example/')
+  await page.getByLabel('Instagram post link', { exact: true }).fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByLabel('Select a saved place on the map').locator('option')).toHaveCount(2)

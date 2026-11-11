@@ -69,9 +69,7 @@ export function SavePlace({
   onRequireLogin,
   authenticated,
 }: Props) {
-  const [state, setState] = useState<SaveState>(
-    draft?.state ?? initialState,
-  )
+  const [state, setState] = useState<SaveState>(draft?.state ?? initialState)
   const [input, setInput] = useState(
     draft?.input ??
       (initialState === 'entry'
@@ -82,15 +80,11 @@ export function SavePlace({
   )
   const [address, setAddress] = useState(
     draft?.address ??
-      (initialState === 'not_found'
-        ? 'Grand Central Market, Los Angeles'
-        : ''),
+      (initialState === 'not_found' ? 'Grand Central Market, Los Angeles' : ''),
   )
   const [note, setNote] = useState(
     draft?.note ??
-      (initialState === 'entry'
-        ? ''
-        : 'Try the carnitas at Villa Morelianas.'),
+      (initialState === 'entry' ? '' : 'Try the carnitas at Villa Morelianas.'),
   )
   const [collection, setCollection] = useState(
     draft?.collection ??
@@ -212,7 +206,7 @@ export function SavePlace({
   const lookup = async () => {
     const value = (manual ? address : input).trim()
     cancelPending()
-    if (!validInput(value)) {
+    if (onPersist ? !parseInstagramLink(value).ok : !validInput(value)) {
       setState('invalid')
       inputRef.current?.focus()
       return
@@ -236,9 +230,10 @@ export function SavePlace({
     }
     // Only the explicitly labelled demo URL may resolve to a sample record.
     if (
-      isUrlInput(value) &&
-      value !== sampleLink &&
-      value !== 'https://maps.app.goo.gl/grandcentral'
+      onPersist ||
+      (isUrlInput(value) &&
+        value !== sampleLink &&
+        value !== 'https://maps.app.goo.gl/grandcentral')
     ) {
       setManual(false)
       setPreview(null)
@@ -323,7 +318,7 @@ export function SavePlace({
     if (onPersist) {
       setState('import_unavailable')
       setImportError(
-        'Use a real Instagram post and confirm its locations before saving to your account.',
+        'Paste an Instagram post link to find and save its locations.',
       )
       return
     }
@@ -413,7 +408,9 @@ export function SavePlace({
       ),
     )
     if (!confirmedPlaces.length) {
-      setPersistError('At least one location must be found before adding places.')
+      setPersistError(
+        'At least one location must be found before adding places.',
+      )
       return
     }
     setPersisting(true)
@@ -457,23 +454,25 @@ export function SavePlace({
     )
   const messages: Partial<Record<SaveState, [string, string]>> = {
     resolving:
-      instagramSource.ok && input.trim() !== sampleLink
+      instagramSource.ok && (onPersist || input.trim() !== sampleLink)
         ? [
             'Reading post photos…',
-            'Extracting place names for review. This can take up to 95 seconds; addresses are not being verified yet.',
+            'Reading the photos for place names. This may take a couple of minutes; locations are looked up next.',
           ]
         : [
             'Finding this place…',
             'Checking the link for a location. You can cancel and enter an address instead.',
           ],
     invalid: [
-      'Check your link or address',
+      onPersist ? 'Check your Instagram link' : 'Check your link or address',
       isUrlInput(manual ? address : input)
         ? (() => {
             const result = parseInstagramLink(manual ? address : input)
             return result.ok ? 'Check your input.' : result.message
           })()
-        : 'Enter a supported Instagram post link or a sample place name. Your input has been kept.',
+        : onPersist
+          ? 'Enter an Instagram post link. Direct place search is not available yet; your input has been kept.'
+          : 'Enter a supported Instagram post link or a sample place name. Your input has been kept.',
     ],
     not_found: [
       'We couldn’t identify the place',
@@ -487,8 +486,12 @@ export function SavePlace({
         'Your link format is valid. We have not retrieved the post or its photos. No places have been added. You can open the original post or keep this link for later.',
     ],
     import_review: [
-      persistSuccess ? 'Places added to your map' : 'Finding places for your map',
-      persistSuccess ? 'Located places are saved. You can retry any missing locations or open the map.' : 'Locations are matched automatically. Found places will be added together; unavailable locations will be listed separately.',
+      persistSuccess
+        ? 'Places added to your map'
+        : 'Finding places for your map',
+      persistSuccess
+        ? 'Located places are saved. You can retry any missing locations or open the map.'
+        : 'Locations are matched automatically. Found places will be added together; unavailable locations will be listed separately.',
     ],
     lookup_error: [
       'Couldn’t check this link',
@@ -578,7 +581,11 @@ export function SavePlace({
             {state === 'entry' && (
               <div className="save-intro">
                 <h2>Save somewhere worth going.</h2>
-                <p>Paste a social post, a map link, or a street address.</p>
+                <p>
+                  {onPersist
+                    ? 'Paste an Instagram post link to find its places. Direct place search is not available yet.'
+                    : 'Paste a social post, a map link, or a street address.'}
+                </p>
               </div>
             )}
             {message && (
@@ -594,8 +601,8 @@ export function SavePlace({
             {state === 'import_unavailable' && instagramSource.ok && (
               <div className="field-help">
                 <p>
-                  One post can contain several photos. The selected photo
-                  number does not limit the intended import.
+                  One post can contain several photos. The selected photo number
+                  does not limit the intended import.
                 </p>
                 <a
                   href={instagramSource.source.canonicalUrl}
@@ -613,8 +620,8 @@ export function SavePlace({
             )}
             {persistSuccess && (
               <p role="status">
-                Located places were added to your map. Some locations may
-                still need another lookup.
+                Located places were added to your map. Some locations may still
+                need another lookup.
               </p>
             )}
             {state === 'import_review' && preview && instagramSource.ok && (
@@ -644,23 +651,27 @@ export function SavePlace({
             {!confirmed && (
               <>
                 <label className="field-label" htmlFor="place-input">
-                  {manual && !hasPlace
-                    ? 'Place name or address'
-                    : 'Link or address'}
+                  {onPersist
+                    ? 'Instagram post link'
+                    : manual && !hasPlace
+                      ? 'Place name or address'
+                      : 'Link or address'}
                 </label>
                 <div className="link-input-wrap">
                   <input
                     ref={inputRef}
                     id="place-input"
                     className="link-input"
-                    placeholder="Paste a link or enter an address"
+                    placeholder={
+                      onPersist
+                        ? 'https://www.instagram.com/p/...'
+                        : 'Paste a link or enter an address'
+                    }
                     maxLength={2048}
                     value={manual && !hasPlace ? address : input}
                     readOnly={busy || hasPlace || state === 'import_review'}
                     disabled={state === 'saving'}
-                    aria-invalid={
-                      state === 'invalid' || state === 'not_found'
-                    }
+                    aria-invalid={state === 'invalid' || state === 'not_found'}
                     aria-describedby={message ? 'save-status' : undefined}
                     onChange={(e) => {
                       if (manual && !hasPlace) setAddress(e.target.value)
@@ -783,17 +794,15 @@ export function SavePlace({
           <footer
             className={`save-footer ${state === 'import_review' ? 'review-footer' : ''}`}
           >
-            {state === 'import_review' &&
-              !persistSuccess &&
-              !persisting && (
-                <p className="field-help" id="map-save-help">
-                  {!reviewComplete
-                    ? 'Finding locations automatically…'
-                    : !confirmedIds.length
-                      ? 'No locations could be found. Retry the missing places or try another post.'
-                      : 'Located places are ready to add to your map.'}
-                </p>
-              )}
+            {state === 'import_review' && !persistSuccess && !persisting && (
+              <p className="field-help" id="map-save-help">
+                {!reviewComplete
+                  ? 'Finding locations automatically…'
+                  : !confirmedIds.length
+                    ? 'No locations could be found. Retry the missing places or try another post.'
+                    : 'Located places are ready to add to your map.'}
+              </p>
+            )}
             {state === 'saving' && (
               <p className="field-help" role="status">
                 Saving in progress. Please wait.
@@ -817,8 +826,7 @@ export function SavePlace({
               disabled={
                 busy ||
                 (state === 'import_review' &&
-                  (!reviewComplete ||
-                    (!!onPersist && !confirmedIds.length)))
+                  (!reviewComplete || (!!onPersist && !confirmedIds.length)))
               }
               aria-describedby={
                 state === 'import_review' && !persistSuccess && !persisting
