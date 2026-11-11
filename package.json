@@ -25,7 +25,8 @@
     "cloud:test:start": "node scripts/cloud/runtime.mjs on",
     "cloud:test:stop": "node scripts/cloud/runtime.mjs off",
     "cloud:status": "node scripts/cloud/runtime.mjs status",
-    "test:processing-ui": "playwright test --config playwright.processing.config.ts"
+    "test:processing-ui": "playwright test --config playwright.processing.config.ts",
+    "test:direct-ui": "playwright test --config playwright.direct.config.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1166.0",

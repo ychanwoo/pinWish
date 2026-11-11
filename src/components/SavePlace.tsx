@@ -34,6 +34,7 @@ export interface SaveDraft {
   locationReviews?: Record<number, CandidateLocationDraft>
 }
 interface Props {
+  onDirectSearch?: () => void
   draft: SaveDraft | null
   onDraft: (draft: SaveDraft | null) => void
   initialState: SaveState
@@ -54,6 +55,7 @@ interface Props {
   authenticated?: boolean
 }
 export function SavePlace({
+  onDirectSearch,
   draft,
   onDraft,
   initialState,
@@ -471,7 +473,7 @@ export function SavePlace({
             return result.ok ? 'Check your input.' : result.message
           })()
         : onPersist
-          ? 'Enter an Instagram post link. Direct place search is not available yet; your input has been kept.'
+          ? 'Enter an Instagram post link. Use Place search to add a place by name or address. Your input has been kept.'
           : 'Enter a supported Instagram post link or a sample place name. Your input has been kept.',
     ],
     not_found: [
@@ -567,6 +569,38 @@ export function SavePlace({
             <Icon name="c8142" />
           </button>
         </header>
+        {onDirectSearch &&
+          ['entry', 'invalid', 'lookup_error'].includes(state) && (
+            <div
+              className="save-methods"
+              aria-label="Choose how to add a place"
+            >
+              <button type="button" aria-pressed="true">
+                Instagram link
+              </button>
+              <button
+                type="button"
+                aria-pressed="false"
+                onClick={() => {
+                  onDraft({
+                    state,
+                    input,
+                    address,
+                    note,
+                    collection,
+                    resolved,
+                    manual,
+                    preview,
+                    importError,
+                    locationReviews,
+                  })
+                  onDirectSearch()
+                }}
+              >
+                Place search
+              </button>
+            </div>
+          )}
         <form
           className="save-form"
           onSubmit={(e) => {
@@ -583,7 +617,7 @@ export function SavePlace({
                 <h2>Save somewhere worth going.</h2>
                 <p>
                   {onPersist
-                    ? 'Paste an Instagram post link to find its places. Direct place search is not available yet.'
+                    ? 'Paste an Instagram post link to find its places. Use Place search to add a place by name or address.'
                     : 'Paste a social post, a map link, or a street address.'}
                 </p>
               </div>

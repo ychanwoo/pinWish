@@ -17,6 +17,7 @@ export interface SavedSource {
   evidence: string
 }
 export interface SavedPlace {
+  searchOrigin?: { query: string; region: string }
   coverPhoto?: CoverPhoto
   id: string
   provider: string
@@ -47,14 +48,17 @@ export interface SavedCollection {
   updatedAt: string
 }
 const errors: Record<string, string> = {
+  selection_expired:
+    'This search result expired. Search again and select the place.',
+  invalid_selection: 'Select a search result before saving.',
+  english_name_unavailable:
+    'An English place name is unavailable. Try a more specific search.',
   collection_name_exists: 'A collection with this name already exists.',
   invalid_collection_name: 'Use a collection name with 1–60 characters.',
   collection_not_found:
     'This collection no longer exists. Refresh your places and choose another collection.',
   collection_conflict:
     'Your collections changed in another session. Refresh your places and try again.',
-  default_collection_protected:
-    'Saved places is your default collection and cannot be renamed or deleted.',
   collection_limit:
     'You have reached the collection limit. Contact support before adding more collections.',
   collection_migration_limit:
@@ -195,9 +199,22 @@ export const renameCollection = (collection: SavedCollection, name: string) =>
     '/collections',
   )
 export const deleteCollection = (collection: SavedCollection) =>
-  storageRequest<{ deleted: boolean }>(
+  storageRequest<{ deleted: boolean; defaultCollection: SavedCollection }>(
     `/${collection.id}`,
     'DELETE',
     { version: collection.version },
     '/collections',
   )
+
+export const saveDirectPlace = (
+  detailsJobId: string,
+  query: string,
+  region: string,
+  note: string,
+  collectionId: string,
+) =>
+  storageRequest<{ item: SavedPlace; duplicate: boolean }>('', 'POST', {
+    directSearch: { detailsJobId, query, region },
+    note,
+    collectionId,
+  })

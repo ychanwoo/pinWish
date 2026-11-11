@@ -243,7 +243,7 @@ The top-left menu toggles the desktop collection sidebar; search reopens it.
 Signed-in users can create empty collections, rename them, move saved places and
 delete collections without deleting their places. Collections survive refresh and
 sign-in. Existing collection names are migrated automatically; **Saved places** is
-the protected default. See [collection behavior, API and validation](docs/persistent-collections.md).
+the initial default and can also be renamed or deleted. See [collection behavior, API and validation](docs/persistent-collections.md).
 
 ## Live-data interface
 
@@ -251,5 +251,16 @@ Cloud mode sorts Recently added by actual creation time, supports address search
 and unvisited filtering, and restores owned places from private links after login.
 Category tabs are hidden until reliable venue categories are stored; names are not
 used to guess Coffee/Food/Culture classifications. The save dialog currently
-accepts Instagram post links. Direct place search and public sharing are separate
-follow-up features. See [UI behavior and validation](docs/validation/live-data-polish.md).
+offers Instagram post links and direct place search as separate entry points.
+Public sharing remains a follow-up feature. See [UI behavior and validation](docs/validation/live-data-polish.md).
+
+## Direct place search
+
+Choose **Place search** in the save dialog to search a name or address with an
+optional city/region. Select the correct result, choose a collection and add it
+to your map. Original queries are preserved; overseas results use English names.
+The backend verifies the owned details job before saving, and duplicate places
+keep existing notes and collections. No Instagram link is required.
+
+See [behavior, API and validation](docs/direct-place-search.md). Run
+`npm run test:direct-ui` for the dedicated browser checks.

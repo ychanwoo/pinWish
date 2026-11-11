@@ -132,9 +132,11 @@ export function PlaceDetail({
               </p>
               <h1 tabIndex={-1} id="place-heading">
                 {place.name}
-                {!place.saved && <span className="mobile-only">
-                  <Icon name="bc707" />
-                </span>}
+                {!place.saved && (
+                  <span className="mobile-only">
+                    <Icon name="bc707" />
+                  </span>
+                )}
               </h1>
               <p>
                 {place.kind} · {place.district}
@@ -245,7 +247,7 @@ export function PlaceDetail({
               }
             >
               <Icon name="3a7b9" />
-              {place.saved ? 'Copy private link' : 'Share'}
+              {place.saved ? 'Copy Link' : 'Share'}
             </button>
           </div>
           {place.saved && (
@@ -253,13 +255,15 @@ export function PlaceDetail({
               Private link · available only when signed in to your account.
             </p>
           )}
-          {!onMove && <div className="mobile-collection-label">
-            In collection:{' '}
-            <span>
-              <Icon name="0c15e" />
-              {place.collection}
-            </span>
-          </div>}
+          {!onMove && (
+            <div className="mobile-collection-label">
+              In collection:{' '}
+              <span>
+                <Icon name="0c15e" />
+                {place.collection}
+              </span>
+            </div>
+          )}
           {onMove && collections && (
             <form
               className="move-collection"
@@ -421,19 +425,27 @@ export function PlaceDetail({
               <dt>Origin</dt>
               <dd>
                 {place.saved ? (
-                  Object.values(place.saved.sources).map((source) => (
-                    <a
-                      key={source.canonicalUrl + source.slides.join(',')}
-                      href={source.originalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Instagram · photos {source.slides.join(', ')}
-                      {place.saved?.countryCode === 'KR'
-                        ? ` · ${source.correctedName || source.extractedName}`
-                        : ''}
-                    </a>
-                  ))
+                  Object.keys(place.saved.sources).length === 0 ? (
+                    <span>
+                      {place.saved.searchOrigin
+                        ? 'Added from place search'
+                        : 'Source unavailable'}
+                    </span>
+                  ) : (
+                    Object.values(place.saved.sources).map((source) => (
+                      <a
+                        key={source.canonicalUrl + source.slides.join(',')}
+                        href={source.originalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Instagram · photos {source.slides.join(', ')}
+                        {place.saved?.countryCode === 'KR'
+                          ? ` · ${source.correctedName || source.extractedName}`
+                          : ''}
+                      </a>
+                    ))
+                  )
                 ) : (
                   <button
                     onClick={() =>

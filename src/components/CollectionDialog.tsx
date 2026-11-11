@@ -3,6 +3,7 @@ import type { SavedCollection } from '../lib/storage-api'
 import { useModalFocus } from '../hooks/useModalFocus'
 
 interface Props {
+  mode?: 'manage' | 'rename' | 'delete'
   collection?: SavedCollection
   onClose: () => void
   onCreate: (id: string, name: string) => Promise<void>
@@ -10,6 +11,7 @@ interface Props {
   onDelete: (collection: SavedCollection) => Promise<void>
 }
 export function CollectionDialog({
+  mode = 'manage',
   collection,
   onClose,
   onCreate,
@@ -21,7 +23,7 @@ export function CollectionDialog({
   const [busy, setBusy] = useState(false)
   const pending = useRef(false)
   const [error, setError] = useState('')
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(mode === 'delete')
   const close = () => {
     if (!pending.current) onClose()
   }
@@ -53,6 +55,9 @@ export function CollectionDialog({
         aria-modal="true"
         aria-labelledby="collection-title"
         aria-busy={busy}
+        aria-describedby={
+          confirmDelete ? 'collection-delete-description' : undefined
+        }
         onSubmit={(e) => {
           e.preventDefault()
           if (confirmDelete && collection) {
@@ -73,13 +78,20 @@ export function CollectionDialog({
           {confirmDelete
             ? 'Delete collection?'
             : collection
-              ? 'Manage collection'
+              ? mode === 'rename'
+                ? 'Edit collection name'
+                : 'Manage collection'
               : 'New collection'}
         </h2>
         {confirmDelete ? (
-          <p>
-            Places in <strong>{collection?.name}</strong> will move to Saved
-            places. Your notes, photos and original links will be kept.
+          <p
+            className="collection-delete-copy"
+            id="collection-delete-description"
+          >
+            Are you sure you want to delete <strong>{collection?.name}</strong>?
+            <span>
+              Your places will move to another collection, or a new Saved places collection if this is your last one. Your notes, photos and original links will be kept.
+            </span>
           </p>
         ) : (
           <>
@@ -115,13 +127,14 @@ export function CollectionDialog({
             onClick={
               confirmDelete
                 ? () => {
-                    setConfirmDelete(false)
+                    if (mode === 'delete') close()
+                    else setConfirmDelete(false)
                     setError('')
                   }
                 : close
             }
           >
-            {confirmDelete ? 'Keep collection' : 'Cancel'}
+            {confirmDelete ? 'No' : 'Cancel'}
           </button>
           {confirmDelete ? (
             <button
@@ -130,7 +143,7 @@ export function CollectionDialog({
               disabled={busy}
               onClick={() => void perform(() => onDelete(collection!))}
             >
-              {busy ? 'Deleting…' : 'Delete collection'}
+              {busy ? 'Deleting…' : 'Yes'}
             </button>
           ) : (
             <button className="primary" disabled={busy || !name.trim()}>
@@ -142,7 +155,7 @@ export function CollectionDialog({
             </button>
           )}
         </div>
-        {collection && !confirmDelete && (
+        {collection && !confirmDelete && mode === 'manage' && (
           <div className="collection-delete-area">
             <button
               type="button"

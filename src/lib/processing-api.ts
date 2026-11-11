@@ -1,4 +1,4 @@
-import { accessToken, getSession } from './cloud-auth'
+import { accessToken, getSession, expireSession } from './cloud-auth'
 const api = (import.meta.env.VITE_PROCESSING_API_URL ?? '').replace(/\/$/, '')
 export const cloudProcessing = Boolean(api)
 export async function processingRequest(
@@ -51,6 +51,7 @@ export async function processingRequest(
         continue
       }
       if (getSession()?.sub !== owner) throw new Error('Your account changed.')
+      if (response.status === 401) expireSession()
       return response
     }
     return error('processing_unavailable')
@@ -84,7 +85,10 @@ export async function processingRequest(
     if (job.status === 'complete')
       return new Response(JSON.stringify(job.result), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Pinwish-Job': id,
+        },
       })
     if (job.status === 'failed')
       return error(job.code ?? 'processing_unavailable')

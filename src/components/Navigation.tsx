@@ -1,6 +1,9 @@
+import { CollectionRow } from './CollectionRow'
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
+  onCollectionAction?: (name: string, action: 'rename' | 'delete') => void
+  canManageCollection?: (name: string) => boolean
   persistent?: boolean
   sidebarOpen: boolean
   onSidebarOpen: (open: boolean) => void
@@ -19,6 +22,8 @@ interface Props {
 }
 export function DesktopNavigation({
   persistent = false,
+  onCollectionAction,
+  canManageCollection,
   sidebarOpen,
   onSidebarOpen,
   places,
@@ -215,19 +220,31 @@ export function DesktopNavigation({
                 (c !== 'LA weekend' &&
                   !(view === 'empty' && c === 'Weekend ideas')),
             )
-            .map((c) => (
-              <button
-                key={c}
-                className={`collection-link ${collection === c ? 'active' : ''}`}
-                onClick={() => onCollection(c)}
-              >
-                <Icon name="3e06b" />
-                <span>{c}</span>
-                <span className="count">
-                  {places.filter((p) => p.collection === c).length}
-                </span>
-              </button>
-            ))}
+            .map((c) =>
+              persistent && onCollectionAction ? (
+                <CollectionRow
+                  key={c}
+                  name={c}
+                  count={places.filter((p) => p.collection === c).length}
+                  active={collection === c}
+                  editable={!!canManageCollection?.(c)}
+                  onSelect={() => onCollection(c)}
+                  onAction={(action) => onCollectionAction(c, action)}
+                />
+              ) : (
+                <button
+                  key={c}
+                  className={`collection-link ${collection === c ? 'active' : ''}`}
+                  onClick={() => onCollection(c)}
+                >
+                  <Icon name="3e06b" />
+                  <span>{c}</span>
+                  <span className="count">
+                    {places.filter((p) => p.collection === c).length}
+                  </span>
+                </button>
+              ),
+            )}
           <button
             className="collection-link"
             onClick={onNewCollection}

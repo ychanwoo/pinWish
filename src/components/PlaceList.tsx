@@ -249,7 +249,7 @@ export function PlaceList({
                 <Icon name="faf82" />
               </button>
               <span
-                className={`desktop-visited ${place.visited ? 'is-visited' : 'warm'}`}
+                className={`desktop-visited ${place.visited ? 'is-visited' : persistent ? 'is-unvisited' : 'warm'}`}
               >
                 {place.visited ? 'Visited' : 'Unvisited'}
               </span>
@@ -270,7 +270,7 @@ export function PlaceList({
                 <Icon name="ec9f3" />
               </button>
               <button
-                aria-label={`${persistent ? 'Copy private link to' : 'Share'} ${place.name}`}
+                aria-label={`${persistent ? 'Copy Link to' : 'Share'} ${place.name}`}
                 title={
                   persistent
                     ? 'Only your account can open this saved place'
