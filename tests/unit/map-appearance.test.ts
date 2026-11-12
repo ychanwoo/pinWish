@@ -53,7 +53,7 @@ test('visited feature and region color update without depending on the source of
     visited: true,
     saved: { collectionId: 'default' },
   } as Place
-  const f = placeFeatures([p], { p: data }, { default: '#426b57' }).features[0]
+  const f = placeFeatures([p], { default: '#426b57' }).features[0]
   assert.equal(f.properties?.visited, true)
   assert.equal(f.properties?.color, '#426b57')
   assert.notEqual(
@@ -61,7 +61,7 @@ test('visited feature and region color update without depending on the source of
     'javascript:bad',
   )
   assert.equal(
-    placeFeatures([{ ...p, visited: false }], { p: data }, {}).features[0]
+    placeFeatures([{ ...p, visited: false }], {}).features[0]
       .properties?.visited,
     false,
   )
@@ -95,17 +95,10 @@ test('collection identity determines pin color across cities, renames and collec
     visited: false,
     saved: { collectionId: 'default' },
   } as Place
-  const other = { ...base, id: 'b', collection: 'Renamed Trip' }
+  const other = { ...base, id: 'b', collection: 'Renamed Trip', coordinates: { longitude: -74, latitude: 40.7 } }
   const colors = { default: '#426b57', other: '#426782' }
   const features = placeFeatures(
     [base, other],
-    {
-      a: data,
-      b: {
-        ...data,
-        region: { ...data.region, key: 'b'.repeat(64), label: 'Another city' },
-      },
-    },
     colors,
   ).features
   assert.deepEqual(
@@ -114,7 +107,7 @@ test('collection identity determines pin color across cities, renames and collec
   )
   const moved = { ...base, saved: { ...base.saved!, collectionId: 'other' } }
   assert.equal(
-    placeFeatures([moved], {}, colors).features[0].properties?.color,
+    placeFeatures([moved], colors).features[0].properties?.color,
     '#426782',
   )
 })

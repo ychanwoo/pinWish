@@ -108,7 +108,6 @@ export default function LiveMap(props: Props) {
         type: 'geojson',
         data: placeFeatures(
           latest.current.places,
-          latest.current.appearance?.details,
           latest.current.appearance?.colors,
         ),
         cluster: true,
@@ -269,7 +268,6 @@ export default function LiveMap(props: Props) {
     ;(map.current.getSource('places') as GeoJSONSource).setData(
       placeFeatures(
         latest.current.places,
-        latest.current.appearance?.details,
         latest.current.appearance?.colors,
       ),
     )
@@ -291,7 +289,6 @@ export default function LiveMap(props: Props) {
     ;(map.current.getSource('selection') as GeoJSONSource).setData(
       placeFeatures(
         selected ? [selected] : [],
-        latest.current.appearance?.details,
         latest.current.appearance?.colors,
       ),
     )

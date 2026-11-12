@@ -1,4 +1,4 @@
-import { collectionColor, type PlaceDetails } from './map-appearance.ts'
+import { collectionColor } from './map-appearance.ts'
 import type { Place } from '../data/places'
 import type { FeatureCollection, Point } from 'geojson'
 export function mapCoordinates(place: Place): [number, number] | null {
@@ -15,7 +15,6 @@ export function mapCoordinates(place: Place): [number, number] | null {
 }
 export function placeFeatures(
   places: Place[],
-  _details: Record<string, PlaceDetails> = {},
   colors: Record<string, string> = {},
 ): FeatureCollection<Point> {
   return {
