@@ -7,7 +7,7 @@ interface Props {
   active: boolean
   editable: boolean
   onSelect: () => void
-  onAction: (action: 'rename' | 'delete' | 'share') => void
+  onAction: (action: 'rename' | 'delete' | 'share' | 'plan') => void
 }
 export function CollectionRow({
   name,
@@ -120,6 +120,7 @@ export function CollectionRow({
           aria-label={`${name} options`}
           ref={menu}
         >
+          <button role="menuitem" disabled={!editable} onClick={() => { setOpen(false); trigger.current?.focus(); onAction('plan') }}>Plan a trip</button>
           <button role="menuitem" disabled={!editable} onClick={() => { setOpen(false); trigger.current?.focus(); onAction('share') }}>Share collection</button>
           <button
             role="menuitem"

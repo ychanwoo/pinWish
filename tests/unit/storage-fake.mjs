@@ -53,11 +53,16 @@ export function db() {
             }
           return {}
         }
+        case 'UpdateItemCommand': {
+          const k=key(unmarshal(p.Key)),old=data.get(k),v=unmarshal(p.ExpressionAttributeValues)
+          if((old?.count??0)>=v[':limit']) throw Object.assign(Error(),{name:'ConditionalCheckFailedException'})
+          data.set(k,{...unmarshal(p.Key),count:(old?.count??0)+v[':one'],expiresAt:v[':ttl']});return {}
+        }
         case 'PutItemCommand': {
           const v = unmarshal(p.Item),
             old = data.get(key(v))
           if (
-            p.ConditionExpression === 'attribute_not_exists(pk)'
+            !p.ConditionExpression ? false : p.ConditionExpression === 'attribute_not_exists(pk)'
               ? !!old
               : old?.version !== unmarshal(p.ExpressionAttributeValues)[':v']
           )

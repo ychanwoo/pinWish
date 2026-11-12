@@ -48,6 +48,25 @@ export interface SavedCollection {
   updatedAt: string
 }
 const errors: Record<string, string> = {
+  invalid_trip_date: 'Choose a valid travel start date.',
+  invalid_trip_time: 'Use a valid time for your day and opening hours.',
+  invalid_trip_day: 'Plan 2–14 hours per day, between 06:00 and 23:00.',
+  invalid_trip_days: 'Choose 1–7 days or let us recommend the duration.',
+  select_three_to_twenty_places: 'Choose between 3 and 20 places.',
+  invalid_visit_duration: 'Visit lengths must be between 15 minutes and 10 hours.',
+  invalid_manual_hours: 'Select open weekdays and a closing time after opening.',
+  itinerary_timezone_missing: 'A place has no reliable time zone. Remove it and try again.',
+  itinerary_multiple_timezones: 'Plan one time zone at a time. Split these places into separate trips.',
+  itinerary_places_changed: 'A selected place changed or moved. Reopen the planner and select your places again.',
+  itinerary_context_expired: 'Opening hours need refreshing. Go back to Choose places and review hours again.',
+  itinerary_provider_unavailable: 'Could not retrieve opening hours or routes. Your choices are kept; try again.',
+  itinerary_provider_busy: 'The map provider is busy. Wait a moment and retry.',
+  itinerary_limit: 'The trip lookup limit has been reached. Try again later; existing saved trips remain available.',
+  itinerary_incomplete: 'Resolve the unscheduled places before saving.',
+  itinerary_conflict: 'This journey changed in another tab. Reopen it before making changes.',
+  itinerary_not_found: 'This journey is no longer available.',
+  invalid_itinerary_name: 'Use a journey name with 1–80 characters.',
+
   selection_expired:
     'This search result expired. Search again and select the place.',
   invalid_selection: 'Select a search result before saving.',

@@ -222,6 +222,8 @@ const template = {
             PolicyDocument: {
               Version: '2012-10-17',
               Statement: [
+                { Effect: 'Allow', Action: ['geo-places:GetPlace'], Resource: sub('arn:${AWS::Partition}:geo-places:${AWS::Region}::provider/default') },
+                { Effect: 'Allow', Action: ['geo-routes:CalculateRouteMatrix'], Resource: sub('arn:${AWS::Partition}:geo-routes:${AWS::Region}::provider/default') },
                 {
                   Effect: 'Allow',
                   Action: 'lambda:InvokeFunction',
@@ -234,6 +236,7 @@ const template = {
                   Action: [
                     'dynamodb:GetItem',
                     'dynamodb:PutItem',
+                    'dynamodb:UpdateItem',
                     'dynamodb:Query',
                     'dynamodb:ConditionCheckItem',
                     'dynamodb:DeleteItem',
@@ -719,6 +722,14 @@ for (const [i, route] of [
   'GET /collections/{id}/sharing',
   'POST /collections/{id}/sharing',
   'DELETE /collections/{id}/sharing',
+  'POST /collections/{id}/itineraries/prepare',
+  'GET /itineraries',
+  'POST /itineraries',
+  'POST /itineraries/preview',
+  'GET /itineraries/{id}',
+  'DELETE /itineraries/{id}',
+  'POST /itineraries/{id}/sharing',
+  'DELETE /itineraries/{id}/sharing',
 ].entries())
   template.Resources[`Route${i}`] = {
     Type: 'AWS::ApiGatewayV2::Route',
@@ -736,6 +747,11 @@ for (const [i, route] of ['GET /shared/{token}', 'GET /shared/{token}/places/{id
 template.Resources.SharedPermission = { Type: 'AWS::Lambda::Permission', Properties: { Action: 'lambda:InvokeFunction', FunctionName: ref('Storage'), Principal: 'apigateway.amazonaws.com', SourceArn: sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/shared/*') } }
 template.Resources.Stage.DependsOn = ['SharedRoute0', 'SharedRoute1']
 template.Resources.Stage.Properties.RouteSettings = Object.fromEntries(['GET /shared/{token}', 'GET /shared/{token}/places/{id}/photo'].map(route => [route, { ThrottlingBurstLimit: 5, ThrottlingRateLimit: 2 }]))
+template.Resources.TripSharedRoute = { Type:'AWS::ApiGatewayV2::Route', Properties:{ApiId:ref('Api'),RouteKey:'GET /trip-shares/{token}',AuthorizationType:'NONE',Target:sub('integrations/${Integration}')} }
+template.Resources.ItineraryPermission = {Type:'AWS::Lambda::Permission',Properties:{Action:'lambda:InvokeFunction',FunctionName:ref('Storage'),Principal:'apigateway.amazonaws.com',SourceArn:sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/*/itineraries*')}}
+template.Resources.TripSharedPermission = {Type:'AWS::Lambda::Permission',Properties:{Action:'lambda:InvokeFunction',FunctionName:ref('Storage'),Principal:'apigateway.amazonaws.com',SourceArn:sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/trip-shares/*')}}
+template.Resources.Stage.DependsOn.push('TripSharedRoute')
+template.Resources.Stage.Properties.RouteSettings['GET /trip-shares/{token}']={ThrottlingBurstLimit:5,ThrottlingRateLimit:2}
 await mkdir('infra/generated', { recursive: true })
 await writeFile('infra/generated/storage.json', JSON.stringify(template) + '\n')
 console.log('Built infra/generated/storage.json')

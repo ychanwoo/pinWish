@@ -3175,3 +3175,60 @@ a {
   .shared-layout:has(.shared-detail) { grid-template-columns: 320px minmax(0, 1fr) 360px; }
   .shared-detail { position: relative; inset: auto; width: auto; border-radius: 0; border-width: 0 0 0 1px; box-shadow: none; }
 }
+
+/* Trip planning: restrained typography, clear time controls, and a quiet timeline. */
+.trip-overlay{position:fixed;inset:0;z-index:150;background:rgba(27,35,30,.34);display:flex;align-items:center;justify-content:center;padding:24px}
+.trip-dialog{width:min(1080px,100%);height:min(920px,calc(100dvh - 48px));background:#fff;border-radius:12px;box-shadow:0 20px 80px #17211a24;display:flex;flex-direction:column;overflow:hidden;color:#1d2520}
+.trip-header{padding:25px 36px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e9e4}
+.trip-header h1{font-size:22px;line-height:1.35;letter-spacing:-.35px;margin:6px 0 0;font-weight:500;outline:none}.trip-collection-name{display:block;font-size:12px;line-height:1.5;font-weight:400;letter-spacing:0;color:#827b73;overflow-wrap:anywhere}.trip-eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:600;color:#746d65;text-transform:uppercase}
+.trip-close{font-size:30px;background:none;border:0;color:#716b65;width:40px;height:40px}.trip-progress{padding:16px 36px;display:flex;gap:36px;border-bottom:1px solid #e5e9e4;color:#968f86;font-size:12px}.trip-progress>span{display:flex;gap:8px}.trip-progress .current{color:#a63325;font-weight:600}
+.trip-body{overflow-y:auto;flex:1;padding:30px 36px;min-height:0}.trip-section-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}.trip-section-heading h2,.trip-result-heading h2{font-size:25px;letter-spacing:-.6px;margin:0 0 8px;font-weight:600}.trip-section-heading p,.trip-muted{font-size:13px;color:#777069;line-height:1.65;margin:8px 0}.trip-section-heading>span{white-space:nowrap;color:#a63325;font-size:13px}
+.trip-place-selection{border-top:1px solid #e3e7e0}.trip-place-selection>label{display:flex;align-items:center;gap:16px;padding:19px 12px;border-bottom:1px solid #e3e7e0;cursor:pointer}.trip-place-selection>label.selected{background:#f5f7f3}.trip-place-selection strong{display:block;font-size:16px;font-weight:550}.trip-place-selection small{display:block;font-size:12px;color:#79736d;margin-top:6px}.trip-place-selection em{font-style:normal;font-size:11px;color:#7a756d;margin-left:auto;white-space:nowrap}.trip-dialog input[type=checkbox]{accent-color:#a63325;width:17px;height:17px;flex-shrink:0}
+.trip-dialog label{font-size:12px;color:#5f625b}.trip-dialog input:not([type=checkbox]),.trip-dialog select{width:100%;border:1px solid #d9dfd5;border-radius:5px;padding:11px 12px;background:white;color:#243027;font:inherit;font-size:14px;margin-top:7px;min-width:0}.trip-dialog input:focus,.trip-dialog select:focus{outline:2px solid #a63325;outline-offset:2px}.trip-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;background:#f6f7f3;border:1px solid #e6e9e1;padding:24px;border-radius:8px}.trip-review-list{margin-top:28px}.trip-review-place{padding:25px 0;border-top:1px solid #e2e7de}.trip-review-top{display:flex;align-items:start;gap:16px}.trip-order{color:#ac3728;font-size:12px;padding-top:5px}.trip-review-top>div{flex:1}.trip-review-top h3{font-size:18px;margin:0 0 6px;font-weight:550;letter-spacing:-.3px}.trip-review-top p{font-size:12px;color:#777069;margin:0}.trip-review-top>label{width:135px;flex-shrink:0}.trip-hours{margin:18px 0 12px 32px;font-size:12px;line-height:1.8;color:#716e65}.trip-hours strong,.trip-hours span{display:block}.trip-hours strong{color:#48634e;font-weight:500}.trip-hours .needs-check{color:#965a25}.trip-review-place details{margin-left:32px;font-size:12px}.trip-review-place summary{cursor:pointer;color:#625d55;padding:8px 0;text-decoration:underline;text-underline-offset:4px}.trip-check{display:flex;align-items:center;gap:8px;margin:12px 0}.trip-manual{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:450px}.trip-weekdays{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px}.trip-weekdays label{display:flex;gap:4px;align-items:center}.trip-place-actions{display:flex;gap:18px;margin:18px 0 0 32px}.trip-place-actions button,.trip-share-actions>button:not(.primary),.trip-delete{background:none;border:0;color:#746c62;font-size:12px;padding:5px 0;text-decoration:underline;text-underline-offset:4px}.trip-place-actions button:last-child,.trip-delete{color:#a63325}.trip-dialog button:disabled{opacity:.4;cursor:not-allowed}
+.trip-footer{border-top:1px solid #e4e8e0;background:#fff;padding:18px 36px;display:flex;justify-content:space-between;gap:20px;align-items:center}.trip-footer>div:first-child{flex:1;min-width:0}.trip-footer p{font-size:12px;line-height:1.5;margin:0;color:#787168}.trip-footer .field-error{color:#a63325}.trip-footer-actions{display:flex;gap:12px}.trip-footer button,.trip-sharing>.primary,.trip-share-actions .primary,.trip-confirm button,.trip-public-empty button{padding:13px 20px;border:1px solid #dce1d8;border-radius:5px;background:white;white-space:nowrap;font-size:13px}.trip-footer .primary,.trip-sharing>.primary,.trip-share-actions .primary,.trip-public-empty .primary{background:#a63325;color:white;border-color:#a63325}
+.trip-library{margin-top:32px}.trip-library h3{font-size:13px;font-weight:600}.trip-library>button{width:100%;padding:16px 0;background:none;border:0;border-top:1px solid #e5e9e0;display:flex;justify-content:space-between;text-align:left;font-size:14px}.trip-library small{display:block;font-size:11px;color:#80766b;margin-top:5px}.trip-library>button>span:last-child{font-size:12px;color:#a63325}.trip-result-heading{display:flex;align-items:center;justify-content:space-between;gap:20px}.trip-result-heading h2{margin-top:7px}.trip-result-heading>strong{font-size:15px;font-weight:500;color:#a63325;white-space:nowrap}.trip-day{margin-top:30px}.trip-day>header{display:flex;align-items:center;gap:16px;padding-bottom:15px;border-bottom:1px solid #dce2d6}.trip-day-number{font-size:29px;color:#a63325;letter-spacing:-1px}.trip-day h3{font-size:17px;margin:0;font-weight:550}.trip-day header p{font-size:12px;color:#7a746c;margin:5px 0 0}.trip-day ol{list-style:none;padding:0;margin:0}.trip-day li{display:flex;gap:24px;padding-top:24px}.trip-clock{width:60px;flex-shrink:0;font-size:14px}.trip-clock time,.trip-clock span{display:block}.trip-clock span{font-size:12px;color:#888177;margin-top:5px}.trip-stop-detail{flex:1;border-left:1px solid #e0e6da;padding:0 0 24px 24px;min-width:0}.trip-stop-detail h4{font-size:19px;font-weight:550;letter-spacing:-.3px;margin:0 0 7px}.trip-stop-detail>p{font-size:12px;color:#80786e;line-height:1.6}.trip-stop-detail .trip-connection{font-size:11px;margin:0 0 12px;color:#746b60}.trip-stop-meta{display:flex;gap:8px 18px;flex-wrap:wrap;font-size:11px;color:#536b54;margin:10px 0}.trip-stop-detail details{font-size:11px;color:#776d61;margin:10px 0}.trip-stop-detail summary{cursor:pointer}.trip-directions{font-size:11px;color:#9e3426;text-underline-offset:3px}.trip-footnote{font-size:11px;line-height:1.8;color:#827a6f;border-top:1px solid #e6e9e0;padding-top:18px;margin:22px 0 0}.trip-unplaced{background:transparent;border:0;border-top:1px solid #e3e7e0;padding:20px 0 0;margin-top:24px}.trip-unplaced h3{font-size:14px;margin:0}.trip-unplaced p{font-size:12px;line-height:1.6}.trip-unplaced span{display:block;color:#777069;margin-top:4px}.trip-name{display:block;margin-top:24px;max-width:460px}.trip-sharing{margin-top:26px;padding:24px;background:#f5f7f2;border:1px solid #e2e7da;border-radius:7px}.trip-sharing h3{font-size:18px;font-weight:550;margin:0 0 8px}.trip-sharing>p{font-size:12px;color:#777064;line-height:1.7}.trip-sharing label{display:block;margin:16px 0}.trip-share-actions{display:flex;align-items:center;gap:22px}.trip-confirm{margin-top:20px;border:1px solid #d9c9bd;padding:20px}.trip-confirm h3{font-size:18px}.trip-confirm p{font-size:13px;color:#766d62}.trip-confirm button{margin:8px 10px 0 0}.trip-confirm .delete-confirm{color:#a63325;border-color:#a63325}.trip-public{min-height:100dvh;background:#fafbf8;color:#20291f}.trip-public>header{display:flex;justify-content:space-between;align-items:center;padding:24px 36px;border-bottom:1px solid #e0e6da;background:white}.trip-public>header a{font-size:26px;font-weight:650;color:#a63325;text-decoration:none}.trip-public>header span{font-size:12px;color:#7e766c}.trip-public main{max-width:900px;margin:auto;padding:50px 36px}.trip-public-title{margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid #e3e7e0}.trip-public-title h1{font-family:Georgia,"Times New Roman",serif;font-size:34px;font-weight:400;line-height:1.25;letter-spacing:-.7px;margin:0;overflow-wrap:anywhere}.trip-public-title p{font-size:12px;line-height:1.6;font-weight:400;color:#817b73;margin:8px 0 0}.trip-public-empty{padding:50px 0}.trip-public-empty p{line-height:1.7}
+@media(max-width:700px){.trip-overlay{padding:0}.trip-dialog{width:100%;height:100dvh;border-radius:0}.trip-header{padding:20px}.trip-header h1{font-size:21px}.trip-progress{padding:14px 20px;gap:18px;font-size:10px}.trip-body{padding:24px 20px}.trip-settings{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:16px}.trip-section-heading{align-items:start}.trip-section-heading h2,.trip-result-heading h2{font-size:23px}.trip-place-selection>label{padding:16px 4px;gap:12px}.trip-place-selection em{display:none}.trip-review-top{flex-wrap:wrap;gap:10px}.trip-review-top>div{flex-basis:calc(100% - 35px)}.trip-review-top>label{margin-left:25px;width:145px}.trip-hours,.trip-review-place details,.trip-place-actions{margin-left:25px}.trip-footer{padding:14px 20px;display:block}.trip-footer>div:first-child{margin-bottom:10px}.trip-footer-actions{justify-content:flex-end}.trip-footer button{padding:12px 16px}.trip-result-heading{display:block}.trip-result-heading>strong{display:block;margin-top:12px}.trip-day li{gap:10px}.trip-clock{width:46px;font-size:12px}.trip-stop-detail{padding-left:14px}.trip-stop-detail h4{font-size:17px}.trip-sharing{padding:18px}.trip-public>header{padding:18px 20px}.trip-public>header span{font-size:10px}.trip-public main{padding:30px 20px}.trip-public-title h1{font-size:29px}.trip-review-place details{overflow-wrap:anywhere}}
+
+.trip-section-heading.trip-selection-heading h2 {
+  font-size: 18px;
+  line-height: 1.45;
+  font-weight: 500;
+  letter-spacing: -.2px;
+  margin-bottom: 5px;
+}
+.trip-section-heading.trip-selection-heading p {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #817b73;
+  margin: 0;
+}
+.trip-selection-heading > span {
+  font-size: 12px;
+  color: #77746c;
+  font-variant-numeric: tabular-nums;
+}
+
+.trip-duration-hint {
+  display: block;
+  margin-top: 7px;
+  color: #777069;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.trip-duration-hint[data-suggested='true'] {
+  color: #3f6248;
+}
+
+.trip-result-heading h2 { font-size: 22px; font-weight: 500; letter-spacing: -.35px; margin: 0; }
+.trip-result-summary { font-size: 12px; color: #777069; margin: 8px 0 0; line-height: 1.6; }
+.trip-unplaced p { padding: 12px 0; margin: 0; border-bottom: 1px solid #edf0e9; }
+.trip-unplaced strong { font-weight: 500; }
+
+.trip-public .trip-result-heading h2 {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.5;
+}

@@ -1,3 +1,4 @@
+import { ItineraryPlanner } from './components/ItineraryPlanner'
 import { CollectionSharing } from './components/CollectionSharing'
 import { lazy, Suspense } from 'react'
 import { forgetPhoto, prefetchPhotos } from './lib/place-photo'
@@ -144,6 +145,7 @@ function App() {
   const [notice, setNotice] = useState('')
   const [newCollection, setNewCollection] = useState(false)
   const sharingReturnFocus = useRef<HTMLElement | null>(null)
+  const [tripCollection, setTripCollection] = useState<SavedCollection | null>(null)
   const [sharingCollection, setSharingCollection] = useState<SavedCollection | null>(null)
   const loadPlaces = useCallback(async (next: string | null = null) => {
     if (!getSession()) return
@@ -224,7 +226,7 @@ function App() {
     loadGeneration.current++
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
-    setSharingCollection(null)
+    setTripCollection(null); setSharingCollection(null)
     setCollections(['Saved places'])
     setCatalog([])
     setCollection('Saved places')
@@ -427,7 +429,7 @@ function App() {
       {cloudEnabled && (
         <header
           className="account-bar"
-          inert={Boolean(saveState || authOpen || newCollection || sharingCollection)}
+          inert={Boolean(saveState || authOpen || newCollection || sharingCollection || tripCollection)}
         >
           <span>pinWish</span>
           <div>
@@ -470,7 +472,7 @@ function App() {
           </div>
         </header>
       )}
-      <div inert={Boolean(saveState || newCollection || authOpen || sharingCollection)}>
+      <div inert={Boolean(saveState || newCollection || authOpen || sharingCollection || tripCollection)}>
         <DesktopNavigation
           sidebarOpen={sidebarOpen}
           onSidebarOpen={setSidebarOpen}
@@ -481,6 +483,7 @@ function App() {
           onCollectionAction={cloudEnabled ? (name, action) => {
             const item = catalog.find(c => c.name === name)
             if (!item) return
+            if (action === 'plan') { sharingReturnFocus.current = document.activeElement as HTMLElement; setTripCollection(item); return }
             if (action === 'share') { sharingReturnFocus.current = document.activeElement as HTMLElement; setSharingCollection(item); return }
             setManagedCollection(item)
             setCollectionDialogMode(action)
@@ -942,9 +945,11 @@ function App() {
           </button>
         </div>
       )}
+      {tripCollection && session && <ItineraryPlanner key={`${session.sub}:${tripCollection.id}`} collection={tripCollection} places={places.flatMap(p => p.saved && p.saved.collectionId === tripCollection.id ? [p.saved] : [])} onClose={() => { setTripCollection(null); requestAnimationFrame(() => sharingReturnFocus.current?.focus()) }} />}
       {sharingCollection && session && <CollectionSharing key={`${session.sub}:${sharingCollection.id}`} collection={sharingCollection} onClose={() => { setSharingCollection(null); requestAnimationFrame(() => sharingReturnFocus.current?.focus()) }} />}
       {newCollection && (
         <CollectionDialog
+          onPlan={managedCollection && cloudEnabled ? () => { sharingReturnFocus.current = document.querySelector<HTMLElement>('.collection-manage'); setNewCollection(false); setTripCollection(managedCollection) } : undefined}
           onShare={managedCollection && cloudEnabled ? () => { sharingReturnFocus.current = document.querySelector<HTMLElement>('.collection-manage'); setNewCollection(false); setSharingCollection(managedCollection) } : undefined}
           mode={collectionDialogMode}
           collection={managedCollection}
