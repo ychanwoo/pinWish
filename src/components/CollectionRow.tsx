@@ -1,7 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Icon } from './Icon'
+import { pinPalette } from '../lib/map-appearance'
 interface Props {
+  color?: string
   name: string
   count: number
   active: boolean
@@ -11,6 +12,7 @@ interface Props {
 }
 export function CollectionRow({
   name,
+  color = '#a93426',
   count,
   active,
   editable,
@@ -30,8 +32,19 @@ export function CollectionRow({
       const bounds = menu.current.getBoundingClientRect()
       const below = anchor.bottom + 6
       setPosition({
-        left: Math.max(8, Math.min(anchor.right - bounds.width, window.innerWidth - bounds.width - 8)),
-        top: Math.max(8, below + bounds.height <= window.innerHeight - 8 ? below : anchor.top - bounds.height - 6),
+        left: Math.max(
+          8,
+          Math.min(
+            anchor.right - bounds.width,
+            window.innerWidth - bounds.width - 8,
+          ),
+        ),
+        top: Math.max(
+          8,
+          below + bounds.height <= window.innerHeight - 8
+            ? below
+            : anchor.top - bounds.height - 6,
+        ),
       })
     }
     placeMenu()
@@ -46,7 +59,11 @@ export function CollectionRow({
     if (!open) return
     menu.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus()
     const outside = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node) && !menu.current?.contains(event.target as Node)) setOpen(false)
+      if (
+        !root.current?.contains(event.target as Node) &&
+        !menu.current?.contains(event.target as Node)
+      )
+        setOpen(false)
     }
     document.addEventListener('pointerdown', outside)
     return () => document.removeEventListener('pointerdown', outside)
@@ -56,7 +73,10 @@ export function CollectionRow({
       className={`collection-row ${active ? 'active' : ''}`}
       ref={root}
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node) && !menu.current?.contains(event.relatedTarget as Node))
+        if (
+          !event.currentTarget.contains(event.relatedTarget as Node) &&
+          !menu.current?.contains(event.relatedTarget as Node)
+        )
           setOpen(false)
       }}
       onKeyDown={(event) => {
@@ -92,11 +112,31 @@ export function CollectionRow({
       <button
         className={`collection-link ${active ? 'active' : ''}`}
         onClick={onSelect}
+        aria-label={`${name} ${count}`}
       >
-        <Icon name="3e06b" />
-        <span>{name}</span>
+        <svg
+          className="collection-color-icon"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke={color}
+          strokeWidth="1.7"
+          aria-hidden="true"
+        >
+          <path d="M7 5h12v16l-6-4-6 4V5Z" />
+          <path d="M4 17V2h12" />
+        </svg>
+        <span className="collection-label-block">
+          <span className="collection-label-name">{name}</span>
+          <span className="collection-color-caption" aria-hidden="true">
+            {pinPalette.find((p) => p.color === color)?.name ?? 'Custom'} · Map
+            pins
+          </span>
+        </span>
         <span className="count">{count}</span>
       </button>
+
       <button
         type="button"
         className="collection-more"
@@ -112,47 +152,69 @@ export function CollectionRow({
           <circle cx="10" cy="16" r="1.5" />
         </svg>
       </button>
-      {open && createPortal(
-        <div
-          className="collection-menu"
-          style={position}
-          role="menu"
-          aria-label={`${name} options`}
-          ref={menu}
-        >
-          <button role="menuitem" disabled={!editable} onClick={() => { setOpen(false); trigger.current?.focus(); onAction('plan') }}>Plan a trip</button>
-          <button role="menuitem" disabled={!editable} onClick={() => { setOpen(false); trigger.current?.focus(); onAction('share') }}>Share collection</button>
-          <button
-            role="menuitem"
-            disabled={!editable}
-            onClick={() => {
-              setOpen(false)
-              trigger.current?.focus()
-              onAction('rename')
-            }}
+      {open &&
+        createPortal(
+          <div
+            className="collection-menu"
+            style={position}
+            role="menu"
+            aria-label={`${name} options`}
+            ref={menu}
           >
-            Edit name
-          </button>
-          <button
-            role="menuitem"
-            className="collection-menu-delete"
-            disabled={!editable}
-            onClick={() => {
-              setOpen(false)
-              trigger.current?.focus()
-              onAction('delete')
-            }}
-          >
-            Delete
-          </button>
-          {!editable && (
-            <p>
-              Saved places is your default collection and cannot be renamed or
-              deleted.
-            </p>
-          )}
-        </div>, document.body
-      )}
+            <button
+              role="menuitem"
+              disabled={!editable}
+              onClick={() => {
+                setOpen(false)
+                trigger.current?.focus()
+                onAction('plan')
+              }}
+            >
+              Plan a trip
+            </button>
+            <button
+              role="menuitem"
+              disabled={!editable}
+              onClick={() => {
+                setOpen(false)
+                trigger.current?.focus()
+                onAction('share')
+              }}
+            >
+              Share collection
+            </button>
+            <button
+              role="menuitem"
+              disabled={!editable}
+              onClick={() => {
+                setOpen(false)
+                trigger.current?.focus()
+                onAction('rename')
+              }}
+            >
+              Edit name
+            </button>
+            <button
+              role="menuitem"
+              className="collection-menu-delete"
+              disabled={!editable}
+              onClick={() => {
+                setOpen(false)
+                trigger.current?.focus()
+                onAction('delete')
+              }}
+            >
+              Delete
+            </button>
+            {!editable && (
+              <p>
+                Saved places is your default collection and cannot be renamed or
+                deleted.
+              </p>
+            )}
+          </div>,
+          document.body,
+        )}
     </div>
   )
 }

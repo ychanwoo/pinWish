@@ -1,3 +1,4 @@
+import { useMapAppearance } from './hooks/useMapAppearance'
 import { ItineraryPlanner } from './components/ItineraryPlanner'
 import { CollectionSharing } from './components/CollectionSharing'
 import { lazy, Suspense } from 'react'
@@ -114,6 +115,7 @@ function App() {
     cloudEnabled ? ['Saved places'] : ['LA weekend', 'Weekend ideas'],
   )
   const [catalog, setCatalog] = useState<SavedCollection[]>([])
+  const mapAppearance = useMapAppearance(cloudEnabled ? session?.sub : undefined, places, catalog)
   const catalogRef = useRef(catalog)
   useEffect(() => {
     catalogRef.current = catalog
@@ -474,6 +476,7 @@ function App() {
       )}
       <div inert={Boolean(saveState || newCollection || authOpen || sharingCollection || tripCollection)}>
         <DesktopNavigation
+          appearance={mapAppearance}
           sidebarOpen={sidebarOpen}
           onSidebarOpen={setSidebarOpen}
           view={view}
@@ -603,6 +606,7 @@ function App() {
               }
             >
               <LiveMap
+                appearance={mapAppearance}
                 key={session?.sub ?? 'guest'}
                 places={mapPlaces}
                 selectedId={selectedId}
@@ -638,6 +642,9 @@ function App() {
           {view === 'detail' &&
             (!cloudEnabled || places.some((p) => p.id === selectedId)) && (
               <PlaceDetail
+                metadata={mapAppearance.details[selected.id]}
+                metadataError={mapAppearance.errors[selected.id]}
+                onRefreshMetadata={() => mapAppearance.refresh(selected.id)}
                 key={selected.id}
                 place={selected}
                 places={places}

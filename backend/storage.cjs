@@ -1,3 +1,4 @@
+const { createMapDetails } = require('./map-details.cjs')
 const { createItineraries } = require('./itineraries.cjs')
 const { createSharing } = require('./sharing.cjs')
 const { createCollections } = require('./collections.cjs')
@@ -160,6 +161,7 @@ function createHandler({
   table = process.env.TABLE_NAME,
   photoOptions = {},
   itineraryOptions = {},
+  mapDetailsOptions = {},
   jobsTable = process.env.JOBS_TABLE,
 } = {}) {
   const send = (command) => client.send(command)
@@ -199,6 +201,7 @@ function createHandler({
   })
   const sharing = createSharing({ read, send, table, marshal, unmarshal, collections, photos, fail })
   const itineraries = createItineraries({read,send,table,marshal,unmarshal,collections,fail,...itineraryOptions})
+  const mapDetails = createMapDetails({read,send,table,marshal,fail,...mapDetailsOptions})
   const publicItem = (item) => {
     const { pk: _pk, sk: _sk, ...rest } = item
     return rest
@@ -283,6 +286,9 @@ function createHandler({
         if (!body || typeof body !== 'object' || Array.isArray(body))
           fail(400, 'invalid_input')
       }
+      if(event.rawPath === '/map-preferences') return response(200, await mapDetails.preferences(pk, method, body))
+      const detailsRoute = /^\/places\/([a-f0-9]{64})\/details$/.exec(event.rawPath ?? '')
+      if(detailsRoute) { if(method !== 'GET') fail(404,'not_found'); return response(200, await mapDetails.details(pk,detailsRoute[1])) }
       if(prepareTrip) { if(method!=='POST') fail(404,'not_found');return response(200,await itineraries.prepare(pk,prepareTrip[1],body)) }
       if(tripRoute) return response(200,await itineraries.route(pk,method,tripRoute[1],tripRoute[2],body,event.queryStringParameters ?? {}))
       if (collectionRoute) {

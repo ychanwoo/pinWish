@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-11-12T20:33:08.658Z",
+  "passed": true,
+  "checks": [
+    "Metadata and preferences require authentication and owned places",
+    "Actual provider region, time zone and weekly hours are returned and cached",
+    "Collection colors persist per account and reject stale versions",
+    "Color reset and existing visited-state updates persist"
+  ],
+  "cleanupErrors": [],
+  "temporaryUsersDeleted": 2,
+  "note": "Actual AWS API checks. Public place metadata cache expires after seven days; quota bookkeeping after two days. Runtime paused."
+}

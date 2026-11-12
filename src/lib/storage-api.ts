@@ -48,6 +48,10 @@ export interface SavedCollection {
   updatedAt: string
 }
 const errors: Record<string, string> = {
+  details_limit: 'Place details refresh limit reached. Please try again later.',
+  details_unavailable: 'Could not refresh place details. Please retry in a few minutes.',
+  map_preferences_conflict: 'Map colors changed in another tab. The latest colors have been loaded; choose again.',
+  invalid_map_preferences: 'Choose one of the available map colors.',
   invalid_trip_date: 'Choose a valid travel start date.',
   invalid_trip_time: 'Use a valid time for your day and opening hours.',
   invalid_trip_day: 'Plan 2–14 hours per day, between 06:00 and 23:00.',

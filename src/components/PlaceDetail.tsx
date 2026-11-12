@@ -1,3 +1,5 @@
+import { PlaceHours } from './PlaceHours'
+import type { PlaceDetails } from '../lib/map-appearance'
 import { savedDate } from '../lib/place-presentation'
 import { PlaceCoverPhoto } from './PlaceCoverPhoto'
 import type { SavedPlace } from '../lib/storage-api'
@@ -6,6 +8,9 @@ import { asset, placeTags, type Place } from '../data/places'
 import { Icon } from './Icon'
 import { useModalFocus } from '../hooks/useModalFocus'
 interface Props {
+  metadata?: PlaceDetails
+  metadataError?: string
+  onRefreshMetadata?: () => Promise<void>
   collections?: string[]
   onMove?: (collection: string) => Promise<boolean>
   place: Place
@@ -22,6 +27,7 @@ interface Props {
   onSelect: (id: string) => void
 }
 export function PlaceDetail({
+  metadata, metadataError, onRefreshMetadata,
   collections,
   onMove,
   place,
@@ -410,7 +416,7 @@ export function PlaceDetail({
               <Icon name="95284" />
             </button>
           </div>
-          <dl className="place-facts">
+          <dl className={`place-facts ${place.saved && onRefreshMetadata ? 'has-live-hours' : ''}`}>
             <div>
               <dt>Assigned Collection</dt>
               <dd>
@@ -471,9 +477,9 @@ export function PlaceDetail({
               <dt>Address</dt>
               <dd>{place.address}</dd>
             </div>
-            <div>
+            <div className="place-hours-row">
               <dt>Operating Hours</dt>
-              <dd>Hours not available</dd>
+              <dd>{place.saved && onRefreshMetadata ? <PlaceHours data={metadata} error={metadataError} onRefresh={onRefreshMetadata} /> : 'Hours not available'}</dd>
             </div>
           </dl>
           {onDelete && (
