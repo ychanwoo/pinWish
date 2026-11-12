@@ -1,0 +1,26 @@
+{
+  "checkedDate": "2026-11-11",
+  "region": "us-east-1",
+  "source": "AWS Price List API: AmazonLocationService",
+  "prices": [
+    {
+      "sku": "NRP6GJGTTFTDNCMG",
+      "description": "$4.00 per thousand GetPlace request (Stored) in US East (N. Virginia)",
+      "unit": "Address",
+      "usdPerUnit": "0.0040000000",
+      "effectiveDate": "2026-04-01T00:00:00Z"
+    },
+    {
+      "sku": "VSYF5976A4G75QXZ",
+      "description": "$0.50 per thousand total routes calculated from Calculate Route Matrix (Core) in US East (N. Virginia)",
+      "unit": "Route",
+      "usdPerUnit": "0.0005000000",
+      "effectiveDate": "2026-04-01T00:00:00Z"
+    }
+  ],
+  "examples": {
+    "10_places_prepare_and_matrix_usd": 0.09,
+    "20_places_prepare_and_matrix_usd": 0.28
+  },
+  "note": "Excludes free-tier credits, taxes, Lambda, API Gateway, DynamoDB and hosting. Matrix charges count each origin/destination pair."
+}

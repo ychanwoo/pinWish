@@ -276,3 +276,10 @@ links also expire after 30 days or when the original collection is deleted.
 See [sharing behavior, privacy and testing](docs/collection-sharing.md).
 [Itinerary planning and sharing](docs/next-collection-itinerary.md) are recorded
 as the next feature and are not implemented in this branch.
+
+## Collection itineraries
+
+Collection `⋮` → **Plan a trip** (mobile: **Manage collection**). Select 3–20 places,
+review opening hours and visit lengths, then generate, adjust, save and share an
+itinerary. Missing hours are included with an explicit unverified-hours notice; visits are never silently
+scheduled outside known hours. See [itinerary behavior, API and limits](docs/collection-itinerary.md).
