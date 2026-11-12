@@ -111,7 +111,7 @@ test('unknown hours are scheduled with explicit uncertainty; manual hours overri
     'unknown',
   )
 })
-test('unreachable pairs never get zero-minute fake routes, and a fixed duration exposes unplaced stops', () => {
+test('unreachable routes remain explicit while all places receive dedicated days', () => {
   const r = schedule(
     places,
     [
@@ -121,8 +121,11 @@ test('unreachable pairs never get zero-minute fake routes, and a fixed duration 
     ],
     settings({ days: 1 }),
   )
-  assert.equal(r.complete, false)
-  assert.equal(r.unscheduled.length, 2)
+  assert.equal(r.complete, true)
+  assert.equal(r.unscheduled.length, 0)
+  const stops = r.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.equal(stops.filter(s => s.travel === null).length, 2)
 })
 test('manual order stays in order and durations are not shortened to squeeze into a day', () => {
   const s = settings({
@@ -139,7 +142,11 @@ test('manual order stays in order and durations are not shortened to squeeze int
     r.days[0].stops.map((s) => s.id),
     ['2', '0'],
   )
-  assert.equal(r.unscheduled[0].id, '1')
+  assert.equal(r.unscheduled.length, 0)
+  const last = r.days.flatMap(d => d.stops).at(-1)
+  assert.equal(last.id, '1')
+  assert.equal(last.duration, 600)
+  assert.equal(last.hoursSource, 'suggested')
 })
 test('invalid dates, overnight day ranges, malformed manual hours and duplicate stops are rejected', () => {
   for (const extra of [
@@ -200,12 +207,14 @@ test('a longer morning visit is considered before short stops to avoid a needles
   assert.equal(result.days[0].stops[0].id, '0')
 })
 
-test('trailing empty days are removed even when a known closure prevents completion', () => {
+test('visits that exceed opening windows remain clearly marked suggestions', () => {
   const ps = places.map((p) => ({ ...p, hours: h('T220000', 'PT1H') }))
   const result = schedule(ps, matrix, settings({ days: 3 }))
-  assert.equal(result.complete, false)
-  assert.equal(result.dayCount, 0)
-  assert.equal(result.unscheduled.length, 3)
+  assert.equal(result.complete, true)
+  assert.equal(result.unscheduled.length, 0)
+  const stops = result.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.ok(stops.every(s => s.hoursSource === 'suggested'))
 })
 test('two-day trips distribute visits without dropping places or adding days', () => {
   const ps = Array.from({ length: 6 }, (_, i) => ({
@@ -231,4 +240,26 @@ test('two-day trips distribute visits without dropping places or adding days', (
     new Set(result.days.flatMap((d) => d.stops.map((s) => s.id))).size,
     6,
   )
+})
+
+
+test('a full preferred day extends to the next opening weekday with every place exactly once', () => {
+  const ps = places.map(p => ({ ...p, hours: h('T090000', 'PT09H', 'FREQ:WEEKLY;BYDAY:MO') }))
+  const r = schedule(ps, matrix, settings({ days: 1, stops: places.map(p => ({ id: p.id, duration: 300 })) }))
+  assert.equal(r.complete, true)
+  assert.equal(r.unscheduled.length, 0)
+  const stops = r.days.flatMap(d => d.stops)
+  assert.equal(new Set(stops.map(s => s.id)).size, 3)
+  assert.equal(stops.length, 3)
+  assert.ok(r.dayCount > 7)
+  assert.ok(r.days.filter(d => d.stops.length).every(d => new Date(d.date + 'T12:00:00Z').getUTCDay() === 1))
+  assert.ok(stops.every(s => s.hoursSource === 'provider' && s.arrival >= 540 && s.departure <= 1080))
+})
+
+test('tentative late-night visits remain within a calendar day and never claim verified hours', () => {
+  const ps = places.map(p => ({ ...p, hours: h('T220000', 'PT1H') }))
+  const r = schedule(ps, matrix, settings({ days: 1, stops: places.map(p => ({ id: p.id, duration: 600 })) }))
+  const stops = r.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.ok(stops.every(s => s.hoursSource === 'suggested' && s.departure <= 1440 && s.duration === 600))
 })

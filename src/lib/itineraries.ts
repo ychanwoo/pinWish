@@ -36,12 +36,14 @@ export interface ScheduledStop {
   arrival: number
   departure: number
   duration: number
-  travel: number
+  travel: number | null
+  planningNote?: string
   wait: number
   hoursSource: string
   hours: string[]
 }
 export interface TripPlan {
+  adjustments?: string[]
   days: { date: string; stops: ScheduledStop[] }[]
   unscheduled: { id: string; name: string; reason: string }[]
   complete: boolean

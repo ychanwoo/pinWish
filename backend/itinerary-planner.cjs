@@ -298,6 +298,14 @@ function scheduleOnce(places, matrix, settings, dailyLimit = Infinity) {
 // adding days or sacrificing a stop. Confirmed hours and routes remain constraints.
 function schedule(places, matrix, settings) {
   let best = scheduleOnce(places, matrix, settings)
+  const adjustments = []
+  if (!best.complete) {
+    const extended = scheduleOnce(places, matrix, { ...settings, days: 28 })
+    if (extended.unscheduled.length < best.unscheduled.length) {
+      best = extended
+      adjustments.push('Extra dates were added to include your selected places.')
+    }
+  }
   const imbalance = (plan) => {
     const loads = plan.days.map((d) =>
       d.stops.reduce((n, s) => n + s.duration + s.travel, 0),
@@ -327,7 +335,55 @@ function schedule(places, matrix, settings) {
         best = candidate
     }
   }
-  return best
+  // Keep every selection in a saveable recommendation. If normal routing cannot
+  // fit a visit, give it a dedicated day; never claim an unknown route is verified.
+  for (const missing of best.unscheduled) {
+    const stop = settings.stops.find((s) => s.id === missing.id)
+    const p = places.find((p) => p.id === missing.id)
+    const previous = best.days.flatMap((d) => d.stops).at(-1)
+    const rawTravel = previous ? matrix[places.findIndex((p) => p.id === previous.id)]?.[places.indexOf(p)] : 0
+    const travel = Number.isFinite(rawTravel) && rawTravel >= 0 ? rawTravel : null
+    const firstDate = best.days.length ? datePlus(best.days.at(-1).date, 1) : settings.date
+    let choice, suggested
+    // Prefer a full visit inside a real weekly window, even outside daily preferences.
+    for (let n = 0; n < 7; n++) {
+      const date = datePlus(firstDate, n)
+      const windows = windowsOn(p, stop, date)
+      for (const w of windows ?? [{ start: minutes(settings.start), end: 1380 }]) {
+        const arrival = Math.max(w.start, 360 + (travel ?? 0) + (previous ? 10 : 0))
+        if (arrival < w.end && (!suggested || w.end - arrival > suggested.available))
+          suggested = { date, arrival, duration: stop.duration, available: w.end - arrival }
+        if (arrival + stop.duration <= w.end) { choice = { date, arrival, duration: stop.duration }; break }
+      }
+      if (choice) break
+    }
+    let hoursSource = stop.manual ? 'manual' : p.hours.status === 'available' ? 'provider' : 'unknown'
+    let planningNote = 'A dedicated day was added for this visit.'
+    if (!choice) {
+      // No supported opening window can accommodate this duration. Keep the place
+      // as an explicitly tentative suggestion, not a fabricated opening-hours match.
+      choice = suggested ?? { date: firstDate, arrival: minutes(settings.start), duration: stop.duration }
+      choice.arrival = Math.min(choice.arrival, 1440 - choice.duration)
+      hoursSource = 'suggested'
+      planningNote = 'Suggested time only. Available opening windows or transfer time could not accommodate this visit; confirm access and transport before booking.'
+    }
+    if (travel === null) planningNote += ' Route unavailable; arrange transport separately.'
+    const offset = Math.round((Date.parse(choice.date) - Date.parse(settings.date)) / 86400000)
+    while (best.days.length < offset) best.days.push({ date: datePlus(settings.date, best.days.length), stops: [] })
+    best.days.push({ date: choice.date, stops: [{
+      id: p.id, name: p.name, address: p.address, coordinates: p.coordinates,
+      arrival: choice.arrival, departure: choice.arrival + choice.duration,
+      duration: choice.duration, travel, wait: 0, hoursSource,
+      hours: stop.manual ? [`${stop.manual.open}–${stop.manual.close} (user confirmed)`] : p.hours.display,
+      planningNote,
+    }] })
+  }
+  if (best.unscheduled.length) adjustments.push('Some visits use dedicated days or suggested times. Review the notes beside those places.')
+  best.unscheduled = []
+  best.complete = true
+  best.dayCount = best.days.length
+  best.nights = Math.max(0, best.dayCount - 1)
+  return { ...best, adjustments }
 }
 module.exports = {
   hoursFromAWS,

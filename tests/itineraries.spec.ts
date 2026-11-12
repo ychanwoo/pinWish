@@ -234,3 +234,19 @@ test('invalid and revoked public trip links clear content and offer retry', asyn
     page.getByRole('heading', { name: 'Revocable trip' }),
   ).toHaveCount(0)
 })
+
+test('all selected visits remain saveable when their durations exceed listed windows', async ({ page }) => {
+  await setup(page)
+  await enter(page)
+  await page.getByRole('button', { name: 'Review hours & time' }).click()
+  await page.getByLabel('Start date', { exact: true }).fill('2026-11-18')
+  for (const name of ['The Broad', 'Griffith Observatory', 'Museum of Art'])
+    await page.getByLabel(`Visit length for ${name}`).selectOption('600')
+  await page.getByRole('button', { name: 'Create journey', exact: true }).click()
+  await expect(page.locator('.trip-stop-detail')).toHaveCount(3)
+  await expect(page.getByText('Suggested time · confirm opening hours', { exact: true })).toHaveCount(3)
+  await expect(page.getByRole('button', { name: 'Save journey', exact: true })).toBeEnabled()
+  await page.getByRole('button', { name: 'Save journey', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'Your saved trip', exact: true })).toBeVisible()
+  await expect(page.locator('.trip-stop-detail')).toHaveCount(3)
+})

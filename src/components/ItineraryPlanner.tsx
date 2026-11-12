@@ -367,10 +367,10 @@ export function ItineraryPlanner({
                       setSettings((s) => ({ ...s, days: +e.target.value }))
                     }
                   >
-                    <option value={0}>Recommend for me (up to 7 days)</option>
+                    <option value={0}>Recommend for me</option>
                     {Array.from({ length: 7 }, (_, i) => (
                       <option key={i} value={i + 1}>
-                        Up to {i + 1} days
+                        Prefer {i + 1} days
                       </option>
                     ))}
                   </select>
@@ -614,7 +614,7 @@ export function ItineraryPlanner({
                 Listed weekly hours are supplied by Amazon Location. Holiday
                 changes, temporary closures, ticket availability and last
                 admission are not guaranteed. Confirm these with the venue.
-                Manual hours apply to the weekdays you select.
+                Manual hours apply to the weekdays you select. Dates may be extended to include every place. Visits that cannot fit verified hours remain as clearly marked suggested times.
               </p>
             </>
           )}

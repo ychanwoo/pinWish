@@ -204,3 +204,18 @@ test('paid provider preparation is bounded by an atomic per-owner quota',async()
  assert.equal((await f.call('POST','/collections/default/itineraries/prepare',{ids:f.places.map(p=>p.id)})).statusCode,429)
  assert.equal(f.providerCalls.details,calls)
 })
+
+test('overlong visits stay in a saveable preview with explicit suggested-time notes', async () => {
+  const f = await itineraryFixture(), ctx = await prepared(f)
+  const settings = { ...options(f), days: 1, stops: f.places.map(p => ({ id: p.id, duration: 600 })) }
+  const response = await f.call('POST', '/itineraries/preview', { contextId: ctx.contextId, settings })
+  assert.equal(response.statusCode, 200)
+  const preview = json(response)
+  assert.equal(preview.plan.complete, true)
+  const stops = preview.plan.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.ok(stops.every(s => s.hoursSource === 'suggested' && s.planningNote))
+  const saved = await f.call('POST', '/itineraries', { id: randomUUID(), previewId: preview.previewId, name: 'All selected places' })
+  assert.equal(saved.statusCode, 200, saved.body)
+  assert.equal(json(saved).item.plan.days.flatMap(d => d.stops).length, 3)
+})
