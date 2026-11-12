@@ -6,6 +6,7 @@ export default defineConfig({
     'place-photos.spec.ts',
     'collections.spec.ts',
     'sharing.spec.ts',
+    'itineraries.spec.ts',
     'live-data.spec.ts',
   ],
   outputDir: 'test-results/cloud',
