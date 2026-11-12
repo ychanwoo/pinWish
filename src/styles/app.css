@@ -3291,3 +3291,29 @@ a {
   box-shadow: 0 3px 12px #18261b14;
 }
 .place-hover-label .maplibregl-popup-tip { display: none; }
+
+/* Quiet, shared waiting state; the underlying screen and draft stay in place. */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: rgb(249 250 248 / 68%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: progress;
+  outline: none;
+}
+.loading-screen-content { display: flex; flex-direction: column; align-items: center; gap: 18px; color: #354139; font-size: 14px; font-weight: 500; letter-spacing: .015em; }
+.loading-spinner { width: 30px; height: 30px; border: 2px solid rgb(53 65 57 / 16%); border-top-color: #354139; border-radius: 50%; animation: loading-turn .85s linear infinite; }
+.loading-screen .loading-cancel { padding: 6px 12px; background: transparent; border: 0; color: #626b65; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.cloud-list-status .refresh-places-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 1px solid #dce1db; border-radius: 6px; background: #fff; color: #465249; font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; transition: background .15s, border-color .15s; }
+.cloud-list-status .refresh-places-button:hover:not(:disabled) { background: #f3f5f1; border-color: #aeb9ae; }
+.cloud-list-status .refresh-places-button:focus-visible, .loading-cancel:focus-visible { outline: 2px solid #426b57; outline-offset: 3px; }
+.refresh-places-button:disabled { opacity: .5; cursor: progress; }
+@keyframes loading-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; border-style: dotted; } }

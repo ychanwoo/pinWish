@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useEffect, useRef, useState } from 'react'
 import type { SavedCollection, SavedPlace } from '../lib/storage-api'
 import {
@@ -47,6 +48,7 @@ export function ItineraryPlanner({
     [busy, setBusy] = useState(''),
     [message, setMessage] = useState(''),
     [confirmation, setConfirmation] = useState<'delete' | 'stop' | null>(null)
+  const [loadingTrips, setLoadingTrips] = useState(true)
   const pending = useRef(false),
     alive = useRef(true),
     saveId = useRef(crypto.randomUUID()),
@@ -71,6 +73,7 @@ export function ItineraryPlanner({
       .catch((e) => {
         if (alive.current) setError(e.message)
       })
+      .finally(() => { if (alive.current) setLoadingTrips(false) })
   }, [collection.id])
   useEffect(() => {
     heading.current?.focus()
@@ -185,6 +188,7 @@ export function ItineraryPlanner({
   const current = step === 'saved' ? saved : preview
   return (
     <div className="trip-overlay" ref={root}>
+      <LoadingOverlay active={!!busy || loadingTrips} />
       <section
         className="trip-dialog"
         role="dialog"

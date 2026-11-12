@@ -303,7 +303,7 @@ test('empty results and edited or cancelled searches never enable saving', async
   await search(page)
   await expect(page.getByText('No places found', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Search', exact: true }).click()
-  await page.getByRole('button', { name: 'Stop search', exact: true }).click()
+  await page.locator('.loading-screen').getByRole('button', { name: 'Cancel', exact: true }).click()
   await expect(
     page.getByRole('button', { name: 'Add to map', exact: true }),
   ).toBeDisabled()

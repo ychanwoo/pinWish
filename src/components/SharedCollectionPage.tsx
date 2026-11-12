@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import {
   lazy,
   Suspense,
@@ -268,6 +269,7 @@ export default function SharedCollectionPage({ token }: { token: string }) {
         </a>
         <span>Shared collection · Read only</span>
       </header>
+      <LoadingOverlay active={loading && !data} />
       {loading && !data ? (
         <main className="shared-message" role="status">
           Loading collection…

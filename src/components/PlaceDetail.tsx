@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { PlaceHours } from './PlaceHours'
 import type { PlaceDetails } from '../lib/map-appearance'
 import { savedDate } from '../lib/place-presentation'
@@ -68,6 +69,7 @@ export function PlaceDetail({
       : [place.photo]
   return (
     <>
+      <LoadingOverlay active={deleteBusy || noteBusy || moveBusy} />
       <header className="mobile-detail-header">
         <button
           className="icon-button"

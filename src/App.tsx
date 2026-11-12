@@ -1,3 +1,4 @@
+import { LoadingOverlay, RefreshIcon } from './components/LoadingOverlay'
 import { useMapAppearance } from './hooks/useMapAppearance'
 import { ItineraryPlanner } from './components/ItineraryPlanner'
 import { CollectionSharing } from './components/CollectionSharing'
@@ -425,6 +426,7 @@ function App() {
     <div
       className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'} view-${view} ${saveState ? 'has-save' : ''} ${cloudEnabled ? 'cloud-enabled' : ''}`}
     >
+      <LoadingOverlay active={cloudLoading && !authOpen && !saveState && !tripCollection && !sharingCollection && !newCollection} />
       <a className="skip-link" href="#main-content">
         Skip to places
       </a>
@@ -539,12 +541,14 @@ function App() {
               ) : (
                 <>
                   <button
+                    className="refresh-places-button"
                     disabled={cloudLoading}
                     onClick={() => void loadPlaces()}
                   >
-                    Refresh places
+                    <RefreshIcon />
+                    <span>Refresh places</span>
                   </button>
-                  {cloudLoading && <p role="status">Loading your places…</p>}
+
                   {cloudError && (
                     <p role="alert" className="field-error">
                       {cloudError}

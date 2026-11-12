@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useEffect, useRef, useState } from 'react'
 import { processingRequest } from '../lib/processing-api'
 import {
@@ -287,6 +288,7 @@ export function DirectPlace(props: Props) {
   const saving = busy === 'save' || busy === 'collection'
   return (
     <div className="save-overlay direct-overlay">
+      <LoadingOverlay active={!!busy} onCancel={!saving ? cancel : undefined} />
       <div
         className="save-dialog direct-dialog"
         role="dialog"
@@ -365,18 +367,6 @@ export function DirectPlace(props: Props) {
                 </button>
               </div>
             </form>
-          )}
-          {(busy === 'search' || busy === 'details') && (
-            <div className="direct-progress" role="status">
-              <span>
-                {busy === 'search'
-                  ? 'Searching places…'
-                  : 'Checking place details…'}
-              </span>
-              <button type="button" onClick={cancel}>
-                Stop search
-              </button>
-            </div>
           )}
           {error && (
             <p className="direct-error" role="alert">

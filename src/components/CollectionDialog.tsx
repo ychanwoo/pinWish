@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useRef, useState } from 'react'
 import type { SavedCollection } from '../lib/storage-api'
 import { useModalFocus } from '../hooks/useModalFocus'
@@ -53,6 +54,7 @@ export function CollectionDialog({
   }
   return (
     <div className="simple-overlay" ref={ref}>
+      <LoadingOverlay active={busy} />
       <form
         className="simple-dialog collection-dialog"
         role="dialog"
