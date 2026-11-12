@@ -65,6 +65,8 @@ const errors: Record<string, string> = {
   itinerary_context_expired: 'Opening hours need refreshing. Go back to Choose places and review hours again.',
   itinerary_provider_unavailable: 'Could not retrieve opening hours or routes. Your choices are kept; try again.',
   itinerary_provider_busy: 'The map provider is busy. Wait a moment and retry.',
+  itinerary_hourly_limit: 'The hourly trip lookup limit has been reached. Try again at the start of the next hour. Existing saved journeys are still available.',
+  itinerary_daily_limit: 'Today’s shared trip lookup budget has been reached. It resets at midnight UTC. Existing saved journeys are still available.',
   itinerary_limit: 'The trip lookup limit has been reached. Try again later; existing saved trips remain available.',
   itinerary_incomplete: 'Resolve the unscheduled places before saving.',
   itinerary_conflict: 'This journey changed in another tab. Reopen it before making changes.',

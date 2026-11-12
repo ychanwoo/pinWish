@@ -72,7 +72,7 @@ function createItineraries({
         )
       } catch (e) {
         if (e.name === 'ConditionalCheckFailedException')
-          fail(429, 'itinerary_limit')
+          fail(429, key.startsWith('GLOBAL#') ? 'itinerary_daily_limit' : 'itinerary_hourly_limit')
         throw e
       }
     }
@@ -119,6 +119,17 @@ function createItineraries({
     )
     if (rows.some((p) => !p || collections.resolve(catalog, p).id !== id))
       fail(409, 'itinerary_places_changed')
+    // Validate ownership and collection membership before using any cached data.
+    const lookupKey = 'TRIPCTXLOOKUP#' + digest(JSON.stringify([id, rows.map(p => [
+      p.id, p.placeId, p.displayName ?? p.name, p.address, p.coordinates,
+    ])]))
+    const lookup = await read({ pk, sk: lookupKey })
+    if (lookup?.expiresAt > now()) {
+      const cached = await read({ pk, sk: 'TRIPCTX#' + lookup.contextId })
+      if (cached?.expiresAt > now()) return {
+        contextId: cached.id, places: cached.places, zone: cached.zone, checkedAt: cached.checkedAt,
+      }
+    }
     await quota(pk)
     const places = []
     const deadline = AbortSignal.timeout(15000)
@@ -175,6 +186,7 @@ function createItineraries({
       checkedAt,
       expiresAt: now() + 3600,
     })
+    await put({ pk, sk: lookupKey, contextId, expiresAt: now() + 3600 })
     return { contextId, places, zone: places[0].zone, checkedAt }
   }
   async function preview(pk, body) {
