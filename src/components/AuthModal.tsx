@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useState } from 'react'
 import { useModalFocus } from '../hooks/useModalFocus'
 import {
@@ -60,6 +61,7 @@ export function AuthModal({
   }
   return (
     <div className="auth-overlay" ref={modal}>
+      <LoadingOverlay active={busy} />
       <section
         className="auth-card"
         role="dialog"

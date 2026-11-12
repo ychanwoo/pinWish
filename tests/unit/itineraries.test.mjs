@@ -199,8 +199,52 @@ test('collection deletion disables existing itinerary shares and update version 
 
 test('paid provider preparation is bounded by an atomic per-owner quota',async()=>{
  const f=await itineraryFixture()
- for(let i=0;i<6;i++) await prepared(f)
+ for(let i=0;i<6;i++) {
+  for(const [key] of f.client.data) if(key.includes('TRIPCTXLOOKUP#')) f.client.data.delete(key)
+  await prepared(f)
+ }
+ for(const [key] of f.client.data) if(key.includes('TRIPCTXLOOKUP#')) f.client.data.delete(key)
  const calls=f.providerCalls.details
  assert.equal((await f.call('POST','/collections/default/itineraries/prepare',{ids:f.places.map(p=>p.id)})).statusCode,429)
  assert.equal(f.providerCalls.details,calls)
+})
+
+test('overlong visits stay in a saveable preview with explicit suggested-time notes', async () => {
+  const f = await itineraryFixture(), ctx = await prepared(f)
+  const settings = { ...options(f), days: 1, stops: f.places.map(p => ({ id: p.id, duration: 600 })) }
+  const response = await f.call('POST', '/itineraries/preview', { contextId: ctx.contextId, settings })
+  assert.equal(response.statusCode, 200)
+  const preview = json(response)
+  assert.equal(preview.plan.complete, true)
+  const stops = preview.plan.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.ok(stops.every(s => s.hoursSource === 'suggested' && s.planningNote))
+  const saved = await f.call('POST', '/itineraries', { id: randomUUID(), previewId: preview.previewId, name: 'All selected places' })
+  assert.equal(saved.statusCode, 200, saved.body)
+  assert.equal(json(saved).item.plan.days.flatMap(d => d.stops).length, 3)
+})
+
+
+test('repeated preparation reuses owner context and route cache without spending lookup quota', async () => {
+  const f = await itineraryFixture(), first = await prepared(f)
+  for (let n = 0; n < 10; n++) assert.equal((await prepared(f)).contextId, first.contextId)
+  assert.equal(f.providerCalls.details, 3)
+  for (let n = 0; n < 2; n++) {
+    const ctx = await prepared(f)
+    const response = await f.call('POST', '/itineraries/preview', { contextId: ctx.contextId, settings: options(f) })
+    assert.equal(response.statusCode, 200)
+  }
+  assert.equal(f.providerCalls.matrix, 1)
+  // Fixture owner partitions use the storage handler's USER# prefix.
+  const key = [...f.client.data.keys()].find(k => k.endsWith('|PLACE#' + f.places[0].id))
+  f.client.data.delete(key)
+  assert.equal((await f.call('POST', '/collections/default/itineraries/prepare', { ids: f.places.map(p => p.id) })).statusCode, 409)
+})
+
+test('expired preparation cache refreshes real place data', async () => {
+  const f = await itineraryFixture(), first = await prepared(f)
+  const key = [...f.client.data.keys()].find(k => k.endsWith('TRIPCTX#' + first.contextId))
+  f.client.data.get(key).expiresAt = 0
+  assert.notEqual((await prepared(f)).contextId, first.contextId)
+  assert.equal(f.providerCalls.details, 6)
 })

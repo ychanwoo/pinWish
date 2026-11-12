@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useEffect, useRef, useState } from 'react'
 import type { SavedCollection, SavedPlace } from '../lib/storage-api'
 import {
@@ -47,6 +48,7 @@ export function ItineraryPlanner({
     [busy, setBusy] = useState(''),
     [message, setMessage] = useState(''),
     [confirmation, setConfirmation] = useState<'delete' | 'stop' | null>(null)
+  const [loadingTrips, setLoadingTrips] = useState(true)
   const pending = useRef(false),
     alive = useRef(true),
     saveId = useRef(crypto.randomUUID()),
@@ -71,6 +73,7 @@ export function ItineraryPlanner({
       .catch((e) => {
         if (alive.current) setError(e.message)
       })
+      .finally(() => { if (alive.current) setLoadingTrips(false) })
   }, [collection.id])
   useEffect(() => {
     heading.current?.focus()
@@ -185,6 +188,7 @@ export function ItineraryPlanner({
   const current = step === 'saved' ? saved : preview
   return (
     <div className="trip-overlay" ref={root}>
+      <LoadingOverlay active={!!busy || loadingTrips} />
       <section
         className="trip-dialog"
         role="dialog"
@@ -363,10 +367,10 @@ export function ItineraryPlanner({
                       setSettings((s) => ({ ...s, days: +e.target.value }))
                     }
                   >
-                    <option value={0}>Recommend for me (up to 7 days)</option>
+                    <option value={0}>Recommend for me</option>
                     {Array.from({ length: 7 }, (_, i) => (
                       <option key={i} value={i + 1}>
-                        Up to {i + 1} days
+                        Prefer {i + 1} days
                       </option>
                     ))}
                   </select>
@@ -610,7 +614,7 @@ export function ItineraryPlanner({
                 Listed weekly hours are supplied by Amazon Location. Holiday
                 changes, temporary closures, ticket availability and last
                 admission are not guaranteed. Confirm these with the venue.
-                Manual hours apply to the weekdays you select.
+                Manual hours apply to the weekdays you select. Dates may be extended to include every place. Visits that cannot fit verified hours remain as clearly marked suggested times.
               </p>
             </>
           )}

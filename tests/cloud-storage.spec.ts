@@ -544,3 +544,30 @@ test('a Korean overseas post automatically saves and opens its English map pin w
   await expect(page.locator('#place-heading')).toHaveText('Museum')
   expect(await page.locator('body').innerText()).not.toMatch(/\p{Script=Hangul}/u)
 })
+
+test('loading overlay covers sign-in, clears on failure, and restores the form', async ({ page }) => {
+  await setup(page)
+  let release!: () => void
+  const gate = new Promise<void>((resolve) => { release = resolve })
+  await page.route('https://cognito-idp.us-east-1.amazonaws.com/**', async (route) => {
+    await gate
+    await route.fulfill({ status: 400, json: { __type: 'NotAuthorizedException', message: 'Incorrect username or password.' } })
+  })
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Sign in', exact: true }).last().first().click()
+  const modal = page.getByRole('dialog')
+  await modal.getByLabel('Email', { exact: true }).fill('person@example.com')
+  await modal.getByLabel('Password', { exact: true }).fill('Password123!')
+  await modal.getByRole('button', { name: 'Sign in', exact: true }).last().click()
+  const loading = page.locator('.loading-screen')
+  await expect(loading).toBeVisible()
+  await expect(loading).toContainText('Loading…')
+  await expect(loading).toHaveCSS('backdrop-filter', 'blur(6px)')
+  await page.keyboard.press('Escape')
+  await expect(loading).toBeVisible()
+  await page.screenshot({ path: '/tmp/pinwish-loading-screen.png' })
+  release()
+  await expect(loading).toHaveCount(0)
+  await expect(modal.getByLabel('Email', { exact: true })).toHaveValue('person@example.com')
+  await expect(modal.getByRole('button', { name: 'Sign in', exact: true }).last()).toBeEnabled()
+})

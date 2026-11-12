@@ -1,3 +1,5 @@
+import type { MapAppearance } from '../hooks/useMapAppearance'
+import { MapAppearancePanel } from './MapAppearancePanel'
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
 import type { GeoJSONSource, Map as MapInstance } from 'maplibre-gl'
@@ -8,6 +10,7 @@ import type { Place } from '../data/places'
 import { mapCoordinates, placeFeatures } from '../lib/map-data'
 
 interface Props {
+  appearance?: MapAppearance
   places: Place[]
   selectedId: string
   onSelect: (place: Place) => void
@@ -22,6 +25,7 @@ const duration = () =>
 export default function LiveMap(props: Props) {
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<MapInstance | null>(null)
+  const hoverLabel = useRef<maplibregl.Popup | null>(null)
   const latest = useRef(props)
   useEffect(() => {
     latest.current = props
@@ -71,6 +75,17 @@ export default function LiveMap(props: Props) {
       return
     }
     map.current = m
+    const label = new maplibregl.Popup({
+      closeButton: false, closeOnClick: true, focusAfterOpen: false,
+      offset: 20, maxWidth: '240px', className: 'place-hover-label',
+    })
+    hoverLabel.current = label
+    const hideLabel = () => { label.remove() }
+    const escapeLabel = (event: KeyboardEvent) => { if (event.key === 'Escape') hideLabel() }
+    m.getCanvas().addEventListener('mouseleave', hideLabel)
+    document.addEventListener('keydown', escapeLabel)
+    m.on('movestart', hideLabel)
+    m.on('click', hideLabel)
     m.addControl(
       new maplibregl.NavigationControl({ showCompass: false }),
       'bottom-right',
@@ -91,7 +106,11 @@ export default function LiveMap(props: Props) {
       clearTimeout(timeout)
       m.addSource('places', {
         type: 'geojson',
-        data: placeFeatures(latest.current.places),
+        data: placeFeatures(
+          latest.current.places,
+          latest.current.appearance?.details,
+          latest.current.appearance?.colors,
+        ),
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 44,
@@ -102,7 +121,7 @@ export default function LiveMap(props: Props) {
         source: 'places',
         filter: ['has', 'point_count'],
         paint: {
-          'circle-color': '#a93426',
+          'circle-color': '#4b5650',
           'circle-radius': 22,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#fff',
@@ -125,8 +144,8 @@ export default function LiveMap(props: Props) {
         source: 'places',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-radius': 9,
-          'circle-color': '#a93426',
+          'circle-radius': 11,
+          'circle-color': ['get', 'color'],
           'circle-stroke-width': 3,
           'circle-stroke-color': '#fff',
         },
@@ -138,11 +157,42 @@ export default function LiveMap(props: Props) {
         source: 'selection',
         paint: {
           'circle-radius': 14,
-          'circle-color': '#a93426',
+          'circle-color': ['get', 'color'],
           'circle-stroke-color': '#1b2923',
           'circle-stroke-width': 4,
         },
       })
+      const check = document.createElement('canvas')
+      check.width = 24
+      check.height = 24
+      const ctx = check.getContext('2d')!
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 3.2
+      ctx.lineCap = 'round'
+      ctx.lineJoin = 'round'
+      ctx.beginPath()
+      ctx.moveTo(6, 12)
+      ctx.lineTo(10, 16)
+      ctx.lineTo(18, 7)
+      ctx.stroke()
+      m.addImage('visited-check', ctx.getImageData(0, 0, 24, 24))
+      for (const source of ['places', 'selection'])
+        m.addLayer({
+          id: source + '-visited',
+          type: 'symbol',
+          source,
+          filter: [
+            'all',
+            ['!', ['has', 'point_count']],
+            ['==', ['get', 'visited'], true],
+          ],
+          layout: {
+            'icon-image': 'visited-check',
+            'icon-size': 0.75,
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
+          },
+        })
       m.on('click', 'pins', (event) => {
         const place = latest.current.places.find(
           (p) => p.id === event.features?.[0]?.properties.id,
@@ -175,6 +225,18 @@ export default function LiveMap(props: Props) {
             )
         }
       })
+      m.on('mousemove', (event) => {
+        if (!matchMedia('(hover: hover)').matches || m.isMoving()) return
+        const features = m.queryRenderedFeatures(event.point, { layers: ['selected-pin', 'pins'] })
+        const feature = features.find(f => f.layer.id === 'selected-pin') ?? features[0]
+        const place = latest.current.places.find(p => p.id === feature?.properties.id)
+        if (!place || feature?.geometry.type !== 'Point') { hideLabel(); return }
+        const coordinates = [...feature.geometry.coordinates] as [number, number]
+        while (Math.abs(event.lngLat.lng - coordinates[0]) > 180)
+          coordinates[0] += event.lngLat.lng > coordinates[0] ? 360 : -360
+        // Provider names are text, never HTML.
+        label.setLngLat(coordinates).setText(place.name).addTo(m)
+      })
       for (const layer of ['pins', 'clusters', 'selected-pin']) {
         m.on('mouseenter', layer, () => {
           m.getCanvas().style.cursor = 'pointer'
@@ -192,19 +254,34 @@ export default function LiveMap(props: Props) {
       disposed = true
       clearTimeout(timeout)
       observer.disconnect()
+      hideLabel()
+      hoverLabel.current = null
+      m.getCanvas().removeEventListener('mouseleave', hideLabel)
+      document.removeEventListener('keydown', escapeLabel)
       map.current = null
       m.remove()
     }
   }, [attempt])
-  const signature = valid
-    .map((p) => `${p.id}:${mapCoordinates(p)}`)
-    .join('|')
+  const signature = valid.map((p) => `${p.id}:${mapCoordinates(p)}`).join('|')
   useEffect(() => {
     if (!ready || !map.current) return
+    hoverLabel.current?.remove()
     ;(map.current.getSource('places') as GeoJSONSource).setData(
-      placeFeatures(latest.current.places),
+      placeFeatures(
+        latest.current.places,
+        latest.current.appearance?.details,
+        latest.current.appearance?.colors,
+      ),
     )
-    fit()
+  }, [
+    signature,
+    ready,
+    props.places,
+    props.appearance?.details,
+    props.appearance?.colors,
+  ])
+  useEffect(() => {
+    if (ready) fit()
   }, [signature, ready])
   useEffect(() => {
     if (!ready || !map.current) return
@@ -212,7 +289,24 @@ export default function LiveMap(props: Props) {
       (p) => p.id === props.selectedId,
     )
     ;(map.current.getSource('selection') as GeoJSONSource).setData(
-      placeFeatures(selected ? [selected] : []),
+      placeFeatures(
+        selected ? [selected] : [],
+        latest.current.appearance?.details,
+        latest.current.appearance?.colors,
+      ),
+    )
+  }, [
+    props.selectedId,
+    signature,
+    ready,
+    props.places,
+    props.appearance?.details,
+    props.appearance?.colors,
+  ])
+  useEffect(() => {
+    if (!ready || !map.current) return
+    const selected = latest.current.places.find(
+      (p) => p.id === props.selectedId,
     )
     const center = selected && mapCoordinates(selected)
     if (center)
@@ -248,7 +342,9 @@ export default function LiveMap(props: Props) {
             </option>
             {valid.map((p) => (
               <option key={p.id} value={p.id}>
+                {p.visited ? '✓ ' : ''}
                 {p.name}
+                {p.visited ? ' · Visited' : ''}
               </option>
             ))}
           </select>
@@ -256,6 +352,11 @@ export default function LiveMap(props: Props) {
         <button onClick={fit} disabled={!ready || !valid.length}>
           Show all
         </button>
+        {props.appearance && (
+          <MapAppearancePanel
+            appearance={props.appearance}
+          />
+        )}
       </div>
       {(!key ||
         error ||
@@ -290,8 +391,8 @@ export default function LiveMap(props: Props) {
       )}
       {valid.length < props.places.length && (
         <p className="live-map-invalid" role="status">
-          {props.places.length - valid.length} places have invalid
-          coordinates and are shown only in the list.
+          {props.places.length - valid.length} places have invalid coordinates
+          and are shown only in the list.
         </p>
       )}
     </section>

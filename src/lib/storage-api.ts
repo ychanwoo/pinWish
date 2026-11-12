@@ -48,6 +48,10 @@ export interface SavedCollection {
   updatedAt: string
 }
 const errors: Record<string, string> = {
+  details_limit: 'Place details refresh limit reached. Please try again later.',
+  details_unavailable: 'Could not refresh place details. Please retry in a few minutes.',
+  map_preferences_conflict: 'Map colors changed in another tab. The latest colors have been loaded; choose again.',
+  invalid_map_preferences: 'Choose one of the available map colors.',
   invalid_trip_date: 'Choose a valid travel start date.',
   invalid_trip_time: 'Use a valid time for your day and opening hours.',
   invalid_trip_day: 'Plan 2–14 hours per day, between 06:00 and 23:00.',
@@ -61,6 +65,8 @@ const errors: Record<string, string> = {
   itinerary_context_expired: 'Opening hours need refreshing. Go back to Choose places and review hours again.',
   itinerary_provider_unavailable: 'Could not retrieve opening hours or routes. Your choices are kept; try again.',
   itinerary_provider_busy: 'The map provider is busy. Wait a moment and retry.',
+  itinerary_hourly_limit: 'The hourly trip lookup limit has been reached. Try again at the start of the next hour. Existing saved journeys are still available.',
+  itinerary_daily_limit: 'Today’s shared trip lookup budget has been reached. It resets at midnight UTC. Existing saved journeys are still available.',
   itinerary_limit: 'The trip lookup limit has been reached. Try again later; existing saved trips remain available.',
   itinerary_incomplete: 'Resolve the unscheduled places before saving.',
   itinerary_conflict: 'This journey changed in another tab. Reopen it before making changes.',

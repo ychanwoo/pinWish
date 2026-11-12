@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useEffect, useRef, useState } from 'react'
 import { useModalFocus } from '../hooks/useModalFocus'
 import type { SavedCollection } from '../lib/storage-api'
@@ -74,6 +75,7 @@ export function CollectionSharing({
   }
   return (
     <div className="simple-overlay" ref={root}>
+      <LoadingOverlay active={busy} />
       <section
         className="simple-dialog share-dialog"
         role="dialog"

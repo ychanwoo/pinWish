@@ -1,7 +1,10 @@
+import type { MapAppearance } from '../hooks/useMapAppearance'
+import { collectionColor } from '../lib/map-appearance'
 import { CollectionRow } from './CollectionRow'
 import { Brand, Icon } from './Icon'
 import { inCollection, type Place, type View } from '../data/places'
 interface Props {
+  appearance?: MapAppearance
   onCollectionAction?: (name: string, action: 'rename' | 'delete' | 'share' | 'plan') => void
   canManageCollection?: (name: string) => boolean
   persistent?: boolean
@@ -21,6 +24,7 @@ interface Props {
   onNotice: (value: string) => void
 }
 export function DesktopNavigation({
+  appearance,
   persistent = false,
   onCollectionAction,
   canManageCollection,
@@ -225,6 +229,7 @@ export function DesktopNavigation({
                 <CollectionRow
                   key={c}
                   name={c}
+                  color={collectionColor(appearance?.collections.find(item=>item.name===c)?.id ?? c, appearance?.colors ?? {})}
                   count={places.filter((p) => p.collection === c).length}
                   active={collection === c}
                   editable={!!canManageCollection?.(c)}

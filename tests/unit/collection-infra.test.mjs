@@ -38,3 +38,12 @@ test('anonymous sharing is limited to read-only routes with throttling and expir
  assert.deepEqual(r.Places.Properties.TimeToLiveSpecification, { AttributeName:'expiresAt', Enabled:true })
  assert.ok(r.SharedPermission.Properties.SourceArn['Fn::Sub'].endsWith('${Api}/*/GET/shared/*'))
 })
+
+test('map metadata and preferences remain JWT-protected with a scoped preferences permission',()=>{
+ const {Resources:r}=JSON.parse(readFileSync('infra/generated/storage.json','utf8'))
+ for(const key of ['GET /map-preferences','PATCH /map-preferences','GET /places/{id}/details']){
+   const route=Object.values(r).find(x=>x.Type==='AWS::ApiGatewayV2::Route'&&x.Properties.RouteKey===key)
+   assert.equal(route.Properties.AuthorizationType,'JWT')
+ }
+ assert.ok(r.MapPreferencesPermission.Properties.SourceArn['Fn::Sub'].endsWith('${Api}/*/*/map-preferences'))
+})

@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { processingRequest } from '../lib/processing-api'
 import { AutomaticPlaces } from './AutomaticPlaces'
 import type {
@@ -541,6 +542,7 @@ export function SavePlace({
                     : 'Find place'
   return (
     <div className="save-overlay">
+      <LoadingOverlay active={busy} onCancel={state === 'resolving' ? editOriginal : undefined} />
       <div
         className={`save-dialog save-${state}`}
         role="dialog"

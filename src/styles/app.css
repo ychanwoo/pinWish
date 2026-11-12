@@ -3232,3 +3232,88 @@ a {
   letter-spacing: 0;
   line-height: 1.5;
 }
+
+/* Map controls share the quiet, compact typography of the place sidebar. */
+.map-appearance { position: relative; }
+.live-map-toolbar { flex-wrap: wrap; }
+.map-color-panel { max-height: calc(100dvh - 180px); overflow-y: auto; position: absolute; top: calc(100% + 10px); right: 0; width: 320px; max-width: calc(100vw - 40px); padding: 20px; border: 1px solid #e0e4dd; border-radius: 8px; background: #fff; box-shadow: 0 8px 28px #18261b18; z-index: 6; color: #202923; }
+.map-color-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.map-color-heading h2 { margin: 0; font-size: 16px; font-weight: 500; letter-spacing: -.2px; }
+.live-map-toolbar .map-color-heading button { border: 0; box-shadow: none; padding: 0; min-width: 28px; font-size: 24px; color: #777069; }
+.map-color-panel p { font-size: 12px; line-height: 1.65; margin: 10px 0 16px; color: #777069; }
+.map-color-regions { max-height: min(45dvh, 360px); overflow-y: auto; }
+.map-color-regions fieldset { border: 0; border-top: 1px solid #edf0e9; padding: 16px 0; margin: 0; min-width: 0; }
+.map-color-regions legend { font-size: 13px; font-weight: 500; padding: 0 8px 0 0; max-width: 100%; overflow-wrap: anywhere; }
+.map-color-regions legend span { margin-left: 6px; color: #817b73; font-size: 11px; font-weight: 400; }
+.map-color-regions small { display: block; font-size: 11px; color: #817b73; margin-bottom: 10px; }
+.map-color-options { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.live-map-toolbar .map-color-options button:not(.map-color-reset) { background: var(--swatch); width: 26px; height: 26px; min-width: 26px; padding: 0; border: 3px solid #fff; border-radius: 50%; box-shadow: none; }
+.live-map-toolbar .map-color-options button[aria-pressed=true] { outline: 1px solid #293a30; outline-offset: 2px; }
+.live-map-toolbar .map-color-options button:focus-visible { outline: 2px solid #293a30; outline-offset: 3px; }
+.live-map-toolbar .map-color-reset { border: 0; box-shadow: none; padding: 6px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; color: #777069; background: none; }
+.map-pin-legend { border-top: 1px solid #e3e7df; padding-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 11px; color: #626b63; }
+.place-hours-detail { text-align: right; font-size: 12px; line-height: 1.65; }
+.place-hours-detail small { display: block; color: #817b73; font-size: 11px; margin-top: 5px; }
+.place-hours-detail details { margin-top: 6px; }
+.place-hours-detail summary { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.place-hours-detail p { margin: 4px 0; }
+.place-hours-detail button { background: none; border: 0; padding: 6px 0; color: #a93426; text-decoration: underline; }
+@media(max-width:700px) {
+  .map-appearance { position: static; }
+  .map-color-panel { left: 0; right: auto; top: calc(100% + 8px); width: min(320px, calc(100vw - 40px)); max-height: calc(100dvh - 230px); overflow-y: auto; }
+}
+
+@media(max-width:767px) {
+  .place-facts.has-live-hours { display: block; padding: 16px 0; margin: 20px 0; box-shadow: none; border-top: 1px solid #e3e7df; }
+  .place-facts.has-live-hours > div:not(.place-hours-row) { display: none; }
+  .place-facts.has-live-hours .place-hours-row { display: block; padding: 0; }
+  .place-hours-row dt { margin-bottom: 10px; }
+  .place-hours-row dd, .place-hours-detail { text-align: left; }
+}
+
+.collection-row > .collection-link > .collection-label-block { display: flex; flex-direction: column; gap: 4px; min-width: 0; white-space: normal; text-align: left; }
+.collection-label-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.collection-color-icon { flex: 0 0 24px; }
+.collection-color-caption { font-size: 10px; line-height: 1.4; color: #817b73; font-weight: 400; }
+
+.place-hover-label { pointer-events: none; }
+.place-hover-label .maplibregl-popup-content {
+  padding: 8px 12px;
+  border: 1px solid #e3e7e0;
+  border-radius: 5px;
+  background: #fff;
+  color: #25312a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  box-shadow: 0 3px 12px #18261b14;
+}
+.place-hover-label .maplibregl-popup-tip { display: none; }
+
+/* Quiet, shared waiting state; the underlying screen and draft stay in place. */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: rgb(249 250 248 / 68%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: progress;
+  outline: none;
+}
+.loading-screen-content { display: flex; flex-direction: column; align-items: center; gap: 18px; color: #354139; font-size: 14px; font-weight: 500; letter-spacing: .015em; }
+.loading-spinner { width: 30px; height: 30px; border: 2px solid rgb(53 65 57 / 16%); border-top-color: #354139; border-radius: 50%; animation: loading-turn .85s linear infinite; }
+.loading-screen .loading-cancel { padding: 6px 12px; background: transparent; border: 0; color: #626b65; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.cloud-list-status .refresh-places-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 1px solid #dce1db; border-radius: 6px; background: #fff; color: #465249; font-size: 12px; font-weight: 500; line-height: 1; white-space: nowrap; transition: background .15s, border-color .15s; }
+.cloud-list-status .refresh-places-button:hover:not(:disabled) { background: #f3f5f1; border-color: #aeb9ae; }
+.cloud-list-status .refresh-places-button:focus-visible, .loading-cancel:focus-visible { outline: 2px solid #426b57; outline-offset: 3px; }
+.refresh-places-button:disabled { opacity: .5; cursor: progress; }
+@keyframes loading-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; border-style: dotted; } }

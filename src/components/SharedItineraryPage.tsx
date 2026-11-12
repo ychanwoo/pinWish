@@ -1,3 +1,4 @@
+import { LoadingOverlay } from './LoadingOverlay'
 import { useEffect, useState } from 'react'
 import { cloudConfig } from '../lib/cloud-auth'
 import type { SavedTrip } from '../lib/itineraries'
@@ -65,6 +66,7 @@ export default function SharedItineraryPage({ token }: { token: string }) {
   }, [token, retry])
   return (
     <div className="trip-public">
+      <LoadingOverlay active={!trip && !error} />
       <header>
         <a href="/">pinWish</a>
         <span>Shared journey · Read only</span>

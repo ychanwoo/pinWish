@@ -730,6 +730,9 @@ for (const [i, route] of [
   'DELETE /itineraries/{id}',
   'POST /itineraries/{id}/sharing',
   'DELETE /itineraries/{id}/sharing',
+  'GET /map-preferences',
+  'PATCH /map-preferences',
+  'GET /places/{id}/details',
 ].entries())
   template.Resources[`Route${i}`] = {
     Type: 'AWS::ApiGatewayV2::Route',
@@ -752,6 +755,7 @@ template.Resources.ItineraryPermission = {Type:'AWS::Lambda::Permission',Propert
 template.Resources.TripSharedPermission = {Type:'AWS::Lambda::Permission',Properties:{Action:'lambda:InvokeFunction',FunctionName:ref('Storage'),Principal:'apigateway.amazonaws.com',SourceArn:sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/trip-shares/*')}}
 template.Resources.Stage.DependsOn.push('TripSharedRoute')
 template.Resources.Stage.Properties.RouteSettings['GET /trip-shares/{token}']={ThrottlingBurstLimit:5,ThrottlingRateLimit:2}
+template.Resources.MapPreferencesPermission = { Type: 'AWS::Lambda::Permission', Properties: { Action: 'lambda:InvokeFunction', FunctionName: ref('Storage'), Principal: 'apigateway.amazonaws.com', SourceArn: sub('arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/*/map-preferences') } }
 await mkdir('infra/generated', { recursive: true })
 await writeFile('infra/generated/storage.json', JSON.stringify(template) + '\n')
 console.log('Built infra/generated/storage.json')
