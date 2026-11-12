@@ -57,8 +57,8 @@ and a 280 KB catalog size guard. Previously existing names are preserved during
 migration unless the catalog size guard is exceeded, in which case migration
 returns an error without modifying place rows. These are project limits, not a
 billing guarantee. Tombstone compaction needs a separate migration before raising
-these limits. Multi-collection membership, shared collections, custom ordering,
-and automatic cross-tab synchronization are outside this branch.
+these limits. Multi-collection membership, collaborative editing, custom ordering and automatic
+cross-tab synchronization are not implemented. [Read-only collection sharing](collection-sharing.md) is implemented.
 
 ## Authenticated API
 
@@ -67,7 +67,7 @@ and automatic cross-tab synchronization are outside this branch.
 | GET /collections | — | `{ items, version }` |
 | POST /collections | `{ id?: UUID, name }` | `201 { item }` |
 | PATCH /collections/{id} | `{ version, name }` | `{ item }` |
-| DELETE /collections/{id} | `{ version }` | `{ deleted: true, defaultCollectionId: "default" }` |
+| DELETE /collections/{id} | `{ version }` | `{ deleted: true, defaultCollectionId, defaultCollection }` |
 | PATCH /places/{id} | `{ version, collectionId }` | `{ item }` |
 
 The UI generates a UUID once per create dialog and reuses it on retries, including
@@ -118,5 +118,5 @@ charges.
 
 For manual testing: start a bounded window, run `npm run dev`, sign in, create an
 empty collection and reload. Rename it, move a saved place into it, then delete the
-collection and verify that the place is still in Saved places. Finish with
+collection and verify that the place is still in the current fallback collection. Finish with
 `npm run cloud:test:stop`. No commit or push is part of these commands.

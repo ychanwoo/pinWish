@@ -2,7 +2,7 @@
 
 PinWish is hosted at https://demo.d297h6ubgr1uhw.amplifyapp.com.
 The default state is **paused**. No local API server is needed for the hosted app.
-Changes in this branch have not been committed or pushed automatically.
+See [release and verification status](README.md#release-and-verification-status) before assuming that the hosted build matches your checkout.
 
 ## Start and stop a test
 
@@ -53,6 +53,7 @@ npm run test:e2e
 npm run test:cloud-ui
 npm run test:import-ui
 npm run test:map-ui
+npm run test:direct-ui
 npm run test:processing-ui
 npm run deploy:backend
 npm run deploy:web
@@ -147,8 +148,7 @@ Before deploying a changed version, retain a known-good Git commit and the last
 local `infra/generated/web.zip`. For rollback, make a separate worktree from the
 known-good commit, install dependencies, and redeploy its compatible backend and
 frontend using these scripts; pause first. Do not use `git reset --hard` on a
-working tree with local changes. This branch introduces no destructive migration
-of existing places or account records. Keep the backend/frontend job protocol
+working tree with local changes. Review release-specific migration requirements before rollback; a prior build may not understand newer records. Keep the backend/frontend job protocol
 versions compatible when rolling either side back.
 
 After the final demo, inventory the Amplify app, stack resources, retained
