@@ -1,5 +1,7 @@
 # Automatic import and English display
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 The earlier manual place-confirmation flow is superseded for Instagram imports.
 Cloud mode now performs serial provider search/details lookups for every extracted
 candidate, saves the located places automatically, and opens the map when the

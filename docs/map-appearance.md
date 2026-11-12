@@ -34,7 +34,7 @@ Sources: [AWS GetPlace](https://docs.aws.amazon.com/location/latest/APIReference
 - Browser coverage includes desktop/mobile collection color persistence/reset and sidebar synchronization, Escape focus return, visited updates, weekly hours, failed saves with retry, existing map interactions and anonymous sharing.
 - Actual AWS checks are recorded in `validation/map-appearance-live.json`: real region/hours/cache, two-account isolation, preferences reset and visited persistence. Temporary users/data removed, runtime paused. Public provider metadata expires automatically; its cache is not private test-account content.
 - Earlier attempts required correcting a missing temporary fixture and adding the provider-required search bias; both attempts cleaned up their temporary accounts and paused runtime.
-- Latest frontend changes are local; the backend was deployed. No commit or push performed.
+- At that validation snapshot, the backend was deployed and the latest frontend changes were local. See [release status](README.md#release-and-verification-status) for the documentation review boundary.
 
 To review locally, open a bounded test window with `npm run cloud:test:start -- 15`, then `npm run dev`. Sign in, open Map colors, choose a collection color, reload, reset, mark an imported or directly added place Visited, and open its Operating Hours. Stop early with `npm run cloud:test:stop`.
 

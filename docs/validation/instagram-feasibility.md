@@ -1,5 +1,7 @@
 # Instagram import feasibility — issue #3
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Checked 2026-11-10 on `feat/2-instagram-link-validation`.
 
 ## Decision

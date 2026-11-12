@@ -1,6 +1,6 @@
 # Direct place search
 
-Branch: `feat/direct-place-search`.
+Implemented in `feat/direct-place-search`; current behavior is described below. Validation dates identify historical runs, not the latest deployment.
 
 ## User flow
 
@@ -18,7 +18,7 @@ The original query is retained as `searchOrigin.query`, including Korean input.
 The existing query resolver converts overseas Korean queries where possible;
 confirmed overseas venues use the provider's English name. South Korea detailed
 place coverage remains unsupported by the existing provider integration and is
-not silently simulated. No new category inference or public sharing is included.
+not silently simulated. Public collection sharing is available separately; direct search does not infer a new category.
 
 Searches run on submission, not on each keystroke. Editing a query or region
 cancels pending browser requests and discards stale results. An already submitted

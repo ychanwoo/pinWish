@@ -1,5 +1,7 @@
 # Live-data UI polish
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Branch: `ui/live-data-polish`. Local validation: November 11, 2026
 (America/Los_Angeles).
 

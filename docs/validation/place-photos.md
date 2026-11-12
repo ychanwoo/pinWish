@@ -1,5 +1,7 @@
 # Automatic representative photo validation
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 The former manual-upload implementation has been replaced. No upload UI or upload
 API remains. Saving a place starts a background AWS Lambda job; opening an older
 saved place starts the same discovery if needed. The detail photo loads without

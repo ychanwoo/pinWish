@@ -1,5 +1,7 @@
 # Collection sharing validation
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Local checks on November 11, 2026:
 
 - Lint, TypeScript and production build passed. Existing MapLibre bundle-size warning remains.

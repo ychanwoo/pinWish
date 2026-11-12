@@ -26,22 +26,22 @@ npm run cloud:configure
 
 Local CORS allows localhost:5173, 127.0.0.1:5173 and 127.0.0.1:5175. Pass `AllowedOrigins` to the stack to add an exact HTTPS frontend origin for a later deployment. There is no wildcard origin or unauthenticated storage route. The Amplify origin is included in deployed CORS and map restrictions. Instagram/Bedrock/search run through authenticated async jobs.
 
-API default throttling is 5 requests/second, burst 10. The UI spaces batch saves and makes up to two bounded retries for HTTP 429 responses. This is not a spending cap. The existing account budget alerts should remain enabled. Cognito default email delivery has low-volume limits; configure an appropriate SES identity and delivery setup before broader use. Password-reset and confirmation messages use Cognito delivery; this branch did not alter account email identities.
+API default throttling is 5 requests/second, burst 10. The UI spaces batch saves and makes up to two bounded retries for HTTP 429 responses. This is not a spending cap. The existing account budget alerts should remain enabled. Cognito default email delivery has low-volume limits; configure an appropriate SES identity and delivery setup before broader use. Password-reset and confirmation messages use Cognito delivery; email delivery must be checked with a real inbox before a demo.
 
 ## Data contract
 
 Partition key: `USER#<JWT sub>`. Sort key: `PLACE#<SHA256(provider:placeId)>`.
 
-- `POST /places`: `{place: ConfirmedPlace, note, collection}`. Stores a schema-validated provider-matched place. This is not a new server geocoding/identity verification step; upstream search is responsible for place lookup. Server derives owner and IDs, not the request body.
+- `POST /places`: imports use `{place: ConfirmedPlace, note, collectionId}`; direct search uses `{directSearch: {detailsJobId, query, region}, note, collectionId}` and resolves the completed, owned details job server-side. See [direct-search provenance](../docs/direct-place-search.md). Stores a schema-validated provider-matched place. This is not a new server geocoding/identity verification step; upstream search is responsible for place lookup. Server derives owner and IDs, not the request body.
 - Same owner + provider ID means one saved place, regardless of collection. Additional original post/slide combinations merge into `sources`; repeated identical submissions are idempotent. Existing note, collection and other user edits are preserved. Different provider IDs for the same physical venue are not automatically merged.
-- Source key hashes canonical Instagram URL plus unique sorted slide numbers. Retains original URL, source spelling, correction, evidence and slide references. Maximum 30 source entries per place; source deletion is not included in this branch.
+- Source key hashes canonical Instagram URL plus unique sorted slide numbers. Retains original URL, source spelling, correction, evidence and slide references. Maximum 30 source entries per place; individual source deletion is not implemented.
 - `GET /places?limit=20&cursor=...`: at most 50 rows, consistent reads, opaque cursor scoped to the authenticated owner. Key-order pagination, not global date sorting. The UI loads all pages before publishing the list/map snapshot so filters and counts cover all saved records.
 - `GET /places/{id}` returns one owned record, otherwise 404.
-- `PATCH /places/{id}`: `{version, note?, collection?, visited?, bookmarked?}`. No owner, provider, coordinates or source mutations. Conditional writes prevent stale overwrites; conflict returns 409, requiring refresh and retry.
+- `PATCH /places/{id}`: `{version, note?, collectionId?, visited?, bookmarked?}` (legacy `collection` names remain accepted). No owner, provider, coordinates or source mutations. Conditional writes prevent stale overwrites; conflict returns 409, requiring refresh and retry.
 - `DELETE /places/{id}`: `{version}`. Explicit UI confirmation and conditional deletion. Deleting a place removes its source references.
 - 24 KiB request limit, note 1,000 characters, collection 60, supported country/coordinate checks. No arbitrary external URLs in source links.
 
-Multi-place saving is sequential with per-record atomicity, not one all-or-nothing transaction. Successful records remain saved if another fails. Retry resubmits safely; already saved records are not duplicated. A new empty collection is still a UI draft; collection names persist through saved places rather than a separate collection table.
+Multi-place saving is sequential with per-record atomicity, not one all-or-nothing transaction. Successful records remain saved if another fails. Retry resubmits safely; already saved records are not duplicated. Empty collections persist in a versioned catalog in the existing Places table. Current clients use stable collection IDs; deleting a collection moves its places logically to the current fallback without deleting place data.
 
 ## Sessions
 
@@ -73,7 +73,7 @@ aws cloudformation describe-stacks --stack-name pinwish-storage-dev --region us-
 aws cloudformation delete-stack --stack-name pinwish-storage-dev --region us-east-1
 ```
 
-The table and user pool use `Retain` to prevent accidental loss during stack changes. Deleting the stack removes its API/Lambda/role/logs/app client, but does not remove the retained table or user pool. After deliberately confirming that data/accounts are no longer needed, delete those two resources using their recorded identifiers in the AWS console (or DynamoDB delete-table / Cognito delete-user-pool). Do not recreate the same stack expecting automatic adoption of retained resources. No cleanup deletion of this deployed development stack was performed during implementation.
+The Places table, photo/artifact bucket and user pool use `Retain` to prevent accidental loss during stack changes. The separate Jobs table does not have a Retain policy. Deleting the stack removes stack-managed resources without a retention policy, including the Jobs table. It does not remove retained Places records, S3 photos/artifacts or the user pool, and the separately managed Amplify app must be inventoried independently. Export required data and record every retained resource identifier before any teardown. Only delete retained resources after explicitly deciding their data is no longer needed; do not recreate the same stack expecting automatic adoption. Pausing is the normal between-demo operation. No stack teardown is performed by this documentation task.
 
 ### Interactive map
 
@@ -112,7 +112,7 @@ source, author and license metadata and displays attribution in the UI.
 token and an owner-scoped record. It returns pending/not_found/unavailable or a
 ready JPEG plus the updated place. Missing photos on old records are queued on
 this request. No upload or photo-delete endpoints exist. Responses are no-store;
-browser Blob URLs are revoked on unmount. Photo errors do not undo place saves.
+browser Blob URLs are managed by the bounded photo cache and released when evicted/cleared. Photo errors do not undo place saves.
 
 The encrypted S3 bucket has public access blocked, ACLs disabled and HTTPS-only
 access. Lambda can read/write/delete only `photos/*` and list only that prefix.

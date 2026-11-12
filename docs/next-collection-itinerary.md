@@ -1,4 +1,6 @@
-# Next work: collection itineraries and itinerary sharing
+# Historical plan: collection itineraries
+
+> Superseded by the implemented [journey guide](collection-itinerary.md). This preserves the scope agreed before implementation; it is not the next-work list.
 
 Agreed scope, recorded November 11, 2026. Not part of `feat/collection-sharing`.
 
