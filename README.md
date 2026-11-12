@@ -287,3 +287,7 @@ scheduled outside known hours. See [itinerary behavior, API and limits](docs/col
 ## Map colors and opening hours
 
 Visited map pins show a check, while collection colors can be changed or reset using **Map colors**. Preferences persist per account. Place details include cached provider weekly hours and a venue-local status qualified as based on listed hours. Missing and stale schedules remain explicit. See [map appearance implementation and validation](docs/map-appearance.md) for collection grouping, cache lifetime, limits and local test steps.
+
+## Maintenance audit
+
+See [the repository and AWS cleanup audit](docs/cleanup-audit.md) for removed items, preserved resources, deployment artifact retention, and validation evidence.
