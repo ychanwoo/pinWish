@@ -1,5 +1,7 @@
 # Interactive saved-place map validation
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Branch: feat/interactive-saved-places-map
 
 - MapLibre renders Amazon Location Maps V2 in cloud mode. Renderer/worker are

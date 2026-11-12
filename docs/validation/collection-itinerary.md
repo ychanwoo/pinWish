@@ -1,5 +1,7 @@
 # Itinerary validation — November 11, 2026
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 ## Automated and visual checks
 
 - 116 unit tests passed, including provider-hour parsing, overnight carryover, weekday closures, daylight-saving conversion, manual hours, missing hours, impossible travel, long visits, manual order and bounded multi-order search.

@@ -1,5 +1,7 @@
 # Persistent collections validation
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Verified November 10, 2026 (America/Los_Angeles); live result recorded at
 2026-11-11T05:39:17Z. Branch: `feat/persistent-collections`.
 

@@ -1,5 +1,7 @@
 # Place search and confirmation — issue #11
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 ## Scope
 
 Local AWS-backed search and explicit confirmation after photo extraction. No database writes, live map, authentication, public deployment, native sharing, or video ingestion.

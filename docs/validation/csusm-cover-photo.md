@@ -1,5 +1,7 @@
 # CSUSM cover-photo regression
 
+> Historical validation snapshot. Results, counts, deployment statements and remaining work below describe the recorded run, not the current release. See the [current documentation index](../README.md) for implemented behavior and verification status. Original evidence is preserved.
+
 Validated November 11, 2026.
 
 The name/coordinate match correctly identified California State University,
