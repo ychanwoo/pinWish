@@ -1,3 +1,4 @@
+const { createItineraries } = require('./itineraries.cjs')
 const { createSharing } = require('./sharing.cjs')
 const { createCollections } = require('./collections.cjs')
 const { createPhotos } = require('./photos.cjs')
@@ -158,6 +159,7 @@ function createHandler({
   client = new DynamoDBClient({}),
   table = process.env.TABLE_NAME,
   photoOptions = {},
+  itineraryOptions = {},
   jobsTable = process.env.JOBS_TABLE,
 } = {}) {
   const send = (command) => client.send(command)
@@ -196,6 +198,7 @@ function createHandler({
     fail,
   })
   const sharing = createSharing({ read, send, table, marshal, unmarshal, collections, photos, fail })
+  const itineraries = createItineraries({read,send,table,marshal,unmarshal,collections,fail,...itineraryOptions})
   const publicItem = (item) => {
     const { pk: _pk, sk: _sk, ...rest } = item
     return rest
@@ -235,6 +238,8 @@ function createHandler({
       }
     }
     try {
+      const publicTrip = /^\/trip-shares\/([^/]+)$/.exec(event.rawPath ?? '')
+      if(publicTrip) { if(event.requestContext?.http?.method !== 'GET') fail(404,'not_found'); return response(200,await itineraries.public(publicTrip[1])) }
       const publicRoute = /^\/shared\/([^/]+)(?:\/places\/([^/]+)\/photo)?$/.exec(event.rawPath ?? '')
       if (publicRoute) {
         if (event.requestContext?.http?.method !== 'GET') fail(404, 'not_found')
@@ -259,7 +264,9 @@ function createHandler({
       const collectionRoute = /^\/collections(?:\/[^/]+)?$/.test(
         event.rawPath ?? '',
       )
-      if (!collectionRoute && id && !/^[a-f0-9]{64}$/.test(id))
+      const tripRoute = /^\/itineraries(?:\/([^/]+))?(?:\/(sharing))?$/.exec(event.rawPath ?? '')
+      const prepareTrip = /^\/collections\/([^/]+)\/itineraries\/prepare$/.exec(event.rawPath ?? '')
+      if (!tripRoute && !prepareTrip && !collectionRoute && id && !/^[a-f0-9]{64}$/.test(id))
         fail(400, 'invalid_id')
       const key = id ? { pk, sk: `PLACE#${id}` } : null
       let body = {}
@@ -276,6 +283,8 @@ function createHandler({
         if (!body || typeof body !== 'object' || Array.isArray(body))
           fail(400, 'invalid_input')
       }
+      if(prepareTrip) { if(method!=='POST') fail(404,'not_found');return response(200,await itineraries.prepare(pk,prepareTrip[1],body)) }
+      if(tripRoute) return response(200,await itineraries.route(pk,method,tripRoute[1],tripRoute[2],body,event.queryStringParameters ?? {}))
       if (collectionRoute) {
         const result = await collections.route(pk, method, id, body)
         return response(result.status, result.data)
