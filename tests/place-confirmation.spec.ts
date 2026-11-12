@@ -96,7 +96,7 @@ test('failed searches are retryable without re-importing or manual confirmation'
   await region.getByRole('button', { name: 'Retry missing places' }).click()
   await expect(region).toContainText(a.address)
 })
-test('closing lookup cancels stale results and reopening resumes the draft', async ({
+test('automatic lookup waits for completion and reopening retains the draft', async ({
   page,
 }) => {
   let release!: () => void
@@ -119,8 +119,16 @@ test('closing lookup cancels stale results and reopening resumes the draft', asy
   )
   await openImport(page)
   await arrival
+  try {
+    await expect(page.locator('.loading-screen')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('dialog')).toHaveCount(1)
+  } finally {
+    release()
+  }
+  await expect(page.locator('.loading-screen')).toHaveCount(0)
+  await expect(page.getByRole('region', { name: 'Extracted place candidates' })).toContainText(a.address)
   await page.getByRole('button', { name: 'Close save dialog' }).click()
-  release()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await expect(

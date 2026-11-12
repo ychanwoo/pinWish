@@ -109,7 +109,7 @@ test('cancelled lookup cannot replace a newer draft', async ({ page }) => {
     .getByLabel('Link or address', { exact: true })
     .fill('https://www.instagram.com/p/example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
-  await page.getByRole('button', { name: 'Stop searching', exact: true }).click()
+  await page.locator('.loading-screen').getByRole('button', { name: 'Cancel', exact: true }).click()
   await page.getByLabel('Link or address', { exact: true }).fill('Maru Coffee')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.locator('.resolved-place')).toContainText('Maru Coffee')

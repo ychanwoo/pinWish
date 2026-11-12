@@ -1,0 +1,145 @@
+{
+  "status": "completed",
+  "scope": "Only duplicate deployments/processing-*.zip objects; no user-data prefixes or infrastructure resources",
+  "plannedAt": "2026-11-12T21:41:42.771Z",
+  "active": "deployments/processing-f0b9d04db3d826e071a0.zip",
+  "retention": "Keep active archive, three newest archives, and at least one archive for every distinct decompressed code hash.",
+  "kept": [
+    {
+      "key": "deployments/processing-02dfae89dce4ca90a72f.zip",
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570"
+    },
+    {
+      "key": "deployments/processing-76fbdd9599c85e81359a.zip",
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570"
+    },
+    {
+      "key": "deployments/processing-879f4f6f0aa864e2b79b.zip",
+      "codeHash": "5785164323a430c6013cf22f2a84cdbfbe0b5a7c7abdb36591de7872e764b74a"
+    },
+    {
+      "key": "deployments/processing-a12f814cee0724d95589.zip",
+      "codeHash": "1c1ab62e66228b16e5b38a088732e79e77e596a19d1456f5d90e4dff371a9ac7"
+    },
+    {
+      "key": "deployments/processing-a517cd5fb5a0e6eed9a5.zip",
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11"
+    },
+    {
+      "key": "deployments/processing-b09307873301ee561ad6.zip",
+      "codeHash": "1825f9a7b00fb76ef84125f85d6ccdff7633ec49d1e0dc484c1d4d815b0ce755"
+    },
+    {
+      "key": "deployments/processing-f0b9d04db3d826e071a0.zip",
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570"
+    }
+  ],
+  "candidates": [
+    {
+      "key": "deployments/processing-0f5de60524351dc87e53.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-2f7eabccfb64c9ee081f.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-35fe43db81f76865a909.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-38dc7c886bc11e705fe1.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-3d31f6bec31536d1d04d.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    },
+    {
+      "key": "deployments/processing-3e3b1d8e81d641b3d2e3.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    },
+    {
+      "key": "deployments/processing-5eeb77c188b65e11c873.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    },
+    {
+      "key": "deployments/processing-5f6e5ae57d5903cd9e2d.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    },
+    {
+      "key": "deployments/processing-76bf9c16cb85bd30f2ab.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-8db74918fc3fec755362.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    },
+    {
+      "key": "deployments/processing-a329b2d33942c43805ba.zip",
+      "bytes": 218732,
+      "codeHash": "fd2b1b156695eb7ac9736bf77ae927b5f8c57ee1cbc2055f783fc688877ece11",
+      "retainedEquivalent": "deployments/processing-a517cd5fb5a0e6eed9a5.zip"
+    },
+    {
+      "key": "deployments/processing-d2fcaaa787df29bd39ff.zip",
+      "bytes": 218425,
+      "codeHash": "1825f9a7b00fb76ef84125f85d6ccdff7633ec49d1e0dc484c1d4d815b0ce755",
+      "retainedEquivalent": "deployments/processing-b09307873301ee561ad6.zip"
+    },
+    {
+      "key": "deployments/processing-d54fb7d63154981d5a78.zip",
+      "bytes": 218435,
+      "codeHash": "5785164323a430c6013cf22f2a84cdbfbe0b5a7c7abdb36591de7872e764b74a",
+      "retainedEquivalent": "deployments/processing-879f4f6f0aa864e2b79b.zip"
+    },
+    {
+      "key": "deployments/processing-f640973422a11fae15a2.zip",
+      "bytes": 218765,
+      "codeHash": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+      "retainedEquivalent": "deployments/processing-02dfae89dce4ca90a72f.zip"
+    }
+  ],
+  "bytes": 3061842,
+  "completedAt": "2026-11-12T21:42:47.988Z",
+  "removed": [
+    "deployments/processing-2f7eabccfb64c9ee081f.zip",
+    "deployments/processing-8db74918fc3fec755362.zip",
+    "deployments/processing-f640973422a11fae15a2.zip",
+    "deployments/processing-0f5de60524351dc87e53.zip",
+    "deployments/processing-3d31f6bec31536d1d04d.zip",
+    "deployments/processing-76bf9c16cb85bd30f2ab.zip",
+    "deployments/processing-5eeb77c188b65e11c873.zip",
+    "deployments/processing-d2fcaaa787df29bd39ff.zip",
+    "deployments/processing-5f6e5ae57d5903cd9e2d.zip",
+    "deployments/processing-a329b2d33942c43805ba.zip",
+    "deployments/processing-d54fb7d63154981d5a78.zip",
+    "deployments/processing-35fe43db81f76865a909.zip",
+    "deployments/processing-3e3b1d8e81d641b3d2e3.zip",
+    "deployments/processing-38dc7c886bc11e705fe1.zip"
+  ],
+  "remainingArchives": 7,
+  "activeArtifactPreserved": true,
+  "userDataMutations": 0,
+  "infrastructureMutations": 0
+}
