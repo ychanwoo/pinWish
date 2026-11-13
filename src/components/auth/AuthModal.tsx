@@ -1,6 +1,6 @@
-import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingOverlay } from '../shared/LoadingOverlay'
 import { useState } from 'react'
-import { useModalFocus } from '../hooks/useModalFocus'
+import { useModalFocus } from '../../hooks/useModalFocus'
 import {
   authError,
   confirmEmail,
@@ -12,7 +12,7 @@ import {
   resetPassword,
   signIn,
   signUp,
-} from '../lib/cloud-auth'
+} from '../../lib/cloud-auth'
 type Mode = 'login' | 'signup' | 'verify' | 'forgot' | 'reset'
 export function AuthModal({
   onClose,
@@ -152,9 +152,15 @@ export function AuthModal({
                 setMessage('Password updated. Sign in with your new password.')
               }
             } catch (failure) {
-              if (mode === 'login' && failure instanceof Error && failure.name === 'UserNotConfirmedException') {
+              if (
+                mode === 'login' &&
+                failure instanceof Error &&
+                failure.name === 'UserNotConfirmedException'
+              ) {
                 change('verify')
-                setMessage('Verify your email to finish setting up your account. Enter your code, or request a new one below.')
+                setMessage(
+                  'Verify your email to finish setting up your account. Enter your code, or request a new one below.',
+                )
               } else {
                 setError(authError(failure))
               }
@@ -185,42 +191,76 @@ export function AuthModal({
             <>
               <label htmlFor="auth-password">Password</label>
               <div className="auth-password-field">
-              <input
-                id="auth-password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete={
-                  mode === 'login' ? 'current-password' : 'new-password'
-                }
-                value={password}
-                maxLength={256}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={busy}
-                aria-invalid={!!passwordIssue}
-                aria-describedby={
-                  mode !== 'login' ? 'password-help' : undefined
-                }
-              />
-              <button
-                type="button"
-                className="password-visibility-toggle"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                aria-controls="auth-password"
-                disabled={busy}
-                onClick={() => setShowPassword(visible => !visible)}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
-                  <circle cx="12" cy="12" r="3" />
-                  {showPassword && <path d="m3 3 18 18" />}
-                </svg>
-              </button>
+                <input
+                  id="auth-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete={
+                    mode === 'login' ? 'current-password' : 'new-password'
+                  }
+                  value={password}
+                  maxLength={256}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={busy}
+                  aria-invalid={!!passwordIssue}
+                  aria-describedby={
+                    mode !== 'login' ? 'password-help' : undefined
+                  }
+                />
+                <button
+                  type="button"
+                  className="password-visibility-toggle"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-controls="auth-password"
+                  disabled={busy}
+                  onClick={() => setShowPassword((visible) => !visible)}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                    <circle cx="12" cy="12" r="3" />
+                    {showPassword && <path d="m3 3 18 18" />}
+                  </svg>
+                </button>
               </div>
               {mode !== 'login' && (
-                <ul id="password-help" className="password-requirements" aria-label="Password requirements">
-                  {passwordRequirements(password).map(requirement => (
-                    <li key={requirement.id} className={requirement.met ? 'is-met' : passwordIssue ? 'is-unmet' : ''}>
-                      <span className="password-requirement-mark" aria-hidden="true">{requirement.met ? '✓' : '–'}</span>
-                      <span>{requirement.label}<span className="password-requirement-state">{requirement.met ? ': met' : ': not met'}</span></span>
+                <ul
+                  id="password-help"
+                  className="password-requirements"
+                  aria-label="Password requirements"
+                >
+                  {passwordRequirements(password).map((requirement) => (
+                    <li
+                      key={requirement.id}
+                      className={
+                        requirement.met
+                          ? 'is-met'
+                          : passwordIssue
+                            ? 'is-unmet'
+                            : ''
+                      }
+                    >
+                      <span
+                        className="password-requirement-mark"
+                        aria-hidden="true"
+                      >
+                        {requirement.met ? '✓' : '–'}
+                      </span>
+                      <span>
+                        {requirement.label}
+                        <span className="password-requirement-state">
+                          {requirement.met ? ': met' : ': not met'}
+                        </span>
+                      </span>
                     </li>
                   ))}
                 </ul>

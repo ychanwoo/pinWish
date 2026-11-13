@@ -1,11 +1,14 @@
-import type { MapAppearance } from '../hooks/useMapAppearance'
-import { collectionColor } from '../lib/map-appearance'
-import { CollectionRow } from './CollectionRow'
-import { Brand, Icon } from './Icon'
-import { inCollection, type Place, type View } from '../data/places'
+import type { MapAppearance } from '../../hooks/useMapAppearance'
+import { collectionColor } from '../../lib/map-appearance'
+import { CollectionRow } from '../collections/CollectionRow'
+import { Brand, Icon } from '../shared/Icon'
+import { inCollection, type Place, type View } from '../../data/places'
 interface Props {
   appearance?: MapAppearance
-  onCollectionAction?: (name: string, action: 'rename' | 'delete' | 'share' | 'plan') => void
+  onCollectionAction?: (
+    name: string,
+    action: 'rename' | 'delete' | 'share' | 'plan',
+  ) => void
   canManageCollection?: (name: string) => boolean
   persistent?: boolean
   sidebarOpen: boolean
@@ -229,7 +232,11 @@ export function DesktopNavigation({
                 <CollectionRow
                   key={c}
                   name={c}
-                  color={collectionColor(appearance?.collections.find(item=>item.name===c)?.id ?? c, appearance?.colors ?? {})}
+                  color={collectionColor(
+                    appearance?.collections.find((item) => item.name === c)
+                      ?.id ?? c,
+                    appearance?.colors ?? {},
+                  )}
                   count={places.filter((p) => p.collection === c).length}
                   active={collection === c}
                   editable={!!canManageCollection?.(c)}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { useModalFocus } from '../hooks/useModalFocus'
-import type { SavedPlace } from '../lib/storage-api'
-import { cachedPhoto, loadPhoto } from '../lib/place-photo'
+import { useModalFocus } from '../../hooks/useModalFocus'
+import type { SavedPlace } from '../../lib/storage-api'
+import { cachedPhoto, loadPhoto } from '../../lib/place-photo'
 export function PlaceCoverPhoto({
   place,
   name,

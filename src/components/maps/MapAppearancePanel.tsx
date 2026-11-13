@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import type { MapAppearance } from '../hooks/useMapAppearance'
-import { pinPalette, collectionColor } from '../lib/map-appearance'
+import type { MapAppearance } from '../../hooks/useMapAppearance'
+import { pinPalette, collectionColor } from '../../lib/map-appearance'
 export function MapAppearancePanel({
   appearance,
 }: {

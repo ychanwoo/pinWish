@@ -1,16 +1,28 @@
-import SharedItineraryPage from './components/SharedItineraryPage'
-import { useSyncExternalStore } from 'react'
+const SharedItineraryPage = lazy(
+  () => import('./components/journeys/SharedItineraryPage'),
+)
+import { lazy, Suspense, useSyncExternalStore } from 'react'
+import { LoadingOverlay } from './components/shared/LoadingOverlay'
 import App from './App'
-import SharedCollectionPage from './components/SharedCollectionPage'
+const SharedCollectionPage = lazy(
+  () => import('./components/collections/SharedCollectionPage'),
+)
 const subscribeLocation = (notify: () => void) => {
   window.addEventListener('hashchange', notify)
   return () => window.removeEventListener('hashchange', notify)
 }
 export default function AppEntry() {
   const hash = useSyncExternalStore(subscribeLocation, () => location.hash)
-  if(hash.startsWith('#trip=')) return <SharedItineraryPage key={hash} token={hash.slice(6)} />
+  if (hash.startsWith('#trip='))
+    return (
+      <Suspense fallback={<LoadingOverlay active />}>
+        <SharedItineraryPage key={hash} token={hash.slice(6)} />
+      </Suspense>
+    )
   return hash.startsWith('#share=') ? (
-    <SharedCollectionPage key={hash} token={hash.slice(7)} />
+    <Suspense fallback={<LoadingOverlay active />}>
+      <SharedCollectionPage key={hash} token={hash.slice(7)} />
+    </Suspense>
   ) : (
     <App />
   )

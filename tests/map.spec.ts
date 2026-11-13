@@ -298,7 +298,9 @@ for (const mobile of [false, true])
     await expect(green).toBeEnabled()
     await green.click()
     await expect(green).toHaveAttribute('aria-pressed', 'true')
-    await expect(page.locator('.collection-row .collection-color-icon').first()).toHaveAttribute('stroke','#426b57')
+    await expect(
+      page.locator('.collection-row .collection-color-icon').first(),
+    ).toHaveAttribute('stroke', '#426b57')
     await page.screenshot({
       path: `/tmp/pinwish-map-colors-${mobile ? 'mobile' : 'desktop'}.png`,
     })
@@ -366,21 +368,67 @@ test('a failed collection color save retains the existing color and can be retri
   await expect(page.locator('.map-color-panel [role=alert]')).toHaveCount(0)
 })
 
-test('hovering a pin shows only its name and dismisses on Escape or pointer exit',async({page})=>{
- await setup(page)
- await page.getByLabel('Select a saved place on the map').selectOption(records[1].id)
- await page.getByRole('button',{name:'Close place details',exact:true}).filter({visible:true}).click()
- const canvas=page.locator('.live-map canvas')
- await expect(async()=>{
-   const box=await canvas.boundingBox()
-   await page.mouse.move(box!.x+box!.width/2,box!.y+box!.height/2)
-   await expect(page.locator('.place-hover-label')).toHaveText('Pier')
- }).toPass()
- await page.keyboard.press('Escape')
- await expect(page.locator('.place-hover-label')).toHaveCount(0)
- const box=await canvas.boundingBox()
- await page.mouse.move(box!.x+box!.width/2+1,box!.y+box!.height/2)
- await expect(page.locator('.place-hover-label')).toHaveText('Pier')
- await page.mouse.move(0,0)
- await expect(page.locator('.place-hover-label')).toHaveCount(0)
+test('hovering a pin shows only its name and dismisses on Escape or pointer exit', async ({
+  page,
+}) => {
+  await setup(page)
+  await page
+    .getByLabel('Select a saved place on the map')
+    .selectOption(records[1].id)
+  await page
+    .getByRole('button', { name: 'Close place details', exact: true })
+    .filter({ visible: true })
+    .click()
+  const canvas = page.locator('.live-map canvas')
+  await expect(async () => {
+    const box = await canvas.boundingBox()
+    await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2)
+    await expect(page.locator('.place-hover-label')).toHaveText('Pier')
+  }).toPass()
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.place-hover-label')).toHaveCount(0)
+  const box = await canvas.boundingBox()
+  await page.mouse.move(box!.x + box!.width / 2 + 1, box!.y + box!.height / 2)
+  await expect(page.locator('.place-hover-label')).toHaveText('Pier')
+  await page.mouse.move(0, 0)
+  await expect(page.locator('.place-hover-label')).toHaveCount(0)
+})
+
+test('unrelated sidebar changes do not rebuild map source data', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const send = Worker.prototype.postMessage
+    ;(window as unknown as { mapDataUpdates: number }).mapDataUpdates = 0
+    Worker.prototype.postMessage = function (
+      ...args: Parameters<Worker['postMessage']>
+    ) {
+      if (args[0]?.type === 'LD')
+        (window as unknown as { mapDataUpdates: number }).mapDataUpdates++
+      return Reflect.apply(send, this, args)
+    }
+  })
+  await setup(page)
+  await expect(page.locator('.live-map canvas')).toBeVisible()
+  await expect(
+    page.getByLabel('Select a saved place on the map').locator('option'),
+  ).toHaveCount(3)
+  await page.waitForTimeout(700)
+  await page.evaluate(() => {
+    ;(window as unknown as { mapDataUpdates: number }).mapDataUpdates = 0
+  })
+  for (let i = 0; i < 6; i++) {
+    await page
+      .getByRole('button', {
+        name: i % 2 ? 'Show collections' : 'Hide collections',
+        exact: true,
+      })
+      .click()
+    await page.waitForTimeout(150)
+  }
+  const updates = await page.evaluate(
+    () => (window as unknown as { mapDataUpdates: number }).mapDataUpdates,
+  )
+  console.log('MAP_SIDEBAR_DATA_UPDATES=' + updates)
+  if (process.env.PINWISH_RECORD_BASELINE !== '1') expect(updates).toBe(0)
 })
