@@ -15,6 +15,8 @@ Current implementation review: November 12, 2026. These guides describe the repo
 | [Collection sharing](collection-sharing.md) | Anonymous read-only links, revocation and privacy |
 | [Journey planning](collection-itinerary.md) | Durations, hours, routes, all-stop fallback, persistence and sharing |
 | [Map appearance and hours](map-appearance.md) | Collection colors, visits, metadata freshness and limits |
+| [Code architecture](code-architecture.md) | Feature folders, hooks, loading boundaries and rendering responsibilities |
+| [Refactor verification](validation/code-refactor.md) | Local regression, bundle and map-work measurements |
 | [Cleanup audit](cleanup-audit.md) | Dated repository/AWS cleanup evidence |
 
 ## Release and verification status

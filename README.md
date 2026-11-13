@@ -86,7 +86,7 @@ Read [deployment, pause/resume and rollback](docs/aws-web-deployment.md) before 
 
 ## Project layout and design
 
-- `src/`: application screens, components, client services and shared styles.
+- `src/`: application screens, feature-organized components, client services and shared styles. See [code architecture](docs/code-architecture.md) for module and loading boundaries.
 - `backend/`: storage, sharing, journey scheduling and supporting server modules.
 - `scripts/cloud/`: deployment, runtime controls and optional live checks.
 - `scripts/instagram/`: extraction/search modules and experimental local tooling.

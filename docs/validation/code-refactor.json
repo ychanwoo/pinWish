@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-13",
+  "baselineCommit": "66dd070b4c366777cea2a97842d4cf5372cd0165",
+  "scope": "Local refactor; mocked provider calls; no AWS deployment or runtime enablement",
+  "bundle": {
+    "before": {
+      "entryKB": 526.77,
+      "entryGzipKB": 159.83
+    },
+    "after": {
+      "entryKB": 351.16,
+      "entryGzipKB": 107.12
+    },
+    "units": "Decimal kB from production build; main entry only, not total lazy-loaded assets"
+  },
+  "mapWorker": {
+    "scenario": "Six sidebar visibility toggles after fixtures and map settle",
+    "beforeDataUpdates": 12,
+    "afterDataUpdates": 0,
+    "counter": "MapLibre LD worker messages",
+    "note": "Bounded redundant-work measurement; not an FPS or end-to-end latency guarantee"
+  },
+  "tests": {
+    "unit": 140,
+    "ui": 25,
+    "cloud": 42,
+    "import": 15,
+    "direct": 12,
+    "map": 9,
+    "processing": 3,
+    "intentionalBrowserSkips": 3
+  },
+  "screenshots": [
+    {
+      "name": "pinwish-trip-public-desktop.png",
+      "beforeSHA256": "19e9ea1983c318021a4b59fe3f573cbdc053d3d636659e8f29baa4d0e5ec3e83",
+      "afterSHA256": "19e9ea1983c318021a4b59fe3f573cbdc053d3d636659e8f29baa4d0e5ec3e83",
+      "differentPixels": 0,
+      "totalPixels": 1296000
+    },
+    {
+      "name": "pinwish-trip-public-mobile.png",
+      "beforeSHA256": "14067dcb2970a10f811d99e690aaced5ff89333699ac07e3b452e86e76e04cda",
+      "afterSHA256": "14067dcb2970a10f811d99e690aaced5ff89333699ac07e3b452e86e76e04cda",
+      "differentPixels": 0,
+      "totalPixels": 351000
+    },
+    {
+      "name": "pinwish-trip-result-desktop.png",
+      "beforeSHA256": "0e276750a02f6a507cfb0e7d1a21c340ffac7d7f49558674a9d72dee973c99b6",
+      "afterSHA256": "0e276750a02f6a507cfb0e7d1a21c340ffac7d7f49558674a9d72dee973c99b6",
+      "differentPixels": 0,
+      "totalPixels": 1296000
+    },
+    {
+      "name": "pinwish-trip-result-mobile.png",
+      "beforeSHA256": "b0ea2e6b667a1b935e2a1536f38690ae1adcab386ae54cf65958452db7a6fb39",
+      "afterSHA256": "b0ea2e6b667a1b935e2a1536f38690ae1adcab386ae54cf65958452db7a6fb39",
+      "differentPixels": 0,
+      "totalPixels": 351000
+    },
+    {
+      "name": "pinwish-trip-review-desktop.png",
+      "beforeSHA256": "9cc865d2aca1ba43cbe452872f74b53a4b4d7ff98b677fc8658c97b7590a631e",
+      "afterSHA256": "f3047244b99f4d43f98eb61e3bf28301e9a6a376176aa23c97426fbe4d66fb22",
+      "differentPixels": 1,
+      "totalPixels": 1296000
+    },
+    {
+      "name": "pinwish-trip-review-mobile.png",
+      "beforeSHA256": "ac4c73a54dfe7aea9f4a41f144dae25c12ea766e541baeb5ba5869ab3217f98e",
+      "afterSHA256": "ac4c73a54dfe7aea9f4a41f144dae25c12ea766e541baeb5ba5869ab3217f98e",
+      "differentPixels": 0,
+      "totalPixels": 351000
+    },
+    {
+      "name": "pinwish-trip-selection-desktop.png",
+      "beforeSHA256": "4d69dbf0a9f8100b3c496b4a38f73fd0d135e7b321dbb67306babd46f48b9d93",
+      "afterSHA256": "4d69dbf0a9f8100b3c496b4a38f73fd0d135e7b321dbb67306babd46f48b9d93",
+      "differentPixels": 0,
+      "totalPixels": 1296000
+    },
+    {
+      "name": "pinwish-trip-selection-mobile.png",
+      "beforeSHA256": "7f069ee15e2d946bc089f01d8f76f7b439560015b12786333c9ac2afcbb3210a",
+      "afterSHA256": "7f069ee15e2d946bc089f01d8f76f7b439560015b12786333c9ac2afcbb3210a",
+      "differentPixels": 0,
+      "totalPixels": 351000
+    }
+  ]
+}
