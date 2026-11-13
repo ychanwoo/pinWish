@@ -39,11 +39,18 @@ export async function resolveCandidate(
     return data
   }
   try {
-    const results = await request('search', {
+    const searchInput = {
       query: target.query,
       region: target.region,
       countryCode: target.countryCode,
-    })
+    }
+    let results = await request('search', searchInput)
+    // A transient model failure is different from an ambiguous name. Retry it
+    // once; never bypass the translation/matching checks for needs_review.
+    if (isPlaceSearchResponse(results) && results.queryConversion?.status === 'unavailable') {
+      signal.throwIfAborted()
+      results = await request('search', searchInput)
+    }
     if (!isPlaceSearchResponse(results))
       throw new Error('The search response could not be verified.')
     displayQuery = visiblePlaceText(
