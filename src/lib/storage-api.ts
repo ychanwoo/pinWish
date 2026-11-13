@@ -113,7 +113,7 @@ export async function storageRequest<T>(
     const token = await accessToken(force)
     if (getSession()?.sub !== owner)
       throw new Error('Your account changed. Please try again.')
-    return fetch(`${cloudConfig.apiUrl}${resource}${path}`, {
+    const perform = () => fetch(`${cloudConfig.apiUrl}${resource}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${token}`,
@@ -122,6 +122,24 @@ export async function storageRequest<T>(
       body: body ? JSON.stringify(body) : undefined,
       signal: AbortSignal.timeout(20000),
     })
+    // Only reads are replayed after a lost response. A write may already have
+    // succeeded, so leave its explicit/idempotent retry to the caller.
+    for (let attempt = 0; ; attempt++) {
+      if (getSession()?.sub !== owner)
+        throw new Error('Your account changed. Please try again.')
+      try {
+        const response = await perform()
+        if (method !== 'GET' || response.status < 500 || attempt === 2)
+          return response
+      } catch (error) {
+        if (!(error instanceof TypeError) &&
+            !(error instanceof DOMException && error.name === 'TimeoutError'))
+          throw error
+        if (method !== 'GET' || attempt === 2)
+          throw new Error('Could not connect to PinWish. Check your connection and retry. Your changes are kept.')
+      }
+      await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)))
+    }
   }
   let r = await send()
   if (r.status === 401) r = await send(true)

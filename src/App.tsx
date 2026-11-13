@@ -845,17 +845,29 @@ function App() {
             onPersist={
               cloudEnabled
                 ? async (confirmed, note, targetCollection) => {
-                    const target = catalog.find(
+                    const owner = getSession()?.sub
+                    if (!owner) throw new Error('Sign in to save places.')
+                    let available = catalog
+                    // A failed initial read is not evidence that a collection
+                    // was deleted. Recover before rejecting a completed import.
+                    if (!available.length) {
+                      const fresh = await listCollections()
+                      requireOwner(owner)
+                      available = fresh.items
+                      setCatalog(available)
+                      setCollections(available.map((c) => c.name))
+                    }
+                    const target = available.find(
                       (c) => c.name === targetCollection,
-                    )
+                    ) ?? (!catalog.length && targetCollection === 'Saved places'
+                      ? available.find((c) => c.isDefault)
+                      : undefined)
                     if (!target)
                       throw new Error(
                         'This collection is no longer available. Close this dialog, refresh your places, and choose another collection.',
                       )
                     if (!targetCollection.trim())
                       throw new Error('Enter a collection name.')
-                    const owner = getSession()?.sub
-                    if (!owner) throw new Error('Sign in to save places.')
                     let saved = 0
                     const failures: string[] = []
                     const savedCollections: string[] = []
@@ -897,6 +909,7 @@ function App() {
                       throw new Error(
                         `${saved} of ${confirmed.length} saved. Retry safely; already saved places will not be duplicated. ${failures.join(' ')}`,
                       )
+                    if (!catalog.length) await loadPlaces()
                   }
                 : undefined
             }
