@@ -513,16 +513,22 @@ test('unverified sign-in resumes verification and allows retrying a wrong code',
   await expect(modal.getByRole('button', { name: 'Verify email', exact: true })).toHaveCount(0)
 })
 
-test('a Korean overseas post automatically saves and opens its English map pin without confirmation', async ({ page }) => {
+for (const failedInitialLoad of [false, true]) {
+test(`an overseas post auto-saves in English after initial load failure: ${failedInitialLoad}`, async ({ page }) => {
   await setup(page)
   const match = { provider: 'amazon-location', placeId: 'museum-id', name: 'Museum', englishName: 'Museum', koreanName: null, address: record.address, countryCode: 'US', countryName: 'United States', coordinates: record.coordinates, placeType: 'PointOfInterest', selectionToken: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
   await page.route('**/api/instagram/preview', r => r.fulfill({ json: { fetchedImages: 1, result: { places: [{ name: '박물관', evidence: '박물관', regionHint: 'Los Angeles', slides: [1], needsLocationConfirmation: true }], ignoredSlides: [] } } }))
   await page.route('**/api/places/search', r => r.fulfill({ json: { matches: [match], excludedResults: 0, unsupportedCountries: [], attribution: 'AWS', queryConversion: { originalQuery: '박물관', searchQuery: 'Museum', searchRegion: 'Los Angeles', status: 'translated' } } }))
   await page.route('**/api/places/details', r => r.fulfill({ json: { place: { ...match, retrievedAt: new Date().toISOString() } } }))
+  let collectionReads = 0
   let saves = 0
   let original = ''
   await page.route('https://storage.example.test/**', r => {
-    if(new URL(r.request().url()).pathname === '/collections') return r.fulfill({json: collectionResponse})
+    if (new URL(r.request().url()).pathname === '/collections') {
+      collectionReads++
+      if (failedInitialLoad && collectionReads <= 3) return r.abort('connectionreset')
+      return r.fulfill({ json: collectionResponse })
+    }
     if (r.request().method() === 'POST') {
       saves++
       const place = r.request().postDataJSON().place
@@ -533,17 +539,23 @@ test('a Korean overseas post automatically saves and opens its English map pin w
   })
   await page.goto('/')
   await login(page)
+  if (failedInitialLoad) await expect(page.getByText('Could not connect to PinWish.', { exact: false })).toBeVisible()
   await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
   await page.getByLabel('Instagram post link', { exact: true }).fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await expect(page.getByLabel('Select a saved place on the map').locator('option')).toHaveCount(2)
   expect(saves).toBe(1)
+  if (failedInitialLoad) {
+    expect(collectionReads).toBeGreaterThan(3)
+    await expect(page.getByText('Could not connect to PinWish.', { exact: false })).toHaveCount(0)
+  }
   expect(original).toBe('박물관')
   await page.getByLabel('Select a saved place on the map').selectOption(record.id)
   await expect(page.locator('#place-heading')).toHaveText('Museum')
   expect(await page.locator('body').innerText()).not.toMatch(/\p{Script=Hangul}/u)
 })
+}
 
 test('loading overlay covers sign-in, clears on failure, and restores the form', async ({ page }) => {
   await setup(page)
@@ -571,3 +583,22 @@ test('loading overlay covers sign-in, clears on failure, and restores the form',
   await expect(modal.getByLabel('Email', { exact: true })).toHaveValue('person@example.com')
   await expect(modal.getByRole('button', { name: 'Sign in', exact: true }).last()).toBeEnabled()
 })
+
+for (const failure of ['network', 'server']) {
+  test(`initial collection read recovers from one ${failure} failure`, async ({ page }) => {
+    await setup(page, [record])
+    let reads = 0
+    await page.route('https://storage.example.test/collections', r => {
+      reads++
+      if (reads === 1) return failure === 'network'
+        ? r.abort('connectionreset')
+        : r.fulfill({ status: 503, json: { code: 'unavailable' } })
+      return r.fulfill({ json: collectionResponse })
+    })
+    await page.goto('/')
+    await login(page)
+    await expect(page.locator('.place-card-title').filter({ hasText: 'Museum' })).toBeVisible()
+    expect(reads).toBe(2)
+    await expect(page.getByText('Failed to fetch', { exact: true })).toHaveCount(0)
+  })
+}

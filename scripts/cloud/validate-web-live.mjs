@@ -1,4 +1,5 @@
-import { randomBytes } from 'node:crypto'
+import { randomBytes, createHash } from 'node:crypto'
+import { execFileSync } from 'node:child_process'
 import { writeFile, readFile } from 'node:fs/promises'
 import assert from 'node:assert/strict'
 import { chromium, expect } from '@playwright/test'
@@ -11,7 +12,10 @@ const users = [],
   checks = [],
   jobs = [],
   errors = []
-let browser, page
+const shareTokens = []
+const networkFailures = []
+let browser, page, failure
+const record = check => { checks.push(check); console.log('Passed:', check) }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 async function request(token, path, method = 'GET', body) {
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -159,6 +163,17 @@ try {
   page = await browser.newPage({ viewport: { width: 1440, height: 1000 } })
   page.setDefaultTimeout(30000)
   page.on('pageerror', (e) => errors.push(e.message))
+  page.on('requestfailed', async (r) => {
+    if (r.url().startsWith(outputs.ApiUrl)) {
+      const item = { method: r.method(), path: new URL(r.url()).pathname.replace(/\/[a-f0-9]{32,}/g, '/:id'), error: r.failure()?.errorText, responseStatus: (await r.response().catch(() => null))?.status() ?? null }
+      networkFailures.push(item)
+      console.log('API network failure:', JSON.stringify(item))
+    }
+  })
+  page.on('response', (r) => {
+    if (r.url().startsWith(outputs.ApiUrl) && r.status() >= 400)
+      console.log('API error:', r.request().method(), new URL(r.url()).pathname.replace(/\/[a-f0-9]{32,}/g, '/:id'), r.status())
+  })
   page.on('request', (request) => {
     if (
       new URL(request.url()).pathname === '/jobs' &&
@@ -188,7 +203,7 @@ try {
     .last()
     .click()
   await expect(dialog).toHaveCount(0, { timeout: 20000 })
-  checks.push('Real Cognito sign-in on HTTPS Amplify origin')
+  record('Real Cognito sign-in on HTTPS Amplify origin')
   console.log('Cognito sign-in completed')
   await page
     .locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true })
@@ -220,13 +235,13 @@ try {
   const imported = await request(users[0].token, '/jobs/' + imports[0].id)
   assert.equal(imported.body.result.fetchedImages, 12)
   assert.equal(imported.body.result.result.places.length, 10)
-  checks.push(
+  record(
     'Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs',
   )
   const jobId = jobs.find((j) => j.operation === 'import')?.id
   assert.equal((await request(users[1].token, '/jobs/' + jobId)).status, 404)
   assert.equal((await request(users[1].token, '/places')).body.items.length, 0)
-  checks.push('Cross-account job and saved-place isolation')
+  record('Cross-account job and saved-place isolation')
   await page
     .getByRole('button', { name: 'Hide collections', exact: true })
     .click()
@@ -243,7 +258,7 @@ try {
   await expect
     .poll(async () => page.locator('.place-card').count(), { timeout: 20000 })
     .toBe(10)
-  checks.push(
+  record(
     'Session and 10 saved places survive reload; sidebar toggle preserves layout',
   )
   await page
@@ -254,7 +269,7 @@ try {
     'Griffith Observatory',
   )
   await expect(page.locator('.cover-frame img')).toBeVisible({ timeout: 45000 })
-  checks.push('Automatic representative photo renders without upload')
+  record('Automatic representative photo renders without upload')
   await page.setViewportSize({ width: 390, height: 844 })
   assert.ok(
     await page.evaluate(
@@ -263,11 +278,17 @@ try {
   )
   await page.screenshot({ path: '/tmp/pinwish-deployed-mobile.png' })
   assert.deepEqual(errors, [])
-  checks.push(
+  record(
     'Mobile detail has no horizontal overflow; no uncaught browser errors',
   )
+  if (process.env.PINWISH_RUN_RELEASE_TESTS === '1') {
+    const { validateReleaseBrowser } = await import('./validate-release-browser.mjs')
+    await validateReleaseBrowser({ page, browser, origin, user: users[0], request, checks, shareTokens })
+  }
+  assert.deepEqual(errors, [])
   console.log(JSON.stringify({ checks }, null, 2))
 } catch (e) {
+  failure = e.message
   console.error('Live validation failed:', e.message)
   if (page) {
     await page
@@ -291,6 +312,15 @@ try {
     }
   }
 
+  for (const {type, token} of shareTokens) {
+    try {
+      const prefix = type === 'trip' ? 'TRIPSHARE#' : 'SHARE#'
+      aws(['dynamodb', 'delete-item', '--table-name', outputs.TableName, '--key', JSON.stringify({pk:{S:prefix+createHash('sha256').update(token).digest('hex')},sk:{S:'LINK'}})])
+    } catch (error) { cleanupErrors.push(error.message); process.exitCode = 1 }
+  }
+  try {
+    execFileSync('node', ['scripts/cloud/runtime.mjs', 'off'], {stdio:'inherit'})
+  } catch (error) { cleanupErrors.push('Runtime pause failed: '+error.message); process.exitCode=1 }
   await writeFile(
     'infra/generated/web-validation.json',
     JSON.stringify(
@@ -298,8 +328,11 @@ try {
         testedAt: new Date().toISOString(),
         origin,
         checks,
+        passed: !failure && !errors.length && !cleanupErrors.length,
+        failure: failure ?? null,
         errors,
         cleanupErrors,
+      networkFailures,
         jobs: jobs.map(({ operation, status, code }) => ({
           operation,
           status,

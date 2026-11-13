@@ -13,6 +13,7 @@ const {
   DeleteItemCommand,
 } = require('@aws-sdk/client-dynamodb')
 const encode = (v) =>
+  v === null ? { NULL: true } :
   typeof v === 'string'
     ? { S: v }
     : typeof v === 'number'
@@ -29,6 +30,7 @@ const encode = (v) =>
               ),
             }
 const decode = (v) =>
+  v.NULL === true ? null :
   'S' in v
     ? v.S
     : 'N' in v

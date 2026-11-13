@@ -1,0 +1,176 @@
+{
+  "reviewDate": "2026-11-12",
+  "timeZone": "America/Los_Angeles",
+  "completedAt": "2026-11-13T03:01:33.766Z",
+  "branch": "test/aws-release-validation",
+  "baseCommit": "2e93b34fcb6a5624f9dfe1d90a6760c7fa23bef1",
+  "uncommittedFixes": [
+    "Bounded route-matrix chunks",
+    "Initial read recovery and collection reload before saving",
+    "One retry for unavailable query conversion",
+    "DynamoDB null round-trip for unreachable routes"
+  ],
+  "local": {
+    "check": "passed",
+    "unit": 140,
+    "browser": {
+      "preview": 25,
+      "import": 15,
+      "cloud": 42,
+      "map": 8,
+      "direct": 12,
+      "processing": 3,
+      "total": 105,
+      "intentionalSkips": 3
+    }
+  },
+  "live": {
+    "testedAt": "2026-11-13T03:00:30.266Z",
+    "passed": true,
+    "checks": [
+      "Real Cognito sign-in on HTTPS Amplify origin",
+      "Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs",
+      "Cross-account job and saved-place isolation",
+      "Session and 10 saved places survive reload; sidebar toggle preserves layout",
+      "Automatic representative photo renders without upload",
+      "Mobile detail has no horizontal overflow; no uncaught browser errors",
+      "Deployed note and visit edits persist after reload",
+      "Deployed collection color persists and map renders",
+      "Journey uncertainty labels match saved results: 3 unknown-hours visits, 0 suggested visits",
+      "All nine unvisited selections scheduled; journey saved, reopened, edited, shared, revoked and deleted against real AWS",
+      "Anonymous collection sharing excludes private notes and revocation removes access",
+      "Real direct search/save and visited state; collection create/rename/move/delete preserves the saved place",
+      "Private saved-place links require authentication and do not expose details anonymously",
+      "Real sign-out clears session and signed-out saving prompts sign-in"
+    ],
+    "email": {
+      "testedAt": "2026-11-13T02:51:29.661Z",
+      "checks": [
+        "Real signup email code accepted; verification returns to sign-in",
+        "New verified account signs in and signs out",
+        "Real reset email code accepted; new password signs in and signs out"
+      ],
+      "errors": [],
+      "temporaryAccountRemoved": true
+    },
+    "uncaughtBrowserErrors": [],
+    "cleanupErrors": [],
+    "diagnostics": {
+      "accepted202ResponseCancellations": 24,
+      "otherRequestFailures": []
+    }
+  },
+  "artifacts": {
+    "verifiedAt": "2026-11-13T02:58:18.194Z",
+    "baseCommit": "2e93b34fcb6a5624f9dfe1d90a6760c7fa23bef1",
+    "includesUncommittedRouteBoundaryFix": true,
+    "includesUncommittedReadRecoveryFix": true,
+    "includesUncommittedNullRouteFix": true,
+    "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+    "frontend": [
+      {
+        "file": "index-CtUUHyss.css",
+        "sha256": "07404e54609df1ae5e8a10b7806b640f26f1bc650baec22fea394001a23adc55"
+      },
+      {
+        "file": "LiveMap-DzytT-P2.js",
+        "sha256": "a3d51f4cba8ad3ae8cd0bc60c53902d409eea3c9f23aad626b6b41a5a1f02f7c"
+      },
+      {
+        "file": "maplibre-gl-worker-DTh23QKw.js",
+        "sha256": "a0da9c70dd13e7313cd609659ac1d231424e1a9ec2cb701758b64bc1ee5c09d9"
+      },
+      {
+        "file": "index.browser-XOxHJFxC.js",
+        "sha256": "f36986acd57ec88200d29cdcffb9dc6bd668d1b0660909d8414bcf2cab5616fc"
+      },
+      {
+        "file": "index-Cv0r4RaA.js",
+        "sha256": "f3bc75eeb61fd3ab49807c35c25789e419e65400bce727f0b6bed71b18da60e2"
+      },
+      {
+        "file": "LiveMap-qvkd0SPb.css",
+        "sha256": "280f62458bee97adaab9c817e977cc89e02cc34d07a3107ba4a545c17c41976d"
+      }
+    ],
+    "backend": [
+      {
+        "function": "storage",
+        "sourceSha256": "4a3a2b6801830f00d017788bdb1f9fda936887ac3b6125e26a7df2e557cb70ad",
+        "awsCodeSha256": "nG35QuggjHM93OgYHrYewFSDMuEltyk9Lmbbqo4AdVg="
+      },
+      {
+        "function": "processing",
+        "sourceSha256": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+        "awsCodeSha256": "sMko/XrkEsFt0fM/mgp7IC+/hT11DSYB8KS3NpuKwtE="
+      },
+      {
+        "function": "worker",
+        "sourceSha256": "23750e5e6400fefb240324b95c3b5a9be8a4f58f48db5b440236d883b6afd570",
+        "awsCodeSha256": "sMko/XrkEsFt0fM/mgp7IC+/hT11DSYB8KS3NpuKwtE="
+      },
+      {
+        "function": "pause",
+        "sourceSha256": "42898b83830acd0e3b0b8c2d186cfac428378ef2a958e94ff44594194e4fe435",
+        "awsCodeSha256": "luj+F6Oi4kN1S+3arGDsdZJpzZnNuJTCcQ7UgOqhzGs="
+      }
+    ],
+    "frontendArchiveSha256": "79a0f9b5b95a7364abbe24967a568fd85643943ff8da7d1a10c92370430ed27b",
+    "amplifyJob": "16"
+  },
+  "routeBoundary": {
+    "testedAt": "2026-11-12T22:07:35.626Z",
+    "passed": true,
+    "scope": "Current backend handler with in-memory storage and synthetic place/hour fixtures; real AWS route matrix provider",
+    "places": 20,
+    "routeRequests": 4,
+    "billedRoutePairs": 400,
+    "cacheRepeatProviderRequests": 0,
+    "allSelectionsIncluded": true,
+    "awsUserDataWrites": 0
+  },
+  "preservation": {
+    "checkedAt": "2026-11-13T03:00:46.511Z",
+    "records": {
+      "before": 11,
+      "after": 11,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "accounts": {
+      "before": 1,
+      "after": 1,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "photos": {
+      "before": 9,
+      "after": 9,
+      "changedOrMissing": 0,
+      "added": 0
+    }
+  },
+  "paused": {
+    "mapPaused": true,
+    "cleanupState": "DISABLED",
+    "hostingPaused": true,
+    "apiDisabled": true,
+    "workers": {
+      "storage": 0,
+      "processing": 0,
+      "worker": 0
+    },
+    "autoPause": {
+      "state": "DISABLED",
+      "expression": "at(2026-11-13T03:12:54)"
+    }
+  },
+  "limitations": [
+    "Earlier Failed to fetch transport cause was not captured; its catalog/save failure was reproduced and fixed.",
+    "Provider availability, AI extraction, opening hours and routes are not guaranteed; uncertain results remain explicit.",
+    "The 20-stop routing probe used synthetic places/hours and in-memory storage with real AWS routing.",
+    "An existing production bundle-size warning remains."
+  ],
+  "committed": false,
+  "pushed": false
+}

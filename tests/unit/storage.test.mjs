@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url)
 const {
   createHandler,
   validatePlace,
+  marshal, unmarshal,
 } = require('../../backend/storage.cjs')
 test('storage rejects unauthenticated and ID-token requests and malformed records', async () => {
   const handler = createHandler({ client: db(), table: 'test' })
@@ -150,4 +151,11 @@ test('pagination cursor cannot cross owners and invalid body limits are rejected
   const invalid = event('POST')
   invalid.body = '{'
   assert.equal((await handler(invalid)).statusCode, 400)
+})
+
+test('DynamoDB encoding preserves nested null without turning unknown values into zero', () => {
+  const value = { stops: [{ travel: null, duration: 60, omitted: undefined }], note: '', visited: false }
+  const encoded = marshal(value)
+  assert.deepEqual(encoded.stops.L[0].M.travel, { NULL: true })
+  assert.deepEqual(unmarshal(encoded), { stops: [{ travel: null, duration: 60 }], note: '', visited: false })
 })

@@ -252,3 +252,24 @@ test('retries with venue and city when address search returns an unrelated tenan
   expect(requests[0].region).toBe(candidate.locationHint)
   expect(requests[1]).toMatchObject({ query: 'Griffith Observatory', region: 'Los Angeles, CA' })
 })
+
+for (const recovers of [true, false]) {
+  test(`translation service unavailable retries once; recovery: ${recovers}`, async ({ page }) => {
+    let searches = 0, details = 0
+    await page.route('**/api/places/search', r => {
+      searches++
+      return r.fulfill({ json: searches > 1 && recovers ? results([a]) : {
+        ...results([a]),
+        queryConversion: { originalQuery: candidate.name, searchQuery: candidate.name, searchRegion: candidate.locationHint, status: 'unavailable' },
+      } })
+    })
+    await page.route('**/api/places/details', r => {
+      details++
+      return r.fulfill({ json: { place: { ...a, retrievedAt: new Date().toISOString() } } })
+    })
+    const region = await openImport(page)
+    await expect(region).toContainText(recovers ? a.address : 'place name could not be matched reliably')
+    expect(searches).toBe(2)
+    expect(details).toBe(recovers ? 1 : 0)
+  })
+}
