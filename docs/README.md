@@ -19,11 +19,11 @@ Current implementation review: November 12, 2026. These guides describe the repo
 
 ## Release and verification status
 
-- The cleanup audit records 134 passing unit tests and 100 passing browser tests on November 12, with three intentional platform-specific skips. These are preserved results, not a claim that this documentation edit reran all suites.
-- Backend and frontend deploy independently. The last recorded frontend deployment predates the latest map/loading/journey refinements; a merged PR does not update Amplify automatically. Before the next demo, deploy the intended compatible backend and frontend, then run a bounded end-to-end check.
-- Individual feature live reports do not establish that the latest combined frontend/backend has been tested together. Real signup email delivery also needs a manual inbox check: automated live accounts suppress delivery.
-- No deployment, runtime enablement, resource deletion or application change is part of this documentation update. Use `npm run cloud:status` to inspect current runtime status; do not infer it from an old screenshot or report.
-- Deployment status can change after this review. Amplify deployment history and the actual build artifacts are the source of truth for the running version.
+The [November 12 release validation](validation/aws-release.md) records the latest compatible frontend/backend deployment, actual email verification and reset, local regression checks, and the combined live walkthrough. See that report for final results and limitations; older feature reports describe their own releases.
+
+Backend and frontend deploy independently. A merged PR does not deploy to Amplify. The release report identifies both its base commit and the fixes validated before commit and includes deployed artifact hashes. Use `npm run cloud:status` to inspect current runtime state rather than inferring it from an old screenshot.
+
+Use the [demo walkthrough](demo-walkthrough.md) to open a bounded test session, demonstrate the saved-place and journey flows, recover from provider failures, and pause afterward.
 
 ## Cache and request limits
 
@@ -60,4 +60,4 @@ The files in `validation/` preserve dated experiments and live/local checks. Old
 
 ## Deferred scope
 
-Native mobile apps/share-sheet intake, Instagram video analysis, collaborative editing of shared collections, guaranteed photo coverage, detailed South Korean place lookup and in-app turn-by-turn navigation are not implemented. AI place extraction is implemented; journey scheduling itself is deterministic. Course presentation/report preparation and a final deployed walkthrough remain separate from documenting the implementation.
+Native mobile apps/share-sheet intake, Instagram video analysis, collaborative editing of shared collections, guaranteed photo coverage, detailed South Korean place lookup and in-app turn-by-turn navigation are not implemented. AI place extraction is implemented; journey scheduling itself is deterministic. Course presentation/report preparation remains separate from implementation and release validation.
