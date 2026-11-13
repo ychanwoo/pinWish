@@ -229,31 +229,36 @@ function createItineraries({
       const points = places.map((p) => ({
         Position: [p.coordinates.longitude, p.coordinates.latitude],
       }))
-      const result = await request(
-        routesClient,
-        new CalculateRouteMatrixCommand({
-          Origins: points,
-          Destinations: points,
-          TravelMode: settings.mode,
-          DepartureTime: departure,
-          RoutingBoundary: { Unbounded: true },
-        }),
-      )
-      if (
-        !Array.isArray(result.RouteMatrix) ||
-        result.RouteMatrix.length !== places.length
-      )
-        fail(502, 'itinerary_provider_unavailable')
-      // -1 denotes an unreachable route; do not invent straight-line travel estimates.
-      const matrix = result.RouteMatrix.map((row) =>
-        row.map((r) =>
-          r.Error || !Number.isFinite(r.Duration)
-            ? -1
-            : Math.ceil((r.Duration / 60) * 1.2),
-        ),
-      )
-      if (matrix.some((r) => r.length !== places.length))
-        fail(502, 'itinerary_provider_unavailable')
+      // Unbounded AWS route matrices permit at most 100 origin/destination
+      // pairs. Keep the supported 20-stop plan without inventing shorter routes.
+      const matrix = points.map(() => [])
+      const deadline = AbortSignal.timeout(25000)
+      for (let origin = 0; origin < points.length; origin += 10) {
+        const origins = points.slice(origin, origin + 10)
+        for (let destination = 0; destination < points.length; destination += 10) {
+          const destinations = points.slice(destination, destination + 10)
+          const result = await request(
+            routesClient,
+            new CalculateRouteMatrixCommand({
+              Origins: origins,
+              Destinations: destinations,
+              TravelMode: settings.mode,
+              DepartureTime: departure,
+              RoutingBoundary: { Unbounded: true },
+            }),
+            deadline,
+          )
+          if (!Array.isArray(result.RouteMatrix) || result.RouteMatrix.length !== origins.length ||
+              result.RouteMatrix.some(row => !Array.isArray(row) || row.length !== destinations.length))
+            fail(502, 'itinerary_provider_unavailable')
+          for (let i = 0; i < origins.length; i++) {
+            // -1 is unreachable, not a zero-minute or straight-line estimate.
+            matrix[origin + i].push(...result.RouteMatrix[i].map(r =>
+              r.Error || !Number.isFinite(r.Duration) ? -1 : Math.ceil((r.Duration / 60) * 1.2)))
+          }
+        }
+      }
+      // Cache only the complete matrix; a failed chunk cannot become a plan.
       cached = {
         pk,
         sk: `TRIPMATRIX#${body.contextId}#${cacheId}`,

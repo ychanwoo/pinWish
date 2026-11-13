@@ -4,11 +4,11 @@ import { place } from './unit/storage-fixture.mjs'
 const { createHandler } = createRequire(import.meta.url)(
   '../backend/storage.cjs',
 )
-export async function itineraryFixture({ unknown = false } = {}) {
+export async function itineraryFixture({ unknown = false, count = 3, liveRoutesClient } = {}) {
   const client = db(),
     places = [],
     providerCalls = { details: 0, matrix: 0 },
-    state = { failRoutes: false }
+    state = { failRoutes: false, routeInputs: [], failMatrixAt: 0, unreachableLast: false }
   const handler = createHandler({
     client,
     table: 'test',
@@ -42,11 +42,16 @@ export async function itineraryFixture({ unknown = false } = {}) {
       routesClient: {
         async send(cmd) {
           providerCalls.matrix++
-          if (state.failRoutes) throw Error('unavailable')
+          state.routeInputs.push(cmd.input)
+          if (liveRoutesClient) return liveRoutesClient.send(cmd)
+          if (state.failRoutes || providerCalls.matrix === state.failMatrixAt) throw Error('unavailable')
+          if (cmd.input.Origins.length * cmd.input.Destinations.length > 100) throw Error('AWS unbounded matrix limit exceeded')
           return {
-            RouteMatrix: cmd.input.Origins.map((_, i) =>
-              cmd.input.Destinations.map((_, j) => ({
-                Duration: i === j ? 0 : 1200,
+            RouteMatrix: cmd.input.Origins.map((o) =>
+              cmd.input.Destinations.map((d) => state.unreachableLast &&
+                (o.Position[0] === places.at(-1).coordinates.longitude || d.Position[0] === places.at(-1).coordinates.longitude)
+                ? { Error: { Code: 'NoRoute' } } : ({
+                Duration: o.Position[0] === d.Position[0] ? 0 : 1200,
                 Distance: 5000,
               })),
             ),
@@ -72,11 +77,7 @@ export async function itineraryFixture({ unknown = false } = {}) {
       body: JSON.stringify(body),
       queryStringParameters: query,
     })
-  for (const [i, name] of [
-    'The Broad',
-    'Griffith Observatory',
-    'Museum of Art',
-  ].entries()) {
+  for (const [i, name] of Array.from({length:count}, (_,i) => ['The Broad','Griffith Observatory','Museum of Art'][i] ?? `Museum ${i + 1}`).entries()) {
     const response = await call('POST', '/places', {
       place: {
         ...place,

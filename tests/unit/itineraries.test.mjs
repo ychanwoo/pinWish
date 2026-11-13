@@ -248,3 +248,49 @@ test('expired preparation cache refreshes real place data', async () => {
   assert.notEqual((await prepared(f)).contextId, first.contextId)
   assert.equal(f.providerCalls.details, 6)
 })
+
+for (const count of [10, 11, 20]) test(`AWS matrix boundaries preserve all ${count} stops and reuse the full cache`, async () => {
+  const f = await itineraryFixture({count}), ctx = await prepared(f)
+  const body = {contextId:ctx.contextId, settings:options(f)}
+  const response = await f.call('POST','/itineraries/preview',body)
+  assert.equal(response.statusCode,200,response.body)
+  const planned=json(response).plan.days.flatMap(d=>d.stops)
+  assert.equal(new Set(planned.map(p=>p.id)).size,count)
+  assert.equal(f.providerCalls.matrix,count<=10?1:4)
+  const matrix=[...f.client.data.values()].find(v=>v.sk.startsWith('TRIPMATRIX#')).matrix
+  for(let i=0;i<count;i++) for(let j=0;j<count;j++) assert.equal(matrix[i][j],i===j?0:24)
+  assert.ok(f.state.routeInputs.every(x=>x.Origins.length*x.Destinations.length<=100))
+  await f.call('POST','/itineraries/preview',body)
+  assert.equal(f.providerCalls.matrix,count<=10?1:4)
+})
+test('failed later route chunk never caches or saves a partial matrix', async()=>{
+ const f=await itineraryFixture({count:11}), ctx=await prepared(f)
+ f.state.failMatrixAt=2
+ const body={contextId:ctx.contextId,settings:options(f)}
+ assert.equal((await f.call('POST','/itineraries/preview',body)).statusCode,502)
+ assert.equal([...f.client.data.keys()].some(k=>k.includes('TRIPMATRIX#')||k.includes('TRIPPREVIEW#')),false)
+ f.state.failMatrixAt=0
+ assert.equal((await f.call('POST','/itineraries/preview',body)).statusCode,200)
+})
+
+test('unreachable route remains an explicit null through preview, save and reload', async () => {
+  const f = await itineraryFixture()
+  f.state.unreachableLast = true
+  const ctx = await prepared(f)
+  const response = await f.call('POST', '/itineraries/preview', { contextId: ctx.contextId, settings: options(f) })
+  assert.equal(response.statusCode, 200, response.body)
+  const preview = json(response)
+  const stops = preview.plan.days.flatMap(d => d.stops)
+  assert.equal(stops.length, 3)
+  assert.ok(stops.some(s => s.travel === null && s.planningNote.includes('Route unavailable')))
+  const id = randomUUID()
+  const saved = await f.call('POST', '/itineraries', { id, name: 'Unknown route journey', previewId: preview.previewId })
+  assert.equal(saved.statusCode, 200, saved.body)
+  const read = await f.call('GET', '/itineraries/' + id)
+  assert.equal(read.statusCode, 200, read.body)
+  assert.deepEqual(json(read).item.plan, preview.plan)
+  const share = json(await f.call('POST', `/itineraries/${id}/sharing`)).item
+  const publicPlan = await f.call('GET', '/trip-shares/' + share.share.token, {}, null)
+  assert.equal(publicPlan.statusCode, 200, publicPlan.body)
+  assert.deepEqual(json(publicPlan).plan, preview.plan)
+})

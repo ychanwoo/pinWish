@@ -44,7 +44,7 @@ A saved itinerary is an explicit snapshot. Editing refreshes place details; chan
 
 ## Usage controls
 
-- At most 20 detail lookups per prepare and 400 origin/destination pairs per uncached matrix.
+- At most 20 detail lookups per prepare and 400 origin/destination pairs per uncached matrix. Unbounded routing requests are split into at most four 10×10 chunks to respect AWS’s 100-pair request limit. All chunks share the same mode/departure and a bounded deadline; only a complete matrix is cached. The quota counts one complete matrix operation, while AWS charges for its origin/destination pairs.
 - Paid preparation/matrix requests limited to six per user per hour and 50 globally per UTC day. A provider preparation cache miss and a new matrix each count once. Reopening the same ordered set of places in a collection reuses the owner-scoped preparation context for one hour, including its matrix cache. Current ownership and collection membership are checked before every cache hit; changes to provider identity, coordinates, name or address invalidate the lookup. The hourly bucket resets at the next UTC hour; the global daily bucket resets at 00:00 UTC. Hourly and daily limit errors have separate messages. Limits are atomic and fail closed.
 - Duration/order edits reuse the matrix for the same selected place set, mode and departure. Date, mode, departure or selection changes may request another matrix.
 - Shared reads never call place/routing providers. Anonymous endpoint throttled to 2 requests/second, burst 5.
