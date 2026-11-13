@@ -1,4 +1,4 @@
-import { Icon } from './Icon'
+import { Icon } from '../shared/Icon'
 export function ListState({
   loading,
   onBack,

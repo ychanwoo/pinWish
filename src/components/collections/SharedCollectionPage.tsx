@@ -1,4 +1,4 @@
-import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingOverlay } from '../shared/LoadingOverlay'
 import {
   lazy,
   Suspense,
@@ -13,10 +13,10 @@ import {
   type SharedCollection,
   type SharedPlace,
   type SharedPhoto,
-} from '../lib/collection-sharing'
-import { useModalFocus } from '../hooks/useModalFocus'
-import type { Place } from '../data/places'
-const LiveMap = lazy(() => import('./LiveMap'))
+} from '../../lib/collection-sharing'
+import { useModalFocus } from '../../hooks/useModalFocus'
+import type { Place } from '../../data/places'
+const LiveMap = lazy(() => import('../maps/LiveMap'))
 function safeUrl(value?: string) {
   try {
     const url = new URL(value ?? '')

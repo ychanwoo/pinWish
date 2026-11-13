@@ -1,7 +1,7 @@
-import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingOverlay } from '../shared/LoadingOverlay'
 import { useEffect, useState } from 'react'
-import { cloudConfig } from '../lib/cloud-auth'
-import type { SavedTrip } from '../lib/itineraries'
+import { cloudConfig } from '../../lib/cloud-auth'
+import type { SavedTrip } from '../../lib/itineraries'
 import { TripSchedule } from './TripSchedule'
 export default function SharedItineraryPage({ token }: { token: string }) {
   const [trip, setTrip] = useState<Pick<

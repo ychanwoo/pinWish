@@ -1,5 +1,5 @@
-import sizes from '../icon-sizes.json'
-import { asset } from '../data/places'
+import sizes from '../../icon-sizes.json'
+import { asset } from '../../data/places'
 export function Icon({
   name,
   className = '',

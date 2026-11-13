@@ -1,12 +1,17 @@
-import { LoadingOverlay, RefreshIcon } from './components/LoadingOverlay'
+import { DirectPlace } from './components/save/DirectPlace'
+import { AuthModal } from './components/auth/AuthModal'
+import { SavePlace } from './components/save/SavePlace'
+import { CollectionDialog } from './components/collections/CollectionDialog'
+import { useWorkspaceNavigation } from './hooks/useWorkspaceNavigation'
+import { AccountBar } from './components/auth/AccountBar'
+import { requireOwner } from './lib/session-owner'
+import { loadWorkspaceSnapshot } from './lib/workspace-snapshot'
+import type { DirectDraft } from './components/save/useDirectPlace'
+import type { SaveDraft } from './components/save/useSavePlace'
+import { LoadingOverlay, RefreshIcon } from './components/shared/LoadingOverlay'
 import { useMapAppearance } from './hooks/useMapAppearance'
-import { ItineraryPlanner } from './components/ItineraryPlanner'
-import { CollectionSharing } from './components/CollectionSharing'
 import { lazy, Suspense } from 'react'
 import { forgetPhoto, prefetchPhotos } from './lib/place-photo'
-const LiveMap = lazy(() => import('./components/LiveMap'))
-import { DirectPlace, type DirectDraft } from './components/DirectPlace'
-import { AuthModal } from './components/AuthModal'
 import {
   cloudEnabled,
   getSession,
@@ -14,7 +19,6 @@ import {
   signOut,
 } from './lib/cloud-auth'
 import {
-  listSaved,
   listCollections,
   createCollection,
   renameCollection,
@@ -28,6 +32,7 @@ import {
   toUIPlace,
 } from './lib/storage-api'
 import {
+  useMemo,
   useCallback,
   useEffect,
   useRef,
@@ -37,21 +42,33 @@ import {
 import {
   initialPlaces,
   filterPlaces,
-  type Category,
   saveStates,
   type Place,
   type SaveState,
   type View,
 } from './data/places'
-import { DesktopNavigation, MobileHeader } from './components/Navigation'
-import { PlaceList } from './components/PlaceList'
-import { MapView } from './components/MapView'
-import { PlaceDetail } from './components/PlaceDetail'
-import { SavePlace, type SaveDraft } from './components/SavePlace'
-import { ListState } from './components/ListState'
-import { Icon } from './components/Icon'
-import { CollectionDialog } from './components/CollectionDialog'
+import {
+  DesktopNavigation,
+  MobileHeader,
+} from './components/navigation/Navigation'
+import { PlaceList } from './components/places/PlaceList'
+import { MapView } from './components/maps/MapView'
+import { PlaceDetail } from './components/places/PlaceDetail'
+import { ListState } from './components/places/ListState'
+import { Icon } from './components/shared/Icon'
 import './styles/app.css'
+
+const CollectionSharing = lazy(() =>
+  import('./components/collections/CollectionSharing').then((m) => ({
+    default: m.CollectionSharing,
+  })),
+)
+const ItineraryPlanner = lazy(() =>
+  import('./components/journeys/ItineraryPlanner').then((m) => ({
+    default: m.ItineraryPlanner,
+  })),
+)
+const LiveMap = lazy(() => import('./components/maps/LiveMap'))
 const params = new URLSearchParams(window.location.search)
 const views: View[] = [
   'list',
@@ -95,28 +112,45 @@ function App() {
       ? params.get('place')
       : null,
   )
-  const [view, setView] = useState<View>(initialView)
   const [places, setPlaces] = useState<Place[]>(
     cloudEnabled ? [] : initialPlaces,
   )
-  const [selectedId, setSelectedId] = useState(
-    params.get('place') || initialPlaces[0].id,
-  )
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<Category | 'All'>('All')
-  const [onlyUnvisited, setOnlyUnvisited] = useState(false)
-  const [collection, setCollection] = useState(
-    cloudEnabled
-      ? 'Saved places'
-      : initialView === 'empty'
-        ? 'Weekend ideas'
-        : 'LA weekend',
-  )
+  const [notice, setNotice] = useState('')
+  const {
+    view,
+    setView,
+    selectedId,
+    setSelectedId,
+    search,
+    setSearch,
+    category,
+    setCategory,
+    onlyUnvisited,
+    setOnlyUnvisited,
+    collection,
+    setCollection,
+    returnView,
+    selected,
+    changeCollection,
+    navigate,
+    openDetail,
+  } = useWorkspaceNavigation({
+    places,
+    initialView,
+    initialSelectedId: params.get('place'),
+    cloudEnabled,
+    onNotice: setNotice,
+    onOpenDetail: () => setSaveState(null),
+  })
   const [collections, setCollections] = useState(
     cloudEnabled ? ['Saved places'] : ['LA weekend', 'Weekend ideas'],
   )
   const [catalog, setCatalog] = useState<SavedCollection[]>([])
-  const mapAppearance = useMapAppearance(cloudEnabled ? session?.sub : undefined, places, catalog)
+  const mapAppearance = useMapAppearance(
+    cloudEnabled ? session?.sub : undefined,
+    places,
+    catalog,
+  )
   const catalogRef = useRef(catalog)
   useEffect(() => {
     catalogRef.current = catalog
@@ -131,7 +165,9 @@ function App() {
       c ? { ...saved, collectionId: c.id, collection: c.name } : saved,
     )
   }
-  const [collectionDialogMode, setCollectionDialogMode] = useState<'manage' | 'rename' | 'delete'>('manage')
+  const [collectionDialogMode, setCollectionDialogMode] = useState<
+    'manage' | 'rename' | 'delete'
+  >('manage')
   const [managedCollection, setManagedCollection] = useState<
     SavedCollection | undefined
   >()
@@ -145,11 +181,13 @@ function App() {
       : null
   }
   const [saveState, setSaveState] = useState<SaveState | null>(initialSave)
-  const [notice, setNotice] = useState('')
   const [newCollection, setNewCollection] = useState(false)
   const sharingReturnFocus = useRef<HTMLElement | null>(null)
-  const [tripCollection, setTripCollection] = useState<SavedCollection | null>(null)
-  const [sharingCollection, setSharingCollection] = useState<SavedCollection | null>(null)
+  const [tripCollection, setTripCollection] = useState<SavedCollection | null>(
+    null,
+  )
+  const [sharingCollection, setSharingCollection] =
+    useState<SavedCollection | null>(null)
   const loadPlaces = useCallback(async (next: string | null = null) => {
     if (!getSession()) return
     const owner = getSession()!.sub,
@@ -157,35 +195,13 @@ function App() {
     setCloudLoading(true)
     setCloudError('')
     try {
-      const collectionResult = await listCollections()
-      collectionResult.items.sort(
-        (a, b) => Number(b.isDefault) - Number(a.isDefault),
+      const snapshot = await loadWorkspaceSnapshot(
+        next,
+        () =>
+          getSession()?.sub === owner && generation === loadGeneration.current,
       )
-      const result = await listSaved(next)
-      if (result.collectionVersion !== collectionResult.version)
-        throw new Error(
-          'Your collections changed while loading. Please refresh your places.',
-        )
-      const seen = new Set<string>()
-      while (result.cursor) {
-        if (
-          getSession()?.sub !== owner ||
-          generation !== loadGeneration.current
-        )
-          return
-        if (seen.has(result.cursor))
-          throw new Error('Could not finish loading places. Please retry.')
-        seen.add(result.cursor)
-        const page = await listSaved(result.cursor)
-        if (page.collectionVersion !== collectionResult.version)
-          throw new Error(
-            'Your collections changed while loading. Please refresh your places.',
-          )
-        result.items.push(...page.items)
-        result.cursor = page.cursor
-      }
-      if (getSession()?.sub !== owner || generation !== loadGeneration.current)
-        return
+      if (!snapshot) return
+      const { collectionResult, result } = snapshot
       const incoming = result.items.map(toUIPlace)
       setPlaces((previous) =>
         next
@@ -222,14 +238,15 @@ function App() {
     } finally {
       if (generation === loadGeneration.current) setCloudLoading(false)
     }
-  }, [])
+  }, [setSelectedId, setOnlyUnvisited, setCategory, setSearch, setCollection, setView, setCatalog, setCollections, setCloudLoading, setCloudError, setPlaces, setCursor, setNotice])
   useEffect(() => {
     if (!cloudEnabled) return
     // Clear private data when the external authentication session changes.
     loadGeneration.current++
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
-    setTripCollection(null); setSharingCollection(null)
+    setTripCollection(null)
+    setSharingCollection(null)
     setCollections(['Saved places'])
     setCatalog([])
     setCollection('Saved places')
@@ -254,7 +271,7 @@ function App() {
       setResumeSave(false)
     }
     if (session?.sub) void loadPlaces()
-  }, [session?.sub, loadPlaces])
+  }, [session?.sub, loadPlaces, setCollection, setView, setSelectedId])
   const photoIds = session?.sub
     ? places
         .filter((p) => p.saved && p.collection === collection)
@@ -266,21 +283,6 @@ function App() {
     if (!photoIds) return
     return prefetchPhotos(photoIds.split('|'))
   }, [photoIds, session?.sub])
-  const changeCollection = (name: string) => {
-    setCollection(name)
-    setCategory('All')
-    setOnlyUnvisited(false)
-    setSearch('')
-    const first = places.find((p) =>
-      !cloudEnabled && name === 'Coffee'
-        ? p.category === 'Coffee'
-        : !cloudEnabled && name === 'Galleries'
-          ? p.category === 'Culture'
-          : p.collection === name,
-    )
-    if (first) setSelectedId(first.id)
-    setView('list')
-  }
   const openNewCollection = () => {
     if (cloudEnabled && !getSession()) {
       setAuthReason('Sign in to create and keep your collections.')
@@ -296,47 +298,24 @@ function App() {
     setNewCollection(true)
   }
   const currentCollection = catalog.find((c) => c.name === collection)
-  const manageCollection =
-    currentCollection
-      ? () => {
-          setCollectionDialogMode('manage')
-          setManagedCollection(currentCollection)
-          setNewCollection(true)
-        }
-      : undefined
-  const requireOwner = (owner: string | undefined) => {
-    if (!owner || getSession()?.sub !== owner)
-      throw new Error('Your account changed. Please try again.')
-  }
-  const returnView = useRef<View>('list')
+  const manageCollection = currentCollection
+    ? () => {
+        setCollectionDialogMode('manage')
+        setManagedCollection(currentCollection)
+        setNewCollection(true)
+      }
+    : undefined
   const refreshTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   )
   const lastAdded = useRef<string | null>(null)
-  const selected =
-    places.find((p) => p.id === selectedId) ||
-    initialPlaces.find((p) => p.id === selectedId) ||
-    initialPlaces[0]
   useEffect(() => {
     if (!notice) return
     const t = setTimeout(() => setNotice(''), 5000)
     return () => clearTimeout(t)
   }, [notice])
   useEffect(() => () => clearTimeout(refreshTimer.current), [])
-  const navigate = useCallback((next: View) => {
-    setView(next)
-    setNotice('')
-    window.scrollTo(0, 0)
-  }, [])
   const closeSave = useCallback(() => setSaveState(null), [])
-  const openDetail = (place: Place) => {
-    returnView.current = view === 'map' || view === 'saved' ? 'map' : 'list'
-    setSelectedId(place.id)
-    setCollection(place.collection)
-    setSaveState(null)
-    navigate('detail')
-    setTimeout(() => document.getElementById('place-heading')?.focus(), 0)
-  }
   const updatePlace = async (place: Place, changes: Partial<Place>) => {
     if (cloudEnabled) {
       if (!place.saved) {
@@ -413,12 +392,16 @@ function App() {
       )
     }
   }
-  const mapPlaces = filterPlaces(
-    places,
-    collection,
-    view === 'detail' ? 'All' : category,
-    view === 'detail' ? false : onlyUnvisited,
-    view === 'detail' ? '' : search,
+  const mapPlaces = useMemo(
+    () =>
+      filterPlaces(
+        places,
+        collection,
+        view === 'detail' ? 'All' : category,
+        view === 'detail' ? false : onlyUnvisited,
+        view === 'detail' ? '' : search,
+      ),
+    [places, collection, view, category, onlyUnvisited, search],
   )
   const mapSelected =
     mapPlaces.find((p) => p.id === selected.id) ?? mapPlaces[0] ?? selected
@@ -426,57 +409,66 @@ function App() {
     <div
       className={`app-shell ${sidebarOpen ? '' : 'sidebar-collapsed'} view-${view} ${saveState ? 'has-save' : ''} ${cloudEnabled ? 'cloud-enabled' : ''}`}
     >
-      <LoadingOverlay active={cloudLoading && !authOpen && !saveState && !tripCollection && !sharingCollection && !newCollection} />
+      <LoadingOverlay
+        active={
+          cloudLoading &&
+          !authOpen &&
+          !saveState &&
+          !tripCollection &&
+          !sharingCollection &&
+          !newCollection
+        }
+      />
       <a className="skip-link" href="#main-content">
         Skip to places
       </a>
       {cloudEnabled && (
-        <header
-          className="account-bar"
-          inert={Boolean(saveState || authOpen || newCollection || sharingCollection || tripCollection)}
-        >
-          <span>pinWish</span>
-          <div>
-            {session ? (
-              <>
-                <span className="account-email">{session.email}</span>
-                <button
-                  onClick={() => {
-                    setDraft(null)
-                    setDirectDraft({ query: '', region: '', note: '', collectionId: '' })
-                    setSaveMethod('instagram')
-                    directOwner.current = null
-                    draftOwner.current = null
-                    setSaveState(null)
-                    setPlaces([])
-                    setCollections(['Saved places'])
-                    setCatalog([])
-                    setCollection('Saved places')
-                    setNewCollection(false)
-                    setManagedCollection(undefined)
-                    setSelectedId('')
-                    setView('list')
-                    void signOut()
-                  }}
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <button
-                className="primary small"
-                onClick={() => {
-                  setAuthReason('')
-                  setAuthOpen(true)
-                }}
-              >
-                Sign in
-              </button>
-            )}
-          </div>
-        </header>
+        <AccountBar
+          session={session}
+          inert={Boolean(
+            saveState ||
+              authOpen ||
+              newCollection ||
+              sharingCollection ||
+              tripCollection,
+          )}
+          onSignIn={() => {
+            setAuthReason('')
+            setAuthOpen(true)
+          }}
+          onSignOut={() => {
+            setDraft(null)
+            setDirectDraft({
+              query: '',
+              region: '',
+              note: '',
+              collectionId: '',
+            })
+            setSaveMethod('instagram')
+            directOwner.current = null
+            draftOwner.current = null
+            setSaveState(null)
+            setPlaces([])
+            setCollections(['Saved places'])
+            setCatalog([])
+            setCollection('Saved places')
+            setNewCollection(false)
+            setManagedCollection(undefined)
+            setSelectedId('')
+            setView('list')
+            void signOut()
+          }}
+        />
       )}
-      <div inert={Boolean(saveState || newCollection || authOpen || sharingCollection || tripCollection)}>
+      <div
+        inert={Boolean(
+          saveState ||
+            newCollection ||
+            authOpen ||
+            sharingCollection ||
+            tripCollection,
+        )}
+      >
         <DesktopNavigation
           appearance={mapAppearance}
           sidebarOpen={sidebarOpen}
@@ -485,16 +477,30 @@ function App() {
           places={places}
           collections={collections}
           onNewCollection={openNewCollection}
-          onCollectionAction={cloudEnabled ? (name, action) => {
-            const item = catalog.find(c => c.name === name)
-            if (!item) return
-            if (action === 'plan') { sharingReturnFocus.current = document.activeElement as HTMLElement; setTripCollection(item); return }
-            if (action === 'share') { sharingReturnFocus.current = document.activeElement as HTMLElement; setSharingCollection(item); return }
-            setManagedCollection(item)
-            setCollectionDialogMode(action)
-            setNewCollection(true)
-          } : undefined}
-          canManageCollection={name => catalog.some(c => c.name === name)}
+          onCollectionAction={
+            cloudEnabled
+              ? (name, action) => {
+                  const item = catalog.find((c) => c.name === name)
+                  if (!item) return
+                  if (action === 'plan') {
+                    sharingReturnFocus.current =
+                      document.activeElement as HTMLElement
+                    setTripCollection(item)
+                    return
+                  }
+                  if (action === 'share') {
+                    sharingReturnFocus.current =
+                      document.activeElement as HTMLElement
+                    setSharingCollection(item)
+                    return
+                  }
+                  setManagedCollection(item)
+                  setCollectionDialogMode(action)
+                  setNewCollection(true)
+                }
+              : undefined
+          }
+          canManageCollection={(name) => catalog.some((c) => c.name === name)}
           persistent={cloudEnabled}
           onView={navigate}
           search={search}
@@ -739,321 +745,383 @@ function App() {
           )}
         </main>
       </div>
-      {saveState && saveMethod === 'search' && cloudEnabled ? (
-        <DirectPlace
-          draft={directDraft}
-          onDraft={(value) => {
-            directOwner.current = getSession()?.sub ?? directOwner.current
-            setDirectDraft(value)
-          }}
-          collections={catalog}
-          authenticated={!!session}
-          onClose={closeSave}
-          onImport={() => setSaveMethod('instagram')}
-          onRequireLogin={() => {
-            closeSave()
-            setResumeSave(true)
-            setAuthReason(
-              'Sign in to search and save places. Your search will be kept.',
-            )
-            setAuthOpen(true)
-          }}
-          onCreateCollection={async (id, name) => {
-            const owner = getSession()?.sub
-            if (!owner) throw new Error('Sign in to create a collection.')
-            const result = await createCollection(id, name)
-            requireOwner(owner)
-            loadGeneration.current++
-            setCloudLoading(false)
-            setCatalog(items => [...items.filter(c => c.id !== result.item.id), result.item])
-            setCollections(items => [...new Set([...items, result.item.name])])
-            return result.item
-          }}
-          onSave={async (jobId, input) => {
-            const owner = getSession()?.sub
-            if (!owner) throw new Error('Sign in to save places.')
-            const result = await saveDirectPlace(
-              jobId,
-              input.query,
-              input.region,
-              input.note,
-              input.collectionId,
-            )
-            requireOwner(owner)
-            loadGeneration.current++
-            setCloudLoading(false)
-            const next = toUIPlace(result.item)
-            setPlaces((items) => [
-              next,
-              ...items.filter((p) => p.id !== next.id),
-            ])
-            setCollection(next.collection)
-            setSelectedId(next.id)
-            setSearch('')
-            setCategory('All')
-            setOnlyUnvisited(false)
-            setView('detail')
-            closeSave()
-            setDirectDraft({
-              query: '',
-              region: '',
-              note: '',
-              collectionId: '',
-            })
-            setNotice(
-              result.duplicate
-                ? 'Already saved. Your existing note and collection have been kept.'
-                : 'Place added to your map.',
-            )
-          }}
-        />
-      ) : (
-        saveState && (
-          <SavePlace
-            onDirectSearch={
-              cloudEnabled
-                ? () => {
-                    setDirectDraft((current) => ({
-                      ...current,
-                      collectionId: catalog.some(
-                        (c) => c.id === current.collectionId,
-                      )
-                        ? current.collectionId
-                        : (catalog.find((c) => c.name === collection)?.id ??
-                          catalog[0]?.id ??
-                          ''),
-                    }))
-                    setSaveMethod('search')
-                  }
-                : undefined
-            }
-            draft={draft}
-            authenticated={!!session}
-            onRequireLogin={
-              cloudEnabled
-                ? (pending) => {
-                    setDraft(pending)
-                    closeSave()
-                    setResumeSave(true)
-                    setAuthReason(
-                      'Sign in to save this place. Your link and review will be kept.',
-                    )
-                    setAuthOpen(true)
-                  }
-                : undefined
-            }
-            onPersist={
-              cloudEnabled
-                ? async (confirmed, note, targetCollection) => {
-                    const owner = getSession()?.sub
-                    if (!owner) throw new Error('Sign in to save places.')
-                    let available = catalog
-                    // A failed initial read is not evidence that a collection
-                    // was deleted. Recover before rejecting a completed import.
-                    if (!available.length) {
-                      const fresh = await listCollections()
-                      requireOwner(owner)
-                      available = fresh.items
-                      setCatalog(available)
-                      setCollections(available.map((c) => c.name))
-                    }
-                    const target = available.find(
-                      (c) => c.name === targetCollection,
-                    ) ?? (!catalog.length && targetCollection === 'Saved places'
-                      ? available.find((c) => c.isDefault)
-                      : undefined)
-                    if (!target)
-                      throw new Error(
-                        'This collection is no longer available. Close this dialog, refresh your places, and choose another collection.',
-                      )
-                    if (!targetCollection.trim())
-                      throw new Error('Enter a collection name.')
-                    let saved = 0
-                    const failures: string[] = []
-                    const savedCollections: string[] = []
-                    for (const [index, place] of confirmed.entries()) {
-                      // Stay below the development API's two-request-per-second limit.
-                      if (index > 0)
-                        await new Promise((resolve) => setTimeout(resolve, 550))
-                      if (getSession()?.sub !== owner)
-                        throw new Error(
-                          'Your session changed. Sign in and retry.',
-                        )
-                      try {
-                        const result = await saveConfirmed(
-                          place,
-                          note,
-                          target.id,
-                        )
-                        requireOwner(owner)
-                        loadGeneration.current++
-                        setCloudLoading(false)
-                        saved++
-                        const next = toUIPlace(result.item)
-                        savedCollections.push(next.collection)
-                        setPlaces((items) => [
-                          next,
-                          ...items.filter((p) => p.id !== next.id),
-                        ])
-                      } catch (e) {
-                        failures.push(
-                          `${place.displayName}: ${e instanceof Error ? e.message : 'Save failed'}`,
-                        )
-                      }
-                    }
-                    requireOwner(owner)
-                    if (savedCollections[0]) setCollection(savedCollections[0])
-                    setSelectedId('')
-                    setView('list')
-                    if (failures.length)
-                      throw new Error(
-                        `${saved} of ${confirmed.length} saved. Retry safely; already saved places will not be duplicated. ${failures.join(' ')}`,
-                      )
-                    if (!catalog.length) await loadPlaces()
-                  }
-                : undefined
-            }
-            onDraft={keepDraft}
-            initialState={saveState}
-            collections={collections}
-            defaultCollection={collection}
-            places={places}
-            scenario={params.get('scenario')}
-            onClose={closeSave}
-            onSaved={(place) => {
-              setPlaces((items) => [place, ...items])
-              setSelectedId(place.id)
-              lastAdded.current = place.id
-              setCollection(place.collection)
-              if (window.matchMedia('(min-width: 768px)').matches) {
-                closeSave()
-                navigate('saved')
-              }
+      <Suspense fallback={<LoadingOverlay active />}>
+        {saveState && saveMethod === 'search' && cloudEnabled ? (
+          <DirectPlace
+            draft={directDraft}
+            onDraft={(value) => {
+              directOwner.current = getSession()?.sub ?? directOwner.current
+              setDirectDraft(value)
             }}
-            onView={openDetail}
-            onMap={() => {
+            collections={catalog}
+            authenticated={!!session}
+            onClose={closeSave}
+            onImport={() => setSaveMethod('instagram')}
+            onRequireLogin={() => {
               closeSave()
-              navigate(
-                window.matchMedia('(min-width: 768px)').matches && !cloudEnabled
-                  ? 'saved'
-                  : 'map',
+              setResumeSave(true)
+              setAuthReason(
+                'Sign in to search and save places. Your search will be kept.',
+              )
+              setAuthOpen(true)
+            }}
+            onCreateCollection={async (id, name) => {
+              const owner = getSession()?.sub
+              if (!owner) throw new Error('Sign in to create a collection.')
+              const result = await createCollection(id, name)
+              requireOwner(owner)
+              loadGeneration.current++
+              setCloudLoading(false)
+              setCatalog((items) => [
+                ...items.filter((c) => c.id !== result.item.id),
+                result.item,
+              ])
+              setCollections((items) => [
+                ...new Set([...items, result.item.name]),
+              ])
+              return result.item
+            }}
+            onSave={async (jobId, input) => {
+              const owner = getSession()?.sub
+              if (!owner) throw new Error('Sign in to save places.')
+              const result = await saveDirectPlace(
+                jobId,
+                input.query,
+                input.region,
+                input.note,
+                input.collectionId,
+              )
+              requireOwner(owner)
+              loadGeneration.current++
+              setCloudLoading(false)
+              const next = toUIPlace(result.item)
+              setPlaces((items) => [
+                next,
+                ...items.filter((p) => p.id !== next.id),
+              ])
+              setCollection(next.collection)
+              setSelectedId(next.id)
+              setSearch('')
+              setCategory('All')
+              setOnlyUnvisited(false)
+              setView('detail')
+              closeSave()
+              setDirectDraft({
+                query: '',
+                region: '',
+                note: '',
+                collectionId: '',
+              })
+              setNotice(
+                result.duplicate
+                  ? 'Already saved. Your existing note and collection have been kept.'
+                  : 'Place added to your map.',
               )
             }}
           />
-        )
-      )}
-      {authOpen && (
-        <AuthModal
-          reason={authReason}
-          onClose={() => {
-            setAuthOpen(false)
-            if (resumeSave) {
-              setResumeSave(false)
-              setSaveState(draft?.state ?? 'entry')
-            }
-          }}
-          onSuccess={() => {
-            setAuthOpen(false)
-            if (resumeSave) {
-              setResumeSave(false)
-              setSaveState(draft?.state ?? 'entry')
-            }
-          }}
-        />
-      )}
-      {notice && (
-        <div className="notice-toast" role="status">
-          <span>{notice}</span>
-          <button aria-label="Dismiss message" onClick={() => setNotice('')}>
-            ×
-          </button>
-        </div>
-      )}
-      {tripCollection && session && <ItineraryPlanner key={`${session.sub}:${tripCollection.id}`} collection={tripCollection} places={places.flatMap(p => p.saved && p.saved.collectionId === tripCollection.id ? [p.saved] : [])} onClose={() => { setTripCollection(null); requestAnimationFrame(() => sharingReturnFocus.current?.focus()) }} />}
-      {sharingCollection && session && <CollectionSharing key={`${session.sub}:${sharingCollection.id}`} collection={sharingCollection} onClose={() => { setSharingCollection(null); requestAnimationFrame(() => sharingReturnFocus.current?.focus()) }} />}
-      {newCollection && (
-        <CollectionDialog
-          onPlan={managedCollection && cloudEnabled ? () => { sharingReturnFocus.current = document.querySelector<HTMLElement>('.collection-manage'); setNewCollection(false); setTripCollection(managedCollection) } : undefined}
-          onShare={managedCollection && cloudEnabled ? () => { sharingReturnFocus.current = document.querySelector<HTMLElement>('.collection-manage'); setNewCollection(false); setSharingCollection(managedCollection) } : undefined}
-          mode={collectionDialogMode}
-          collection={managedCollection}
-          onClose={() => setNewCollection(false)}
-          onCreate={async (id, name) => {
-            if (!cloudEnabled) {
-              if (
-                [...collections, 'Coffee', 'Galleries'].some(
-                  (c) => c.toLowerCase() === name.toLowerCase(),
+        ) : (
+          saveState && (
+            <SavePlace
+              onDirectSearch={
+                cloudEnabled
+                  ? () => {
+                      setDirectDraft((current) => ({
+                        ...current,
+                        collectionId: catalog.some(
+                          (c) => c.id === current.collectionId,
+                        )
+                          ? current.collectionId
+                          : (catalog.find((c) => c.name === collection)?.id ??
+                            catalog[0]?.id ??
+                            ''),
+                      }))
+                      setSaveMethod('search')
+                    }
+                  : undefined
+              }
+              draft={draft}
+              authenticated={!!session}
+              onRequireLogin={
+                cloudEnabled
+                  ? (pending) => {
+                      setDraft(pending)
+                      closeSave()
+                      setResumeSave(true)
+                      setAuthReason(
+                        'Sign in to save this place. Your link and review will be kept.',
+                      )
+                      setAuthOpen(true)
+                    }
+                  : undefined
+              }
+              onPersist={
+                cloudEnabled
+                  ? async (confirmed, note, targetCollection) => {
+                      const owner = getSession()?.sub
+                      if (!owner) throw new Error('Sign in to save places.')
+                      let available = catalog
+                      // A failed initial read is not evidence that a collection
+                      // was deleted. Recover before rejecting a completed import.
+                      if (!available.length) {
+                        const fresh = await listCollections()
+                        requireOwner(owner)
+                        available = fresh.items
+                        setCatalog(available)
+                        setCollections(available.map((c) => c.name))
+                      }
+                      const target =
+                        available.find((c) => c.name === targetCollection) ??
+                        (!catalog.length && targetCollection === 'Saved places'
+                          ? available.find((c) => c.isDefault)
+                          : undefined)
+                      if (!target)
+                        throw new Error(
+                          'This collection is no longer available. Close this dialog, refresh your places, and choose another collection.',
+                        )
+                      if (!targetCollection.trim())
+                        throw new Error('Enter a collection name.')
+                      let saved = 0
+                      const failures: string[] = []
+                      const savedCollections: string[] = []
+                      for (const [index, place] of confirmed.entries()) {
+                        // Stay below the development API's two-request-per-second limit.
+                        if (index > 0)
+                          await new Promise((resolve) =>
+                            setTimeout(resolve, 550),
+                          )
+                        if (getSession()?.sub !== owner)
+                          throw new Error(
+                            'Your session changed. Sign in and retry.',
+                          )
+                        try {
+                          const result = await saveConfirmed(
+                            place,
+                            note,
+                            target.id,
+                          )
+                          requireOwner(owner)
+                          loadGeneration.current++
+                          setCloudLoading(false)
+                          saved++
+                          const next = toUIPlace(result.item)
+                          savedCollections.push(next.collection)
+                          setPlaces((items) => [
+                            next,
+                            ...items.filter((p) => p.id !== next.id),
+                          ])
+                        } catch (e) {
+                          failures.push(
+                            `${place.displayName}: ${e instanceof Error ? e.message : 'Save failed'}`,
+                          )
+                        }
+                      }
+                      requireOwner(owner)
+                      if (savedCollections[0])
+                        setCollection(savedCollections[0])
+                      setSelectedId('')
+                      setView('list')
+                      if (failures.length)
+                        throw new Error(
+                          `${saved} of ${confirmed.length} saved. Retry safely; already saved places will not be duplicated. ${failures.join(' ')}`,
+                        )
+                      if (!catalog.length) await loadPlaces()
+                    }
+                  : undefined
+              }
+              onDraft={keepDraft}
+              initialState={saveState}
+              collections={collections}
+              defaultCollection={collection}
+              places={places}
+              scenario={params.get('scenario')}
+              onClose={closeSave}
+              onSaved={(place) => {
+                setPlaces((items) => [place, ...items])
+                setSelectedId(place.id)
+                lastAdded.current = place.id
+                setCollection(place.collection)
+                if (window.matchMedia('(min-width: 768px)').matches) {
+                  closeSave()
+                  navigate('saved')
+                }
+              }}
+              onView={openDetail}
+              onMap={() => {
+                closeSave()
+                navigate(
+                  window.matchMedia('(min-width: 768px)').matches &&
+                    !cloudEnabled
+                    ? 'saved'
+                    : 'map',
                 )
-              )
-                throw new Error('A collection with this name already exists.')
-              setCollections((items) => [...items, name])
-              changeCollection(name)
-              return
+              }}
+            />
+          )
+        )}
+        {authOpen && (
+          <AuthModal
+            reason={authReason}
+            onClose={() => {
+              setAuthOpen(false)
+              if (resumeSave) {
+                setResumeSave(false)
+                setSaveState(draft?.state ?? 'entry')
+              }
+            }}
+            onSuccess={() => {
+              setAuthOpen(false)
+              if (resumeSave) {
+                setResumeSave(false)
+                setSaveState(draft?.state ?? 'entry')
+              }
+            }}
+          />
+        )}
+        {notice && (
+          <div className="notice-toast" role="status">
+            <span>{notice}</span>
+            <button aria-label="Dismiss message" onClick={() => setNotice('')}>
+              ×
+            </button>
+          </div>
+        )}
+        {tripCollection && session && (
+          <ItineraryPlanner
+            key={`${session.sub}:${tripCollection.id}`}
+            collection={tripCollection}
+            places={places.flatMap((p) =>
+              p.saved && p.saved.collectionId === tripCollection.id
+                ? [p.saved]
+                : [],
+            )}
+            onClose={() => {
+              setTripCollection(null)
+              requestAnimationFrame(() => sharingReturnFocus.current?.focus())
+            }}
+          />
+        )}
+        {sharingCollection && session && (
+          <CollectionSharing
+            key={`${session.sub}:${sharingCollection.id}`}
+            collection={sharingCollection}
+            onClose={() => {
+              setSharingCollection(null)
+              requestAnimationFrame(() => sharingReturnFocus.current?.focus())
+            }}
+          />
+        )}
+        {newCollection && (
+          <CollectionDialog
+            onPlan={
+              managedCollection && cloudEnabled
+                ? () => {
+                    sharingReturnFocus.current =
+                      document.querySelector<HTMLElement>('.collection-manage')
+                    setNewCollection(false)
+                    setTripCollection(managedCollection)
+                  }
+                : undefined
             }
-            const owner = getSession()?.sub
-            const result = await createCollection(id, name)
-            requireOwner(owner)
-            loadGeneration.current++
-            setCloudLoading(false)
-            setCatalog((items) => [
-              ...items.filter((c) => c.id !== result.item.id),
-              result.item,
-            ])
-            setCollections((items) => [
-              ...new Set([...items, result.item.name]),
-            ])
-            changeCollection(result.item.name)
-            setNotice('Collection created.')
-          }}
-          onRename={async (item, name) => {
-            const owner = getSession()?.sub
-            const result = await renameCollection(item, name)
-            requireOwner(owner)
-            loadGeneration.current++
-            setCloudLoading(false)
-            setCatalog((items) =>
-              items.map((c) => (c.id === item.id ? result.item : c)),
-            )
-            setCollections((items) =>
-              items.map((c) => (c === item.name ? result.item.name : c)),
-            )
-            setPlaces((items) =>
-              items.map((p) =>
-                p.saved?.collectionId === item.id
-                  ? toUIPlace({ ...p.saved, collection: result.item.name })
-                  : p,
-              ),
-            )
-            changeCollection(result.item.name)
-            setNotice('Collection renamed.')
-          }}
-          onDelete={async (item) => {
-            const owner = getSession()?.sub
-            const result = await deleteCollection(item)
-            requireOwner(owner)
-            loadGeneration.current++
-            setCloudLoading(false)
-            const fallback = result.defaultCollection
-            setCatalog((items) => [...items.filter((c) => c.id !== item.id && c.id !== fallback.id).map(c => ({ ...c, isDefault: false })), fallback])
-            setCollections((items) => [...new Set([...items.filter((c) => c !== item.name), fallback.name])])
-            setPlaces((items) =>
-              items.map((p) =>
-                p.saved?.collectionId === item.id
-                  ? toUIPlace({
-                      ...p.saved,
-                      collectionId: fallback.id,
-                      collection: fallback.name,
-                    })
-                  : p,
-              ),
-            )
-            changeCollection(fallback.name)
-            setNotice(
-              `Collection deleted. Your places were kept in ${fallback.name}.`,
-            )
-          }}
-        />
-      )}
+            onShare={
+              managedCollection && cloudEnabled
+                ? () => {
+                    sharingReturnFocus.current =
+                      document.querySelector<HTMLElement>('.collection-manage')
+                    setNewCollection(false)
+                    setSharingCollection(managedCollection)
+                  }
+                : undefined
+            }
+            mode={collectionDialogMode}
+            collection={managedCollection}
+            onClose={() => setNewCollection(false)}
+            onCreate={async (id, name) => {
+              if (!cloudEnabled) {
+                if (
+                  [...collections, 'Coffee', 'Galleries'].some(
+                    (c) => c.toLowerCase() === name.toLowerCase(),
+                  )
+                )
+                  throw new Error('A collection with this name already exists.')
+                setCollections((items) => [...items, name])
+                changeCollection(name)
+                return
+              }
+              const owner = getSession()?.sub
+              const result = await createCollection(id, name)
+              requireOwner(owner)
+              loadGeneration.current++
+              setCloudLoading(false)
+              setCatalog((items) => [
+                ...items.filter((c) => c.id !== result.item.id),
+                result.item,
+              ])
+              setCollections((items) => [
+                ...new Set([...items, result.item.name]),
+              ])
+              changeCollection(result.item.name)
+              setNotice('Collection created.')
+            }}
+            onRename={async (item, name) => {
+              const owner = getSession()?.sub
+              const result = await renameCollection(item, name)
+              requireOwner(owner)
+              loadGeneration.current++
+              setCloudLoading(false)
+              setCatalog((items) =>
+                items.map((c) => (c.id === item.id ? result.item : c)),
+              )
+              setCollections((items) =>
+                items.map((c) => (c === item.name ? result.item.name : c)),
+              )
+              setPlaces((items) =>
+                items.map((p) =>
+                  p.saved?.collectionId === item.id
+                    ? toUIPlace({ ...p.saved, collection: result.item.name })
+                    : p,
+                ),
+              )
+              changeCollection(result.item.name)
+              setNotice('Collection renamed.')
+            }}
+            onDelete={async (item) => {
+              const owner = getSession()?.sub
+              const result = await deleteCollection(item)
+              requireOwner(owner)
+              loadGeneration.current++
+              setCloudLoading(false)
+              const fallback = result.defaultCollection
+              setCatalog((items) => [
+                ...items
+                  .filter((c) => c.id !== item.id && c.id !== fallback.id)
+                  .map((c) => ({ ...c, isDefault: false })),
+                fallback,
+              ])
+              setCollections((items) => [
+                ...new Set([
+                  ...items.filter((c) => c !== item.name),
+                  fallback.name,
+                ]),
+              ])
+              setPlaces((items) =>
+                items.map((p) =>
+                  p.saved?.collectionId === item.id
+                    ? toUIPlace({
+                        ...p.saved,
+                        collectionId: fallback.id,
+                        collection: fallback.name,
+                      })
+                    : p,
+                ),
+              )
+              changeCollection(fallback.name)
+              setNotice(
+                `Collection deleted. Your places were kept in ${fallback.name}.`,
+              )
+            }}
+          />
+        )}
+      </Suspense>
     </div>
   )
 }

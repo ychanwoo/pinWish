@@ -1,4 +1,4 @@
-import { tripDate, tripTime, type TripPlan } from '../lib/itineraries'
+import { tripDate, tripTime, type TripPlan } from '../../lib/itineraries'
 export function TripSchedule({
   plan,
   zone,
@@ -30,7 +30,11 @@ export function TripSchedule({
         Local times · {zone.replaceAll('_', ' ')}. Opening hours checked{' '}
         {new Date(checkedAt).toLocaleDateString('en-US')}.
       </p>
-      {plan.adjustments?.map((note) => <p className="trip-muted" key={note}>{note}</p>)}
+      {plan.adjustments?.map((note) => (
+        <p className="trip-muted" key={note}>
+          {note}
+        </p>
+      ))}
       {plan.unscheduled.length > 0 && (
         <section className="trip-unplaced" aria-label="Places not scheduled">
           <h3>Adjust these visits</h3>
@@ -54,7 +58,10 @@ export function TripSchedule({
                 {day.stops.length} {day.stops.length === 1 ? 'place' : 'places'}{' '}
                 ·{' '}
                 {Math.round(
-                  (day.stops.reduce((n, s) => n + s.duration + (s.travel ?? 0), 0) /
+                  (day.stops.reduce(
+                    (n, s) => n + s.duration + (s.travel ?? 0),
+                    0,
+                  ) /
                     60) *
                     10,
                 ) / 10}{' '}
@@ -75,9 +82,13 @@ export function TripSchedule({
                   <span>{tripTime(stop.departure)}</span>
                 </div>
                 <div className="trip-stop-detail">
-                  {(i > 0 || (stop.travel ?? 0) > 0 || stop.travel === null) && (
+                  {(i > 0 ||
+                    (stop.travel ?? 0) > 0 ||
+                    stop.travel === null) && (
                     <p className="trip-connection">
-                      {stop.travel === null ? 'Route unavailable · arrange transport separately' : `${stop.travel} min travel estimate · 10 min arrival buffer`}
+                      {stop.travel === null
+                        ? 'Route unavailable · arrange transport separately'
+                        : `${stop.travel} min travel estimate · 10 min arrival buffer`}
                       {stop.wait > 0
                         ? ` · ${stop.wait} min for waiting / lunch`
                         : ''}
@@ -93,11 +104,13 @@ export function TripSchedule({
                         : stop.hoursSource === 'suggested'
                           ? 'Suggested time · confirm opening hours'
                           : stop.hoursSource === 'unknown'
-                          ? 'Hours unverified · check before visiting'
-                          : 'Within listed opening hours'}
+                            ? 'Hours unverified · check before visiting'
+                            : 'Within listed opening hours'}
                     </span>
                   </div>
-                  {stop.planningNote && <p className="trip-muted">{stop.planningNote}</p>}
+                  {stop.planningNote && (
+                    <p className="trip-muted">{stop.planningNote}</p>
+                  )}
                   <details>
                     <summary>Opening hours</summary>
                     {stop.hours.map((h, i) => (
@@ -122,9 +135,10 @@ export function TripSchedule({
         Travel estimates use the trip’s first departure time, with a 20%
         allowance. Traffic may change. The first day starts at its first place.
         Later days measure travel from the previous day’s last stop; hotel and
-        airport transfers are not included. Lunch is normally reserved from 12:00–13:00; dedicated visits may need a different break.
-        Listed hours may differ on holidays; tickets, reservations and last
-        admission need a separate check.
+        airport transfers are not included. Lunch is normally reserved from
+        12:00–13:00; dedicated visits may need a different break. Listed hours
+        may differ on holidays; tickets, reservations and last admission need a
+        separate check.
       </p>
     </div>
   )

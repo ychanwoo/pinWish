@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import type { InstagramPreview } from '../lib/instagram-preview'
-import type { InstagramSource } from '../lib/instagram'
-import { resolveCandidate, type AutoReviews } from '../lib/automatic-places'
-import { visiblePlaceText } from '../lib/place-name'
+import type { InstagramPreview } from '../../lib/instagram-preview'
+import type { InstagramSource } from '../../lib/instagram'
+import { resolveCandidate, type AutoReviews } from '../../lib/automatic-places'
+import { visiblePlaceText } from '../../lib/place-name'
 interface Props {
   preview: InstagramPreview
   source: InstagramSource
@@ -35,9 +35,7 @@ export function AutomaticPlaces(props: Props) {
           candidate,
         ] of latest.current.preview.result.places.entries()) {
           if (controller.signal.aborted) return
-          if (
-            reviews[index]?.targets.every((t) => t.status === 'confirmed')
-          )
+          if (reviews[index]?.targets.every((t) => t.status === 'confirmed'))
             continue
           reviews[index] = await resolveCandidate(
             candidate,
@@ -85,8 +83,8 @@ export function AutomaticPlaces(props: Props) {
       </p>
       {!props.preview.result.places.length && (
         <p>
-          No readable place names were extracted. Check the original post or
-          try another link.
+          No readable place names were extracted. Check the original post or try
+          another link.
         </p>
       )}
       <ol>

@@ -1,12 +1,12 @@
-import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingOverlay } from '../shared/LoadingOverlay'
 import { useEffect, useRef, useState } from 'react'
-import { useModalFocus } from '../hooks/useModalFocus'
-import type { SavedCollection } from '../lib/storage-api'
+import { useModalFocus } from '../../hooks/useModalFocus'
+import type { SavedCollection } from '../../lib/storage-api'
 import {
   shareSettings,
   shareUrl,
   type ShareSettings,
-} from '../lib/collection-sharing'
+} from '../../lib/collection-sharing'
 export function CollectionSharing({
   collection,
   onClose,

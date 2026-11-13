@@ -1,4 +1,4 @@
-import type { MapAppearance } from '../hooks/useMapAppearance'
+import type { MapAppearance } from '../../hooks/useMapAppearance'
 import { MapAppearancePanel } from './MapAppearancePanel'
 import { useEffect, useRef, useState } from 'react'
 import * as maplibregl from 'maplibre-gl'
@@ -6,8 +6,8 @@ import type { GeoJSONSource, Map as MapInstance } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 maplibregl.setWorkerUrl(workerUrl)
-import type { Place } from '../data/places'
-import { mapCoordinates, placeFeatures } from '../lib/map-data'
+import type { Place } from '../../data/places'
+import { mapCoordinates, placeFeatures } from '../../lib/map-data'
 
 interface Props {
   appearance?: MapAppearance
@@ -76,12 +76,20 @@ export default function LiveMap(props: Props) {
     }
     map.current = m
     const label = new maplibregl.Popup({
-      closeButton: false, closeOnClick: true, focusAfterOpen: false,
-      offset: 20, maxWidth: '240px', className: 'place-hover-label',
+      closeButton: false,
+      closeOnClick: true,
+      focusAfterOpen: false,
+      offset: 20,
+      maxWidth: '240px',
+      className: 'place-hover-label',
     })
     hoverLabel.current = label
-    const hideLabel = () => { label.remove() }
-    const escapeLabel = (event: KeyboardEvent) => { if (event.key === 'Escape') hideLabel() }
+    const hideLabel = () => {
+      label.remove()
+    }
+    const escapeLabel = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') hideLabel()
+    }
     m.getCanvas().addEventListener('mouseleave', hideLabel)
     document.addEventListener('keydown', escapeLabel)
     m.on('movestart', hideLabel)
@@ -226,11 +234,22 @@ export default function LiveMap(props: Props) {
       })
       m.on('mousemove', (event) => {
         if (!matchMedia('(hover: hover)').matches || m.isMoving()) return
-        const features = m.queryRenderedFeatures(event.point, { layers: ['selected-pin', 'pins'] })
-        const feature = features.find(f => f.layer.id === 'selected-pin') ?? features[0]
-        const place = latest.current.places.find(p => p.id === feature?.properties.id)
-        if (!place || feature?.geometry.type !== 'Point') { hideLabel(); return }
-        const coordinates = [...feature.geometry.coordinates] as [number, number]
+        const features = m.queryRenderedFeatures(event.point, {
+          layers: ['selected-pin', 'pins'],
+        })
+        const feature =
+          features.find((f) => f.layer.id === 'selected-pin') ?? features[0]
+        const place = latest.current.places.find(
+          (p) => p.id === feature?.properties.id,
+        )
+        if (!place || feature?.geometry.type !== 'Point') {
+          hideLabel()
+          return
+        }
+        const coordinates = [...feature.geometry.coordinates] as [
+          number,
+          number,
+        ]
         while (Math.abs(event.lngLat.lng - coordinates[0]) > 180)
           coordinates[0] += event.lngLat.lng > coordinates[0] ? 360 : -360
         // Provider names are text, never HTML.
@@ -266,18 +285,9 @@ export default function LiveMap(props: Props) {
     if (!ready || !map.current) return
     hoverLabel.current?.remove()
     ;(map.current.getSource('places') as GeoJSONSource).setData(
-      placeFeatures(
-        latest.current.places,
-        latest.current.appearance?.colors,
-      ),
+      placeFeatures(latest.current.places, latest.current.appearance?.colors),
     )
-  }, [
-    signature,
-    ready,
-    props.places,
-    props.appearance?.details,
-    props.appearance?.colors,
-  ])
+  }, [signature, ready, props.places, props.appearance?.colors])
   useEffect(() => {
     if (ready) fit()
   }, [signature, ready])
@@ -297,7 +307,6 @@ export default function LiveMap(props: Props) {
     signature,
     ready,
     props.places,
-    props.appearance?.details,
     props.appearance?.colors,
   ])
   useEffect(() => {
@@ -350,9 +359,7 @@ export default function LiveMap(props: Props) {
           Show all
         </button>
         {props.appearance && (
-          <MapAppearancePanel
-            appearance={props.appearance}
-          />
+          <MapAppearancePanel appearance={props.appearance} />
         )}
       </div>
       {(!key ||

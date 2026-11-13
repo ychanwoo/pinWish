@@ -1,7 +1,7 @@
-import { LoadingOverlay } from './LoadingOverlay'
+import { LoadingOverlay } from '../shared/LoadingOverlay'
 import { useRef, useState } from 'react'
-import type { SavedCollection } from '../lib/storage-api'
-import { useModalFocus } from '../hooks/useModalFocus'
+import type { SavedCollection } from '../../lib/storage-api'
+import { useModalFocus } from '../../hooks/useModalFocus'
 
 interface Props {
   onPlan?: () => void
@@ -96,7 +96,9 @@ export function CollectionDialog({
           >
             Are you sure you want to delete <strong>{collection?.name}</strong>?
             <span>
-              Your places will move to another collection, or a new Saved places collection if this is your last one. Your notes, photos and original links will be kept.
+              Your places will move to another collection, or a new Saved places
+              collection if this is your last one. Your notes, photos and
+              original links will be kept.
             </span>
           </p>
         ) : (
@@ -161,8 +163,26 @@ export function CollectionDialog({
             </button>
           )}
         </div>
-        {collection && !confirmDelete && mode === 'manage' && onPlan && <button type="button" className="collection-share-entry" disabled={busy} onClick={onPlan}>Plan a trip</button>}
-        {collection && !confirmDelete && mode === 'manage' && onShare && <button type="button" className="collection-share-entry" disabled={busy} onClick={onShare}>Share collection</button>}
+        {collection && !confirmDelete && mode === 'manage' && onPlan && (
+          <button
+            type="button"
+            className="collection-share-entry"
+            disabled={busy}
+            onClick={onPlan}
+          >
+            Plan a trip
+          </button>
+        )}
+        {collection && !confirmDelete && mode === 'manage' && onShare && (
+          <button
+            type="button"
+            className="collection-share-entry"
+            disabled={busy}
+            onClick={onShare}
+          >
+            Share collection
+          </button>
+        )}
         {collection && !confirmDelete && mode === 'manage' && (
           <div className="collection-delete-area">
             <button

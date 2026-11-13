@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { pinPalette } from '../lib/map-appearance'
+import { pinPalette } from '../../lib/map-appearance'
 interface Props {
   color?: string
   name: string

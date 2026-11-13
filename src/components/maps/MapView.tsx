@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { asset, type Place } from '../data/places'
-import { Icon } from './Icon'
+import { asset, type Place } from '../../data/places'
+import { Icon } from '../shared/Icon'
 interface Props {
   places: Place[]
   selected: Place

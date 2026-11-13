@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Place } from '../data/places'
 import type { PlaceDetails } from '../lib/map-appearance'
 import { type SavedCollection, storageRequest } from '../lib/storage-api'
@@ -25,11 +25,15 @@ export function useMapAppearance(
   const generation = useRef(0),
     busy = useRef(false)
   const cache = useRef<Record<string, PlaceDetails>>({})
-  const signature = places
-    .filter((p) => p.saved)
-    .map((p) => p.id)
-    .sort()
-    .join('|')
+  const signature = useMemo(
+    () =>
+      places
+        .filter((p) => p.saved)
+        .map((p) => p.id)
+        .sort()
+        .join('|'),
+    [places],
+  )
   useEffect(() => {
     generation.current++
     cache.current = {}
@@ -176,12 +180,20 @@ export function useMapAppearance(
       }
     }
   }
-  return {
-    collections: catalog.map((c) => ({
+  const collections = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const place of places) {
+      const id = place.saved?.collectionId
+      if (id) counts.set(id, (counts.get(id) ?? 0) + 1)
+    }
+    return catalog.map((c) => ({
       id: c.id,
       name: c.name,
-      count: places.filter((p) => p.saved?.collectionId === c.id).length,
-    })),
+      count: counts.get(c.id) ?? 0,
+    }))
+  }, [catalog, places])
+  return {
+    collections,
     details: dataOwner === owner ? details : {},
     errors: dataOwner === owner ? errors : {},
     refresh,

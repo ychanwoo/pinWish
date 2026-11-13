@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listedHoursStatus, type PlaceDetails } from '../lib/map-appearance'
+import { listedHoursStatus, type PlaceDetails } from '../../lib/map-appearance'
 export function PlaceHours({
   data,
   error,

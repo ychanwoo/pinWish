@@ -1,13 +1,3 @@
-import {
-  CognitoIdentityProviderClient,
-  InitiateAuthCommand,
-  SignUpCommand,
-  ConfirmSignUpCommand,
-  ResendConfirmationCodeCommand,
-  ForgotPasswordCommand,
-  ConfirmForgotPasswordCommand,
-  GlobalSignOutCommand,
-} from '@aws-sdk/client-cognito-identity-provider'
 export const cloudConfig = {
   region: import.meta.env.VITE_AWS_REGION ?? '',
   clientId: import.meta.env.VITE_COGNITO_CLIENT_ID ?? '',
@@ -16,10 +6,7 @@ export const cloudConfig = {
 export const cloudEnabled = Boolean(
   cloudConfig.region && cloudConfig.clientId && cloudConfig.apiUrl,
 )
-const client = new CognitoIdentityProviderClient({
-  region: cloudConfig.region || 'us-east-1',
-  maxAttempts: 1,
-})
+const loadCognito = () => import('./cognito-client')
 interface Session {
   accessToken: string
   refreshToken: string
@@ -93,15 +80,27 @@ export function emailError(email: string) {
 }
 export function passwordRequirements(password: string) {
   return [
-    { id: 'length', label: 'At least 12 characters', met: password.length >= 12 },
-    { id: 'uppercase', label: 'An uppercase letter', met: /[A-Z]/.test(password) },
-    { id: 'lowercase', label: 'A lowercase letter', met: /[a-z]/.test(password) },
+    {
+      id: 'length',
+      label: 'At least 12 characters',
+      met: password.length >= 12,
+    },
+    {
+      id: 'uppercase',
+      label: 'An uppercase letter',
+      met: /[A-Z]/.test(password),
+    },
+    {
+      id: 'lowercase',
+      label: 'A lowercase letter',
+      met: /[a-z]/.test(password),
+    },
     { id: 'number', label: 'A number', met: /\d/.test(password) },
     { id: 'symbol', label: 'A symbol', met: /[^\w\s]/.test(password) },
   ]
 }
 export function passwordError(password: string) {
-  return passwordRequirements(password).every(requirement => requirement.met)
+  return passwordRequirements(password).every((requirement) => requirement.met)
     ? ''
     : 'Use at least 12 characters with uppercase, lowercase, a number, and a symbol.'
 }
@@ -114,8 +113,7 @@ export function authError(error: unknown) {
           'Check your email, verification code, and password format.',
         NotAuthorizedException:
           'The email or password is incorrect, or your session has expired.',
-        UserNotConfirmedException:
-          'Verify your email before signing in.',
+        UserNotConfirmedException: 'Verify your email before signing in.',
         UsernameExistsException:
           'An account with this email already exists. Try signing in.',
         CodeMismatchException:
@@ -166,6 +164,7 @@ export async function signIn(
   remember = false,
 ) {
   const version = ++epoch
+  const { client, InitiateAuthCommand } = await loadCognito()
   const r = await client.send(
     new InitiateAuthCommand({
       ClientId: cloudConfig.clientId,
@@ -183,6 +182,7 @@ export async function signIn(
   )
 }
 export async function signUp(email: string, password: string) {
+  const { client, SignUpCommand } = await loadCognito()
   await client.send(
     new SignUpCommand({
       ClientId: cloudConfig.clientId,
@@ -193,6 +193,7 @@ export async function signUp(email: string, password: string) {
   )
 }
 export async function confirmEmail(email: string, code: string) {
+  const { client, ConfirmSignUpCommand } = await loadCognito()
   await client.send(
     new ConfirmSignUpCommand({
       ClientId: cloudConfig.clientId,
@@ -202,6 +203,7 @@ export async function confirmEmail(email: string, code: string) {
   )
 }
 export async function resendCode(email: string) {
+  const { client, ResendConfirmationCodeCommand } = await loadCognito()
   await client.send(
     new ResendConfirmationCodeCommand({
       ClientId: cloudConfig.clientId,
@@ -210,6 +212,7 @@ export async function resendCode(email: string) {
   )
 }
 export async function forgotPassword(email: string) {
+  const { client, ForgotPasswordCommand } = await loadCognito()
   await client.send(
     new ForgotPasswordCommand({
       ClientId: cloudConfig.clientId,
@@ -222,6 +225,7 @@ export async function resetPassword(
   code: string,
   password: string,
 ) {
+  const { client, ConfirmForgotPasswordCommand } = await loadCognito()
   await client.send(
     new ConfirmForgotPasswordCommand({
       ClientId: cloudConfig.clientId,
@@ -239,10 +243,16 @@ export async function signOut() {
   const old = session
   epoch++
   publish(null)
-  if (old)
-    await client
-      .send(new GlobalSignOutCommand({ AccessToken: old.accessToken }))
-      .catch(() => {})
+  if (old) {
+    try {
+      const { client, GlobalSignOutCommand } = await loadCognito()
+      await client.send(
+        new GlobalSignOutCommand({ AccessToken: old.accessToken }),
+      )
+    } catch {
+      /* Local sign-out remains effective if remote revocation fails. */
+    }
+  }
 }
 let refreshing: Promise<string> | null = null
 export async function accessToken(force = false): Promise<string> {
@@ -258,6 +268,7 @@ export async function accessToken(force = false): Promise<string> {
     version = epoch
   refreshing = (async () => {
     try {
+      const { client, InitiateAuthCommand } = await loadCognito()
       const r = await client.send(
         new InitiateAuthCommand({
           ClientId: cloudConfig.clientId,
