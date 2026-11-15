@@ -6,6 +6,7 @@ Current implementation review: November 12, 2026. These guides describe the repo
 
 | Guide | Scope |
 | --- | --- |
+| [Presentation content](presentation/README.md) | English slide content, architecture and dated evidence; no speaker notes or demo script |
 | [Project overview](../README.md) | Features, boundaries, AWS architecture and course context |
 | [Local development](local-development.md) | Preview/cloud modes, environment configuration, tests and sample screens |
 | [AWS deployment](aws-web-deployment.md) | Existing-stack prerequisites, deployment, pause/resume, rollback and costs |
