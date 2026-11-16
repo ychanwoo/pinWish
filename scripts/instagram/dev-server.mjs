@@ -36,7 +36,7 @@ export function createDevServer({ extract = extractPlaces, placeService = create
       if (isImport) {
         if (typeof payload.input !== 'string') return reply(400, { code: 'invalid_url' })
         const parsed = parseInstagramLink(payload.input)
-        if (!parsed.ok) return reply(400, { code: parsed.code })
+        if (!parsed.ok) return reply(parsed.code === 'unsupported_media' ? 422 : 400, { code: parsed.code })
         if (parsed.source.kind !== 'p') return reply(422, { code: 'unsupported_media' })
         if (activeImport || importAttempts >= importLimit) return reply(429, { code: activeImport ? 'busy' : 'session_limit' })
         activeImport = true; importAttempts += 1

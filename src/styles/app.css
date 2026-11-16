@@ -3304,3 +3304,5 @@ a {
 .refresh-places-button:disabled { opacity: .5; cursor: progress; }
 @keyframes loading-turn { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; border-style: dotted; } }
+
+.loading-screen-content .loading-detail { color: #686e68; font-size: 13px; font-weight: 400; letter-spacing: .01em; font-variant-numeric: tabular-nums; }

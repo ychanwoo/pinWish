@@ -450,7 +450,7 @@ Object.assign(template.Resources, {
               },
               {
                 Effect: 'Allow',
-                Action: ['geo-places:SearchText', 'geo-places:GetPlace'],
+                Action: ['geo-places:SearchText', 'geo-places:GetPlace', 'geo-places:Geocode'],
                 Resource: sub(
                   'arn:${AWS::Partition}:geo-places:${AWS::Region}::provider/default',
                 ),

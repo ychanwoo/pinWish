@@ -47,6 +47,11 @@ function fixture(options = {}) {
       if (name === 'UpdateItemCommand') {
         const id = key(decode(p.Key)),
           record = decode(records.get(id))
+        if (p.UpdateExpression === 'SET progress = :progress') {
+          assert.equal(record.status, 'running')
+          records.set(id, encode({ ...record, progress: p.ExpressionAttributeValues[':progress'].S }))
+          return {}
+        }
         if (record.status !== 'queued')
           throw Object.assign(Error(), {
             name: 'ConditionalCheckFailedException',
@@ -132,6 +137,9 @@ test('jobs reject unauthenticated requests and malformed input before scheduling
     { ...job(), operation: 'execute' },
   ])
     assert.equal((await f.submit(body)).statusCode, 400)
+  const unsupported = await f.submit({ ...job(), payload: { input: 'https://www.instagram.com/reel/abc/' } })
+  assert.equal(unsupported.statusCode, 422)
+  assert.equal(JSON.parse(unsupported.body).code, 'unsupported_media')
   assert.equal(f.invoked.length, 0)
 })
 test('job creation is idempotent, payload-bound, and isolated by account', async () => {
@@ -274,4 +282,24 @@ test('transaction contention is retryable and is not misreported as a daily quot
   assert.equal(response.statusCode, 429)
   assert.equal(JSON.parse(response.body).code, 'processing_throttled')
   assert.equal(f.invoked.length, 0)
+})
+
+test('real OCR progress is owner-scoped and does not survive as stale progress after completion', async () => {
+  let release, announced
+  const visible = new Promise(resolve => { announced = resolve })
+  const pending = new Promise(resolve => { release = resolve })
+  const f = fixture({ extract: async (_, { onProgress }) => {
+    await onProgress({ stage: 'reading_photos', completed: 2, total: 13 })
+    announced()
+    await pending
+    return { fetchedImages: 13, result: { places: [] } }
+  } })
+  const input = job()
+  await f.submit(input)
+  const run = f.handler(f.invoked[0])
+  await visible
+  assert.deepEqual(JSON.parse((await f.get(input.id)).body).progress, {stage:'reading_photos',completed:2,total:13})
+  assert.equal((await f.get(input.id, 'user-b')).statusCode, 404)
+  release(); await run
+  assert.equal(JSON.parse((await f.get(input.id)).body).progress, undefined)
 })

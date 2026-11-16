@@ -122,3 +122,15 @@ No pink block, thick accent rail or white italic note card remains in cloud mode
 Final validation: 96 unit, 12 direct-search and 28 cloud browser tests passed,
 including desktop/mobile creation, ambiguous-response retry, persistence, menu
 availability, and the existing rename/delete lifecycle. Lint/typecheck/build passed.
+
+## Regional search follow-up — November 16, 2026
+
+An explicit region/address is geocoded before name search. SearchText uses that
+provider center and country, with distant results filtered. An unresolved region
+remains available for manual review but is flagged so automatic imports cannot
+silently accept a worldwide namesake. Named `District` results can now be selected
+and saved alongside POIs/streets; `Locality` and `Country` are still rejected.
+District/street coordinates represent an area or road rather than an entrance.
+The processing role adds only `geo-places:Geocode` for this existing provider;
+no new table or always-on service is introduced. See the
+[accuracy evidence](validation/instagram-import-accuracy.md).

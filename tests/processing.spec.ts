@@ -59,7 +59,7 @@ test('authenticated cloud import is queued and polled without a local API', asyn
       await r.fulfill({
         json:
           polls === 1
-            ? { id, status: 'running' }
+            ? { id, status: 'running', progress: { stage: 'reading_photos', completed: 1, total: 2 } }
             : {
                 id,
                 status: 'complete',
@@ -73,6 +73,8 @@ test('authenticated cloud import is queued and polled without a local API', asyn
   })
   await login(page)
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
+  await expect(page.locator('.loading-screen')).toContainText('1 of 2 photos read')
+  await page.screenshot({ path: '/tmp/pinwish-import-progress-desktop.png' })
   await expect(
     page.getByText('No readable place names', { exact: false }),
   ).toBeVisible({ timeout: 10000 })
@@ -126,4 +128,57 @@ test('a lost submission response retries the same idempotency key', async ({
   ).toBeVisible({ timeout: 10000 })
   expect(ids).toHaveLength(2)
   expect(ids[0]).toBe(ids[1])
+})
+
+test('mobile import progress stays within the viewport and cancellation discards late updates', async ({ page }) => {
+  await page.setViewportSize({width:390,height:844})
+  let id = ''
+  await page.route('https://processing.example.test/jobs**', async r => {
+    if (r.request().method() === 'POST') {
+      id = r.request().postDataJSON().id
+      return r.fulfill({status:202,json:{id,status:'queued'}})
+    }
+    return r.fulfill({json:{id,status:'running',progress:{stage:'reading_photos',completed:6,total:13}}})
+  })
+  await login(page)
+  await page.getByRole('button',{name:'Find place',exact:true}).click()
+  await expect(page.locator('.loading-screen')).toContainText('6 of 13 photos read')
+  await page.screenshot({path:'/tmp/pinwish-import-progress-mobile.png'})
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  await page.locator('.loading-screen').getByRole('button',{name:'Cancel',exact:true}).click()
+  await expect(page.locator('.loading-screen')).toHaveCount(0)
+  await expect(page.getByLabel('Instagram post link',{exact:true})).toHaveValue('https://www.instagram.com/p/DfFCMjzk02S/')
+})
+
+test('an interrupted polling body retries the same job without a second import', async ({ page }) => {
+  let id = '', posts = 0, polls = 0
+  await page.route('https://processing.example.test/jobs**', async r => {
+    if (r.request().method() === 'POST') {
+      posts++
+      id = r.request().postDataJSON().id
+      return r.fulfill({status:202,json:{id,status:'queued'}})
+    }
+    expect(new URL(r.request().url()).pathname).toBe('/jobs/'+id)
+    if (++polls === 1) return r.fulfill({status:200,body:'{"id":'})
+    return r.fulfill({json:{id,status:'complete',result:{fetchedImages:1,result:{places:[],ignoredSlides:[1]}}}})
+  })
+  await login(page)
+  await page.getByRole('button',{name:'Find place',exact:true}).click()
+  await expect(page.getByText('No readable place names',{exact:false})).toBeVisible({timeout:10000})
+  expect(posts).toBe(1)
+  expect(polls).toBe(2)
+})
+
+test('unreachable processing endpoint reports connection failure and preserves the link', async ({ page }) => {
+  const ids: string[] = []
+  await page.route('https://processing.example.test/jobs**', r => {
+    ids.push(r.request().postDataJSON().id)
+    return r.abort('connectionreset')
+  })
+  await login(page)
+  await page.getByRole('button',{name:'Find place',exact:true}).click()
+  await expect(page.getByRole('alert')).toContainText('Could not connect to the analysis service',{timeout:10000})
+  await expect(page.getByLabel('Instagram post link',{exact:true})).toHaveValue('https://www.instagram.com/p/DfFCMjzk02S/')
+  expect(ids).toHaveLength(3)
+  expect(new Set(ids).size).toBe(1)
 })

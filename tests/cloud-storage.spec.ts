@@ -513,34 +513,48 @@ test('unverified sign-in resumes verification and allows retrying a wrong code',
   await expect(modal.getByRole('button', { name: 'Verify email', exact: true })).toHaveCount(0)
 })
 
-for (const failedInitialLoad of [false, true]) {
-test(`an overseas post auto-saves in English after initial load failure: ${failedInitialLoad}`, async ({ page }) => {
+for (const [failedInitialLoad, renamedDefault] of [[false, false], [true, false], [false, true]]) {
+test(`an overseas post auto-saves in English after initial load failure: ${failedInitialLoad}, renamed default: ${renamedDefault}`, async ({ page }) => {
   await setup(page)
-  const match = { provider: 'amazon-location', placeId: 'museum-id', name: 'Museum', englishName: 'Museum', koreanName: null, address: record.address, countryCode: 'US', countryName: 'United States', coordinates: record.coordinates, placeType: 'PointOfInterest', selectionToken: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
-  await page.route('**/api/instagram/preview', r => r.fulfill({ json: { fetchedImages: 1, result: { places: [{ name: '박물관', evidence: '박물관', regionHint: 'Los Angeles', slides: [1], needsLocationConfirmation: true }], ignoredSlides: [] } } }))
-  await page.route('**/api/places/search', r => r.fulfill({ json: { matches: [match], excludedResults: 0, unsupportedCountries: [], attribution: 'AWS', queryConversion: { originalQuery: '박물관', searchQuery: 'Museum', searchRegion: 'Los Angeles', status: 'translated' } } }))
+  const match = { provider: 'amazon-location', placeId: 'museum-id', name: 'Example Museum', englishName: 'Example Museum', koreanName: null, address: record.address, countryCode: 'US', countryName: 'United States', coordinates: record.coordinates, placeType: 'PointOfInterest', selectionToken: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
+  await page.route('**/api/instagram/preview', r => r.fulfill({ json: { fetchedImages: 1, result: { places: [{ name: '예시 박물관', evidence: '예시 박물관', regionHint: 'Los Angeles', slides: [1], needsLocationConfirmation: true }], ignoredSlides: [] } } }))
+  await page.route('**/api/places/search', r => r.fulfill({ json: { matches: [match], excludedResults: 0, unsupportedCountries: [], attribution: 'AWS', queryConversion: { originalQuery: '예시 박물관', searchQuery: 'Example Museum', searchRegion: 'Los Angeles', status: 'translated' } } }))
   await page.route('**/api/places/details', r => r.fulfill({ json: { place: { ...match, retrievedAt: new Date().toISOString() } } }))
   let collectionReads = 0
   let saves = 0
   let original = ''
-  await page.route('https://storage.example.test/**', r => {
+  await page.route('https://storage.example.test/**', async r => {
     if (new URL(r.request().url()).pathname === '/collections') {
       collectionReads++
       if (failedInitialLoad && collectionReads <= 3) return r.abort('connectionreset')
-      return r.fulfill({ json: collectionResponse })
+      return r.fulfill({ json: renamedDefault ? { ...collectionResponse, items: collectionResponse.items.map(c => ({ ...c, name: 'My saved places' })) } : collectionResponse })
     }
     if (r.request().method() === 'POST') {
       saves++
+      expect(r.request().postDataJSON().collectionId).toBe('default')
       const place = r.request().postDataJSON().place
       original = place.source.extractedName
-      return r.fulfill({ json: { item: { ...record, sources: { source: { ...record.sources.source, extractedName: original, evidence: original } } } } })
+      return r.fulfill({ json: { item: { ...record, displayName: 'Example Museum', sources: { source: { ...record.sources.source, extractedName: original, evidence: original } } } } })
     }
-    return r.fulfill({ json: { items: saves ? [record] : [], cursor: null, collectionVersion: 1 } })
+    return r.fulfill({ json: { items: saves ? [{ ...record, displayName: 'Example Museum' }] : [], cursor: null, collectionVersion: 1 } })
   })
-  await page.goto('/')
-  await login(page)
+  if (renamedDefault) {
+    // Preserve a pre-login draft containing the old placeholder collection name.
+    await page.goto('/?state=entry')
+    await page.getByLabel('Instagram post link', {exact:true}).fill('https://www.instagram.com/p/Example/')
+    await page.getByRole('button', {name:'Find place',exact:true}).click()
+    const auth = page.getByRole('dialog').filter({has:page.getByLabel('Email',{exact:true})})
+    await auth.getByLabel('Email',{exact:true}).fill('person@example.com')
+    await auth.getByLabel('Password',{exact:true}).fill('Password123!')
+    await auth.getByRole('button',{name:'Sign in',exact:true}).last().click()
+    await expect(page.getByLabel('Instagram post link',{exact:true})).toBeVisible()
+  } else {
+    await page.goto('/')
+    await login(page)
+  }
   if (failedInitialLoad) await expect(page.getByText('Could not connect to PinWish.', { exact: false })).toBeVisible()
-  await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
+  if (!renamedDefault) await page.locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true }).click()
+  if (renamedDefault) await expect(page.locator('#collection-sidebar')).toContainText('My saved places')
   await page.getByLabel('Instagram post link', { exact: true }).fill('https://www.instagram.com/p/Example/')
   await page.getByRole('button', { name: 'Find place', exact: true }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
@@ -550,9 +564,9 @@ test(`an overseas post auto-saves in English after initial load failure: ${faile
     expect(collectionReads).toBeGreaterThan(3)
     await expect(page.getByText('Could not connect to PinWish.', { exact: false })).toHaveCount(0)
   }
-  expect(original).toBe('박물관')
+  expect(original).toBe('예시 박물관')
   await page.getByLabel('Select a saved place on the map').selectOption(record.id)
-  await expect(page.locator('#place-heading')).toHaveText('Museum')
+  await expect(page.locator('#place-heading')).toHaveText('Example Museum')
   expect(await page.locator('body').innerText()).not.toMatch(/\p{Script=Hangul}/u)
 })
 }

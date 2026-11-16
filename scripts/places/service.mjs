@@ -1,3 +1,4 @@
+import { createSearchAreaResolver, isWithinSearchArea } from './search-area.mjs'
 import { createEnglishQueryResolver } from './english-query.mjs'
 import { randomUUID } from 'node:crypto'
 import { GeoPlacesClient, SearchTextCommand, GetPlaceCommand } from '@aws-sdk/client-geo-places'
@@ -5,7 +6,7 @@ import { GeoPlacesClient, SearchTextCommand, GetPlaceCommand } from '@aws-sdk/cl
 export class PlaceError extends Error {
   constructor(code, status = 502) { super(code); this.code = code; this.status = status }
 }
-const selectableTypes = new Set(['PointOfInterest', 'PointAddress', 'InterpolatedAddress', 'Street', 'Intersection'])
+const selectableTypes = new Set(['PointOfInterest', 'PointAddress', 'InterpolatedAddress', 'Street', 'Intersection', 'District'])
 const text = (value, max) => typeof value === 'string' && value.trim().length > 0 && value.length <= max
 export function validateSearch(input) {
   if (!input || !text(input.query, 200) || typeof input.region !== 'string' || input.region.length > 200 ||
@@ -28,7 +29,7 @@ export function normalizePlace(item, language) {
     provider: 'amazon-location', placeId: item.PlaceId, name: item.Title,
     address: item.Address.Label, countryCode, countryName: item.Address.Country.Name ?? countryCode,
     coordinates: { longitude: position[0], latitude: position[1] }, placeType: item.PlaceType,
-    englishName: localized ? item.Title : null, koreanName: null,
+    englishName: localized ? (['District', 'Street'].includes(item.PlaceType) ? item.Title.split(',')[0] : item.Title) : null, koreanName: null,
   }
 }
 export function placeError(error) {
@@ -52,14 +53,18 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
     try { return await client.send(command, { abortSignal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000) }) }
     catch (error) { throw placeError(error) }
   }
+  const areas = createSearchAreaResolver(send, now)
   return {
     async search(input, signal) {
-      const { query, region: area, countryCode } = validateSearch(input)
-      const queryConversion = await queryResolver.resolve({ query, region: area, countryCode }, signal)
-      // No arbitrary LA bias: a world bounding box lets explicit query/region drive ranking.
+      const { query, region: suppliedRegion, countryCode } = validateSearch(input)
+      const queryConversion = await queryResolver.resolve({ query, region: suppliedRegion, countryCode }, signal)
+      const area = await areas.resolve(queryConversion.searchRegion, countryCode, signal)
+      // Search a venue near its independently geocoded region. Combining a venue
+      // and city into a worldwide geocoding query can return only a road/tenant.
       const response = await send(new SearchTextCommand({
-        QueryText: [queryConversion.searchQuery, queryConversion.searchRegion].filter(Boolean).join(', '), MaxResults: 5, Language: 'en',
-        Filter: { BoundingBox: [-180, -90, 180, 90], ...(countryCode ? { IncludeCountries: [countryCode] } : {}) },
+        QueryText: area ? queryConversion.searchQuery : [queryConversion.searchQuery, queryConversion.searchRegion].filter(Boolean).join(', '), MaxResults: 5, Language: 'en',
+        ...(area ? { BiasPosition: area.position, Filter: { IncludeCountries: [area.country] } }
+          : { Filter: { BoundingBox: [-180, -90, 180, 90], ...(countryCode ? { IncludeCountries: [countryCode] } : {}) } }),
         IntendedUse: 'Storage',
       }), signal)
       if (!Array.isArray(response.ResultItems)) throw new PlaceError('invalid_places_response')
@@ -68,15 +73,15 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
       const matches = []
       for (const item of response.ResultItems) {
         const place = normalizePlace(item, 'en')
-        if (!place || seen.has(place.placeId) || (countryCode && place.countryCode !== countryCode)) continue
+        if (!place || !isWithinSearchArea(item, area) || seen.has(place.placeId) || (countryCode && place.countryCode !== countryCode)) continue
         seen.add(place.placeId)
         const selectionToken = randomUUID()
         await selections.set(selectionToken, { place, expires: now() + ttl })
         matches.push({ ...place, selectionToken })
       }
       while (!selectionStore && selections.size > 250) selections.delete(selections.keys().next().value)
-      return { queryConversion, matches, excludedResults: response.ResultItems.length - matches.length,
-        unsupportedCountries: response.ResultItems.some(p => p.Address?.Country?.Code2 === 'KR') ? ['KR'] : [],
+      return { queryConversion, regionResolved: Boolean(area), matches, excludedResults: response.ResultItems.length - matches.length,
+        unsupportedCountries: area?.country === 'KR' || response.ResultItems.some(p => p.Address?.Country?.Code2 === 'KR') ? ['KR'] : [],
         attribution: 'Search results provided by Amazon Location Service',
       }
     },
@@ -92,6 +97,6 @@ export function createPlaceService({ client, region = process.env.PINWISH_PLACES
       return { place: { ...place, retrievedAt: new Date(now()).toISOString() },
         attribution: 'Place details provided by Amazon Location Service' }
     },
-    close() { queryResolver.close(); if (!selectionStore) selections.clear(); if (owned) client.destroy() },
+    close() { areas.clear(); queryResolver.close(); if (!selectionStore) selections.clear(); if (owned) client.destroy() },
   }
 }

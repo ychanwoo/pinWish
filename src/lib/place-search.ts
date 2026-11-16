@@ -33,7 +33,7 @@ export interface LocationTarget {
 }
 export interface CandidateLocationDraft { targets: LocationTarget[] }
 export interface QueryConversion { originalQuery: string; searchQuery: string; searchRegion: string; status: 'unchanged' | 'translated' | 'needs_review' | 'unavailable' }
-export interface PlaceSearchResponse { queryConversion?: QueryConversion; matches: PlaceMatch[]; excludedResults: number; unsupportedCountries: string[]; attribution: string }
+export interface PlaceSearchResponse { regionResolved?: boolean; queryConversion?: QueryConversion; matches: PlaceMatch[]; excludedResults: number; unsupportedCountries: string[]; attribution: string }
 const nonempty = (s: unknown, max: number): s is string => typeof s === 'string' && s.trim().length > 0 && s.length <= max
 const nullableName = (s: unknown) => s === null || nonempty(s, 500)
 export function isPlaceMatch(value: unknown): value is PlaceMatch {
@@ -41,7 +41,7 @@ export function isPlaceMatch(value: unknown): value is PlaceMatch {
   const p = value as PlaceMatch
   return p.provider === 'amazon-location' && nonempty(p.placeId, 500) && nonempty(p.name, 500) &&
     nonempty(p.address, 1000) && nonempty(p.countryName, 200) && /^[A-Z]{2}$/.test(p.countryCode) &&
-    p.countryCode !== 'ZZ' && ['PointOfInterest', 'PointAddress', 'InterpolatedAddress', 'Street', 'Intersection'].includes(p.placeType) &&
+    p.countryCode !== 'ZZ' && ['PointOfInterest', 'PointAddress', 'InterpolatedAddress', 'Street', 'Intersection', 'District'].includes(p.placeType) &&
     Number.isFinite(p.coordinates?.longitude) && Math.abs(p.coordinates.longitude) <= 180 &&
     Number.isFinite(p.coordinates?.latitude) && Math.abs(p.coordinates.latitude) <= 90 &&
     nullableName(p.englishName) && nullableName(p.koreanName)
@@ -49,7 +49,7 @@ export function isPlaceMatch(value: unknown): value is PlaceMatch {
 export function isPlaceSearchResponse(value: unknown): value is PlaceSearchResponse {
   if (!value || typeof value !== 'object') return false
   const r = value as PlaceSearchResponse
-  return (r.queryConversion === undefined || (nonempty(r.queryConversion.originalQuery, 200) && nonempty(r.queryConversion.searchQuery, 200) && typeof r.queryConversion.searchRegion === 'string' && r.queryConversion.searchRegion.length <= 200 && ['unchanged','translated','needs_review','unavailable'].includes(r.queryConversion.status))) && Array.isArray(r.matches) && r.matches.length <= 5 && r.matches.every(p => isPlaceMatch(p) &&
+  return (r.regionResolved === undefined || typeof r.regionResolved === 'boolean') && (r.queryConversion === undefined || (nonempty(r.queryConversion.originalQuery, 200) && nonempty(r.queryConversion.searchQuery, 200) && typeof r.queryConversion.searchRegion === 'string' && r.queryConversion.searchRegion.length <= 200 && ['unchanged','translated','needs_review','unavailable'].includes(r.queryConversion.status))) && Array.isArray(r.matches) && r.matches.length <= 5 && r.matches.every(p => isPlaceMatch(p) &&
     typeof p.selectionToken === 'string' && /^[0-9a-f-]{36}$/.test(p.selectionToken)) &&
     new Set(r.matches.map(p => p.placeId)).size === r.matches.length &&
     Number.isInteger(r.excludedResults) && r.excludedResults >= 0 && Array.isArray(r.unsupportedCountries) &&

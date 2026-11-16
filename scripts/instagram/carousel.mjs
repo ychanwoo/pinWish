@@ -15,7 +15,7 @@ export function extractCarousel(html, shortcode) {
     if (child.media_type !== 1) throw new Error('unsupported_video_slide')
     const url = child.image_versions2?.candidates?.[0]?.url ?? child.display_uri
     if (typeof url !== 'string') throw new Error('partial_carousel')
-    return { slide: index + 1, url }
+    return { slide: index + 1, url, alternatives: (child.image_versions2?.candidates ?? []).map(c => c.url).filter(candidate => typeof candidate === 'string' && candidate !== url).slice(0, 3) }
   })
   return { shortcode, caption: typeof post.caption?.text === 'string' ? post.caption.text.slice(0, 12000) : '', images }
 }
@@ -60,10 +60,15 @@ export function validateExtraction(result, count) {
     if (!place || typeof place.name !== 'string' || !place.name.trim() || place.name.length > 200 || typeof place.regionHint !== 'string' || place.regionHint.length > 200 || typeof place.evidence !== 'string' || !place.evidence.trim() || place.evidence.length > 1000 || !Array.isArray(place.slides) || !place.slides.length || !place.slides.every(validSlide)) throw new Error('invalid_model_output')
     if (place.locationHint !== undefined && (typeof place.locationHint !== 'string' || place.locationHint.length > 200 || /[\p{Cc}]/u.test(place.locationHint))) throw new Error('invalid_model_output')
     if (place.slides.some(n => result.ignoredSlides.includes(n))) throw new Error('invalid_model_output')
+    for (const field of ['searchQuery', 'searchRegion', 'searchName']) {
+      if (place[field] !== undefined && (typeof place[field] !== 'string' || place[field].length > 200 || /[\p{Cc}\p{Script=Hangul}\p{Script=Han}]/u.test(place[field]))) throw new Error('invalid_model_output')
+    }
+    if (place.locationType !== undefined && !['place', 'area', 'street'].includes(place.locationType)) throw new Error('invalid_model_output')
+    const searchHints = Object.fromEntries(['searchQuery', 'searchRegion', 'searchName', 'locationType'].filter(key => place[key] !== undefined).map(key => [key, place[key]]))
     const key = `${place.name.trim().normalize('NFKC').toLowerCase()}|${place.regionHint.trim().normalize('NFKC').toLowerCase()}|${(place.locationHint ?? '').trim().normalize('NFKC').toLowerCase()}`
     const existing = merged.get(key)
     if (existing) existing.slides = [...new Set([...existing.slides, ...place.slides])].sort((a,b) => a-b)
-    else merged.set(key, { ...(place.locationHint === undefined ? {} : { locationHint: place.locationHint.trim() }), name: place.name.trim(), regionHint: place.regionHint.trim(), evidence: place.evidence, slides: [...new Set(place.slides)], needsLocationConfirmation: true })
+    else merged.set(key, { ...searchHints, ...(place.locationHint === undefined ? {} : { locationHint: place.locationHint.trim() }), name: place.name.trim(), regionHint: place.regionHint.trim(), evidence: place.evidence, slides: [...new Set(place.slides)], needsLocationConfirmation: true })
   }
   const places = [...merged.values()]
   const covered = new Set([...result.ignoredSlides, ...places.flatMap(p => p.slides)])

@@ -4,7 +4,7 @@ export interface InstagramPreview {
   fetchedImages: number
   // `name` is the original extracted name, never overwritten by a user correction.
   // Confirmed country/localized names are intentionally absent from an OCR response.
-  result: { places: { name: string; regionHint: string; locationHint?: string; slides: number[]; evidence: string; needsLocationConfirmation: true; correctedName?: string }[]; ignoredSlides: number[] }
+  result: { places: { name: string; regionHint: string; locationHint?: string; searchQuery?: string; searchRegion?: string; searchName?: string; locationType?: 'place' | 'area' | 'street'; slides: number[]; evidence: string; needsLocationConfirmation: true; correctedName?: string }[]; ignoredSlides: number[] }
 }
 export function isInstagramPreview(value: unknown): value is InstagramPreview {
   if (!value || typeof value !== 'object') return false
@@ -17,12 +17,19 @@ export function isInstagramPreview(value: unknown): value is InstagramPreview {
     typeof place.name === 'string' && place.name.trim().length > 0 && place.name.length <= 200 &&
     typeof place.regionHint === 'string' && place.regionHint.length <= 200 &&
     (place.locationHint === undefined || (typeof place.locationHint === 'string' && place.locationHint.length <= 200 && !/[\p{Cc}]/u.test(place.locationHint))) &&
+    ['searchQuery', 'searchRegion', 'searchName'].every(key => {
+      const hint = place[key as 'searchQuery' | 'searchRegion' | 'searchName']
+      return hint === undefined || (typeof hint === 'string' && hint.length <= 200 && !/[\p{Cc}\p{Script=Hangul}\p{Script=Han}]/u.test(hint))
+    }) &&
+    (place.locationType === undefined || ['place', 'area', 'street'].includes(place.locationType)) &&
     typeof place.evidence === 'string' && place.evidence.trim().length > 0 && place.evidence.length <= 1000 &&
     place.needsLocationConfirmation === true && Array.isArray(place.slides) && place.slides.length > 0 &&
     place.slides.every(n => validSlide(n) && !p.result.ignoredSlides.includes(n)))) return false
   return new Set([...p.result.ignoredSlides, ...p.result.places.flatMap(place => place.slides)]).size === p.fetchedImages
 }
 export const importErrorMessages: Record<string, string> = {
+  processing_connection_failed: 'Could not connect to the analysis service. Check your connection and that the AWS test session is running. Your link is kept.',
+  processing_invalid_response: 'The analysis response could not be read after retrying. Your link is kept. Please try again.',
   processing_throttled: 'The service is busy. Your input is kept; please try again shortly.',
   processing_busy: 'Other places are being processed. Wait a moment and try again.',
   daily_limit: 'The daily test limit has been reached. Please try again tomorrow.',
@@ -30,6 +37,8 @@ export const importErrorMessages: Record<string, string> = {
   processing_timeout: 'Processing took too long. Your input is kept; please try again.',
   processing_unavailable: 'The test service is unavailable. Your input is kept; try again when the test session is open.',
   carousel_unavailable: 'Instagram did not provide the carousel. Your link is kept; try again later.',
+  post_too_large: 'This post exceeds the photo-analysis size limit. Try a smaller photo post. Your link is kept.',
+  response_too_large: 'A photo exceeds the download limit. Your link is kept; try a smaller photo post.',
   partial_carousel: 'Some photos are missing. The post has not been imported.',
   unsupported_video_slide: 'This post includes video. Full video analysis is not supported in this experiment.',
   aws_access_denied: 'The server cannot access the configured AWS model. Your link is kept.',

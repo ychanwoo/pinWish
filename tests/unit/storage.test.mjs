@@ -159,3 +159,13 @@ test('DynamoDB encoding preserves nested null without turning unknown values int
   assert.deepEqual(encoded.stops.L[0].M.travel, { NULL: true })
   assert.deepEqual(unmarshal(encoded), { stops: [{ travel: null, duration: 60 }], note: '', visited: false })
 })
+
+test('a verified named district is persisted without relabeling it as a venue', async () => {
+  const handler = createHandler({ client: db(), table: 'test' })
+  const response = await handler(event('POST', { place: { ...place, placeType: 'District', name: 'Example Quarter', displayName: 'Example Quarter' } }))
+  assert.equal(response.statusCode, 201)
+  const stored=JSON.parse(response.body).item
+  assert.equal(stored.placeType,'District')
+  assert.deepEqual(stored.coordinates,place.coordinates)
+  assert.throws(() => validatePlace({place:{...place,placeType:'Locality'}}))
+})

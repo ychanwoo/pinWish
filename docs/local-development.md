@@ -49,7 +49,7 @@ npm run test:direct-ui
 npm run test:processing-ui
 ```
 
-`check` runs lint and the production build, including TypeScript checking. The browser suites use fixtures and local handlers, not real AWS accounts. Let their Playwright configurations start their own servers; stop manually running Vite/API servers on the configured ports first. GitHub Actions runs `npm ci`, `test:unit` and `check`; browser suites are not currently part of CI.
+`check` runs lint and the production build, including TypeScript checking. The browser suites use fixtures and local handlers, not real AWS accounts. Let their Playwright configurations start their own servers; stop manually running Vite/API servers on the configured ports first. GitHub Actions runs `npm ci`, `test:unit` and `check`; a separate browser job runs direct/cloud Chromium suites and the WebKit cloud suite.
 
 `npm run build` writes ignored `dist/`; `npm run preview` serves that build, not current unbuilt source. Neither command deploys. Previewing a cloud-configured build can still make live requests and requires an allowed origin.
 
@@ -89,3 +89,15 @@ Cloud mode instead loads persisted records, synchronizes filters with real map
 pins, and persists note/bookmark/visited edits. User-owned collections, including
 empty collections, persist in AWS. Copied private place URLs are not public sharing links.
 
+
+## WebKit regression checks
+
+```sh
+npx playwright install webkit
+npm run test:webkit-ui -- --workers=2
+```
+
+This reuses the cloud fixture suite with the WebKit engine. Run it separately from
+`test:cloud-ui` because both use port 5176. It does not establish physical iPhone
+coverage. CI also runs fixture-only Chromium direct/cloud suites and WebKit cloud
+checks; installing browsers in CI does not enable AWS runtime.

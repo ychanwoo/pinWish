@@ -40,6 +40,7 @@ export function placeKind(type: string): string {
     (
       {
         PointOfInterest: 'Saved place',
+        District: 'Area',
         PointAddress: 'Address',
         InterpolatedAddress: 'Address',
         Street: 'Street',

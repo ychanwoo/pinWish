@@ -1,4 +1,4 @@
-import { processingRequest } from '../../lib/processing-api'
+import { processingRequest, type ImportProgress } from '../../lib/processing-api'
 import type {
   ConfirmedPlace,
   CandidateLocationDraft,
@@ -24,6 +24,7 @@ export interface SaveDraft {
   address: string
   note: string
   collection: string
+  collectionId?: string
   resolved: Place
   manual: boolean
   preview?: InstagramPreview | null
@@ -36,6 +37,7 @@ export interface SavePlaceProps {
   onDraft: (draft: SaveDraft | null) => void
   initialState: SaveState
   collections: string[]
+  collectionOptions?: { id: string; name: string }[]
   defaultCollection: string
   places: Place[]
   scenario: string | null
@@ -47,6 +49,7 @@ export interface SavePlaceProps {
     places: ConfirmedPlace[],
     note: string,
     collection: string,
+    collectionId?: string,
   ) => Promise<void>
   onRequireLogin?: (draft: SaveDraft) => void
   authenticated?: boolean
@@ -56,6 +59,7 @@ export function useSavePlace({
   onDraft,
   initialState,
   collections,
+  collectionOptions,
   defaultCollection,
   places,
   scenario,
@@ -83,12 +87,17 @@ export function useSavePlace({
     draft?.note ??
       (initialState === 'entry' ? '' : 'Try the carnitas at Villa Morelianas.'),
   )
-  const [collection, setCollection] = useState(
+  const [collection, setCollectionName] = useState(
     draft?.collection ??
       (collections.includes(defaultCollection)
         ? defaultCollection
         : collections[0]),
   )
+  const collectionId = useRef(draft?.collectionId || collectionOptions?.find(c => c.name === collection)?.id)
+  const setCollection = (name: string) => {
+    setCollectionName(name)
+    collectionId.current = collectionOptions?.find(c => c.name === name)?.id
+  }
   const [resolved, setResolved] = useState<Place>(
     draft?.resolved ?? initialPlaces[0],
   )
@@ -101,6 +110,7 @@ export function useSavePlace({
   const [locationReviews, setLocationReviews] = useState<
     Record<number, CandidateLocationDraft>
   >(draft?.locationReviews ?? {})
+  const [importProgress, setImportProgress] = useState<ImportProgress>({ stage: 'reading_post' })
   const [autoBusy, setAutoBusy] = useState(false)
   const [persisting, setPersisting] = useState(false)
   const [persistError, setPersistError] = useState('')
@@ -131,6 +141,7 @@ export function useSavePlace({
             address,
             note,
             collection,
+            collectionId: collectionId.current,
             resolved,
             manual,
             preview,
@@ -215,6 +226,7 @@ export function useSavePlace({
         address,
         note,
         collection,
+        collectionId: collectionId.current,
         resolved,
         manual,
         preview,
@@ -243,6 +255,7 @@ export function useSavePlace({
       const id = request.current
       const controller = new AbortController()
       abortImport.current = controller
+      setImportProgress({ stage: 'reading_post' })
       setState('resolving')
       const deadline = setTimeout(() => controller.abort(), 155000)
       try {
@@ -251,6 +264,8 @@ export function useSavePlace({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ input: value }),
           signal: controller.signal,
+        }, progress => {
+          if (id === request.current && !controller.signal.aborted) setImportProgress(progress)
         })
         const data = await response.json()
         if (id !== request.current) return
@@ -272,6 +287,10 @@ export function useSavePlace({
               name: place.name,
               regionHint: place.regionHint,
               locationHint: place.locationHint,
+              searchQuery: place.searchQuery,
+              searchRegion: place.searchRegion,
+              searchName: place.searchName,
+              locationType: place.locationType,
               slides: place.slides,
               evidence: place.evidence,
               needsLocationConfirmation: true,
@@ -282,7 +301,9 @@ export function useSavePlace({
       } catch {
         if (id !== request.current) return
         setImportError(
-          'The analysis service is unavailable or timed out. Your link is kept. Please try again when the test session is open.',
+          controller.signal.aborted
+            ? 'Analysis took too long. Your link is kept. Please try again.'
+            : 'Could not start or resume analysis. Check your connection and sign-in session, then try again. Your link is kept.',
         )
         setState('import_unavailable')
       } finally {
@@ -387,6 +408,7 @@ export function useSavePlace({
       address,
       note,
       collection,
+      collectionId: collectionId.current,
       resolved,
       manual,
       preview,
@@ -413,7 +435,7 @@ export function useSavePlace({
     setPersisting(true)
     setPersistError('')
     try {
-      await onPersist(confirmedPlaces, note, collection)
+      await onPersist(confirmedPlaces, note, collection, collectionId.current || collectionOptions?.find(c => c.name === collection)?.id)
       setPersistSuccess(true)
       onDraft(null)
       if (
@@ -535,6 +557,7 @@ export function useSavePlace({
                     ? 'View place'
                     : 'Find place'
   return {
+    importProgress,
     action,
     address,
     busy,

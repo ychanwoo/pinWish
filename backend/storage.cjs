@@ -46,6 +46,7 @@ function validatePlace(body, direct = false) {
       'InterpolatedAddress',
       'Street',
       'Intersection',
+      'District',
     ].includes(p.placeType)
   )
     fail(400, 'invalid_place')

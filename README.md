@@ -57,7 +57,7 @@ npm run test:direct-ui
 npm run test:processing-ui
 ```
 
-These checks use local fixtures. CI runs unit tests, lint, TypeScript checking and a production build; the browser suites must be run separately. Opt-in live validation scripts call real AWS services and may incur charges. Historical reports describe their recorded version and date, not a new test of every later release.
+These checks use local fixtures. CI runs unit tests, lint, TypeScript checking and a production build, plus fixture-only Chromium direct/cloud and WebKit cloud browser suites. Other browser suites remain separate. Opt-in live validation scripts call real AWS services and may incur charges. Historical reports describe their recorded version and date, not a new test of every later release.
 
 ## AWS architecture and operation
 
