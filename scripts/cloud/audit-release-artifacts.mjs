@@ -9,7 +9,7 @@ const hash=bytes=>createHash('sha256').update(bytes).digest('hex')
 const {origin,appId,branch}=JSON.parse(await readFile('infra/generated/hosting.json'))
 const template=JSON.parse(await readFile('infra/generated/storage.json'))
 const scratch=await mkdtemp(join(tmpdir(),'pinwish-release-'))
-const result={verifiedAt:new Date().toISOString(),baseCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),includesUncommittedRouteBoundaryFix:true,includesUncommittedReadRecoveryFix:true,includesUncommittedNullRouteFix:true,origin,frontend:[],backend:[]}
+const result={verifiedAt:new Date().toISOString(),baseCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),workingTreeDirty:execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().length>0,origin,frontend:[],backend:[]}
 try {
  const archive='infra/generated/web.zip'
  result.frontendArchiveSha256=hash(await readFile(archive))

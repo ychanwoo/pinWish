@@ -22,7 +22,7 @@ Current implementation review: November 12, 2026. These guides describe the repo
 
 ## Release and verification status
 
-The [November 12 release validation](validation/aws-release.md) records the latest compatible frontend/backend deployment, actual email verification and reset, local regression checks, and the combined live walkthrough. See that report for final results and limitations; older feature reports describe their own releases.
+The [November 16 import performance follow-up](validation/instagram-import-performance.md) documents bounded parallel processing and live progress. The [November 16 Instagram accuracy follow-up](validation/instagram-import-accuracy.md) records the subsequent NYC extraction/search fixes and ten-place source verification. The [November 16 post-refactor validation](validation/post-refactor-release.md) records the latest deployment checks, browser coverage, real Instagram samples and remaining limitations. The [November 12 release validation](validation/aws-release.md) retains historical email verification/reset evidence. Older feature reports describe their own releases.
 
 Backend and frontend deploy independently. A merged PR does not deploy to Amplify. The release report identifies both its base commit and the fixes validated before commit and includes deployed artifact hashes. Use `npm run cloud:status` to inspect current runtime state rather than inferring it from an old screenshot.
 

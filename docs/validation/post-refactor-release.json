@@ -1,0 +1,1951 @@
+{
+  "baseCommit": "49d1244565f64a2f567b295ca9d120687fdfbb73",
+  "validationDate": "2026-11-16",
+  "local": {
+    "unitPassed": 148,
+    "chromiumPassed": 109,
+    "chromiumIntentionalSkips": 3,
+    "webkitPassed": 63,
+    "physicalDevicesTested": false,
+    "ciExecuted": false
+  },
+  "firstLiveRun": {
+    "testedAt": "2026-11-16T18:44:53.425Z",
+    "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+    "checks": [
+      "Real Cognito sign-in on HTTPS Amplify origin",
+      "Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs",
+      "Cross-account job and saved-place isolation",
+      "Session and 10 saved places survive reload; sidebar toggle preserves layout",
+      "Automatic representative photo renders without upload",
+      "Mobile detail has no horizontal overflow; no uncaught browser errors",
+      "Deployed note and visit edits persist after reload",
+      "Deployed collection color persists and map renders",
+      "Journey uncertainty labels match saved results: 3 unknown-hours visits, 0 suggested visits",
+      "All nine unvisited selections scheduled; journey saved, reopened, edited, shared, revoked and deleted against real AWS",
+      "Anonymous collection sharing excludes private notes and revocation removes access",
+      "Real direct search/save and visited state; collection create/rename/move/delete preserves the saved place",
+      "Private saved-place links require authentication and do not expose details anonymously",
+      "Real sign-out clears session and signed-out saving prompts sign-in"
+    ],
+    "passed": true,
+    "failure": null,
+    "errors": [],
+    "cleanupErrors": [],
+    "networkFailures": [
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      }
+    ],
+    "jobs": [
+      {
+        "operation": "import"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      }
+    ]
+  },
+  "initialSampleResults": {
+    "checkedAt": "2026-11-16T18:44:31.547Z",
+    "method": "Deployed jobs and runtime name-matching helper; no sample places saved. Matching is not independent ground truth.",
+    "reports": [
+      {
+        "input": "https://www.instagram.com/p/DfLAnjLEx2G/?img_index=5",
+        "status": "failed",
+        "code": "unsupported_video_slide",
+        "candidates": []
+      },
+      {
+        "input": "https://www.instagram.com/p/DZ9PJzuj1h5/?img_index=8",
+        "status": "failed",
+        "code": "post_too_large",
+        "candidates": []
+      },
+      {
+        "input": "https://www.instagram.com/p/DSuNUlDERWj/?img_index=6",
+        "status": "complete",
+        "candidates": [
+          {
+            "sourceName": "아디다스 SPORTS HUB",
+            "regionHint": "서울",
+            "locationHint": "서울 성동구 성수이로7가길 9 1층",
+            "slides": [
+              2
+            ],
+            "evidence": "아디다스 SPORTS HUB",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "아디다스 SPORTS HUB",
+              "searchQuery": "Adidas Sports Hub",
+              "searchRegion": "Seoul, Seongdong-gu, Seongsu 2-ro 7-ga-gil 9, 1st Floor",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "뉴발란스 북촌 런 허브",
+            "regionHint": "서울",
+            "locationHint": "북촌로5가길 8-3 북촌 런 허브",
+            "slides": [
+              3
+            ],
+            "evidence": "뉴발란스 북촌 런 허브",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "뉴발란스 북촌 런 허브",
+              "searchQuery": "New Balance Bukchon Run Hub",
+              "searchRegion": "Bukchon-ro 5-gil 8-3, Bukchon Run Hub",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "RunDot DONGDAEMUN",
+            "regionHint": "서울시 중구",
+            "locationHint": "서울시 중구 장충단로 275, 두타몰 B1 RunDot",
+            "slides": [
+              4
+            ],
+            "evidence": "RunDot DONGDAEMUN",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "RunDot DONGDAEMUN",
+              "searchQuery": "RunDot DONGDAEMUN",
+              "searchRegion": "275 Jangchungdan-ro, Jung-gu, Seoul, South Korea",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "FIT STATION x 좋은습관 PT",
+            "regionHint": "서울시 성동구",
+            "locationHint": "서울시 성동구 아차산로 18",
+            "slides": [
+              5
+            ],
+            "evidence": "FIT STATION x 좋은습관 PT",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "FIT STATION x 좋은습관 PT",
+              "searchQuery": "FIT STATION x 좋은습관 PT",
+              "searchRegion": "서울시 성동구 아차산로 18",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "회현역 (4호선) Runner's Base",
+            "regionHint": "서울시",
+            "locationHint": "퇴계로 45-2 가로판매대273",
+            "slides": [
+              6
+            ],
+            "evidence": "회현역 (4호선) Runner's Base",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "회현역 (4호선) Runner's Base",
+              "searchQuery": "Runner's Base",
+              "searchRegion": "Toegye-ro 45-2, Garopanmaedae 273",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "여의나루역 (5호선) 러너스테이션",
+            "regionHint": "서울",
+            "locationHint": "서울시 영등포구 여의동로 343",
+            "slides": [
+              7
+            ],
+            "evidence": "여의나루역 (5호선) 러너스테이션",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "여의나루역 (5호선) 러너스테이션",
+              "searchQuery": "Runners Station",
+              "searchRegion": "343 Yeouido-ro, Yeongdeungpo-gu, Seoul, South Korea",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "광화문역 (5호선) Runner's Base",
+            "regionHint": "서울",
+            "locationHint": "서울시 종로구 세종대로 172 지하 2층 광화문역",
+            "slides": [
+              8
+            ],
+            "evidence": "광화문역 (5호선) Runner's Base",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "광화문역 (5호선) Runner's Base",
+              "searchQuery": "Runner's Base",
+              "searchRegion": "172 Sejong-daero, Jongno-gu, Seoul, South Korea, B2, Gwanghwamun Station",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "월드컵경기장역 (6호선) Runner's Base",
+            "regionHint": "서울",
+            "locationHint": "서울 마포구 성산동 421-2",
+            "slides": [
+              9
+            ],
+            "evidence": "월드컵경기장역 (6호선) Runner's Base",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "월드컵경기장역 (6호선) Runner's Base",
+              "searchQuery": "World Cup Stadium Station (Line 6) Runner's Base",
+              "searchRegion": "Seoul, Mapo-gu, Seongsan-dong 421-2",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "먹골 (7호선) 스마트무브 스테이션",
+            "regionHint": "서울시 중랑구",
+            "locationHint": "서울시 중랑구 동일로 지하 901",
+            "slides": [
+              10
+            ],
+            "evidence": "먹골 (7호선) 스마트무브 스테이션",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "먹골 (7호선) 스마트무브 스테이션",
+              "searchQuery": "Meokgol (Line 7) Smart Move Station",
+              "searchRegion": "Dongil-ro, Jungnang-gu, Seoul, South Korea",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          }
+        ],
+        "photos": 12,
+        "ignoredSlides": [
+          1,
+          11,
+          12
+        ]
+      }
+    ]
+  },
+  "initialArtifacts": {
+    "verifiedAt": "2026-11-16T18:40:49.108Z",
+    "baseCommit": "49d1244565f64a2f567b295ca9d120687fdfbb73",
+    "workingTreeDirty": true,
+    "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+    "frontend": [
+      {
+        "file": "cognito-client-D7j0iUG_.js",
+        "sha256": "1c5e86ba234d0a439844d80d8e2b57287da642054064984d95369ad6934c5078"
+      },
+      {
+        "file": "TripSchedule-DuG4Ff-Y.js",
+        "sha256": "e5ff5a4913cb483744c85f69e32ae7383efdaa93d1bffe17052bae7e3dc8194a"
+      },
+      {
+        "file": "ItineraryPlanner-BnXtRU5R.js",
+        "sha256": "93ef1be555e9ebe07a7511e883dfa9ae4b8de2d8a834e97e150fea1fe7366382"
+      },
+      {
+        "file": "SharedCollectionPage-URhkjc_o.js",
+        "sha256": "709adc06348c02bb25b06527283bfa641d00e52319e9a9870d7a8e14f125b367"
+      },
+      {
+        "file": "collection-sharing-Cxkaw_y_.js",
+        "sha256": "21be316ada3fb1524bf1e46f824151dc0817a77d5582cf8de0ecdfc05a964de5"
+      },
+      {
+        "file": "SharedItineraryPage-IJXHsjVU.js",
+        "sha256": "25c652f0e174086152096b5050ed9e765597f94a272debf27710f775455425e5"
+      },
+      {
+        "file": "maplibre-gl-worker-DTh23QKw.js",
+        "sha256": "a0da9c70dd13e7313cd609659ac1d231424e1a9ec2cb701758b64bc1ee5c09d9"
+      },
+      {
+        "file": "LiveMap-D1haFzim.js",
+        "sha256": "77f62540a2e9825df8ec3e94cc1862945210e7501815e1fe241d4ec34f9b49be"
+      },
+      {
+        "file": "CollectionSharing-CcuBV81O.js",
+        "sha256": "d6ed066dba7221411c796b0172e7cb16745a36356ce705aa531b603106c95cf2"
+      },
+      {
+        "file": "index-CUtLjsun.css",
+        "sha256": "c442d8b1806b9740f1eaa73e66e5e353ac6e74620ef4bc368732472c34175e4a"
+      },
+      {
+        "file": "index-FCYy27mS.js",
+        "sha256": "300223ce6957e18e8981b651ee4767e54f815aacafca54da0a09f9d322324b60"
+      },
+      {
+        "file": "index.browser-BwQ_nJjI.js",
+        "sha256": "f64cf716c55dce1043c4c4aacfd8d85b7f6459e63e7112fb4a323bc49c5633cd"
+      },
+      {
+        "file": "LiveMap-qvkd0SPb.css",
+        "sha256": "280f62458bee97adaab9c817e977cc89e02cc34d07a3107ba4a545c17c41976d"
+      }
+    ],
+    "backend": [
+      {
+        "function": "storage",
+        "sourceSha256": "6e3840bb748f07045ffa3af95ad6f71799bc30e9bb02ac5a1aa02146aafdd40d",
+        "awsCodeSha256": "lN/4vhlakVMsPD5Xry4kd0dc7rygiAh5NEvJ/ql5P3U="
+      },
+      {
+        "function": "processing",
+        "sourceSha256": "2946b913520cc7c3f21ed4fba297e56119d8dc4e53c5cb5bc77ef174a6b37527",
+        "awsCodeSha256": "4Hz7gvWD58hrfHL9LMQgaruAl1LzQnsZjI1meZMACn8="
+      },
+      {
+        "function": "worker",
+        "sourceSha256": "2946b913520cc7c3f21ed4fba297e56119d8dc4e53c5cb5bc77ef174a6b37527",
+        "awsCodeSha256": "4Hz7gvWD58hrfHL9LMQgaruAl1LzQnsZjI1meZMACn8="
+      },
+      {
+        "function": "pause",
+        "sourceSha256": "42898b83830acd0e3b0b8c2d186cfac428378ef2a958e94ff44594194e4fe435",
+        "awsCodeSha256": "luj+F6Oi4kN1S+3arGDsdZJpzZnNuJTCcQ7UgOqhzGs="
+      }
+    ],
+    "frontendArchiveSha256": "b542bb21f0468e2c7c3b37d017e114a986572e615f1bd4862df02736941ad756",
+    "amplifyJob": "18"
+  },
+  "firstDataComparison": {
+    "checkedAt": "2026-11-16T18:45:12.923Z",
+    "records": {
+      "before": 11,
+      "after": 11,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "accounts": {
+      "before": 1,
+      "after": 1,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "photos": {
+      "before": 9,
+      "after": 9,
+      "changedOrMissing": 0,
+      "added": 0
+    }
+  },
+  "imageSelection": {
+    "sample": "DZ9PJzuj1h5",
+    "slides": 13,
+    "selectedBytes": 2380618,
+    "size": "1080x1350",
+    "reducesModelInputNotAllDownloadTraffic": true
+  },
+  "operations": {
+    "mapKeyExpires": "2027-01-01T00:00:00Z",
+    "pointInTimeRecoveryEnabled": false,
+    "costScope": "Estimated account-wide November 1-16 Usage records, not PinWish-only or final invoice",
+    "estimatedUsageUsd": 4.0120085419,
+    "runtimeFinalVerified": true,
+    "finalRuntime": {
+      "mapPaused": true,
+      "cleanupState": "DISABLED",
+      "hostingPaused": true,
+      "apiDisabled": true,
+      "workers": {
+        "storage": 0,
+        "processing": 0,
+        "worker": 0
+      },
+      "autoPause": {
+        "state": "DISABLED",
+        "expression": "at(2026-11-16T19:22:12)"
+      }
+    }
+  },
+  "secondSampleRun": {
+    "checkedAt": "2026-11-16T18:52:20.656Z",
+    "method": "Deployed jobs and runtime name-matching helper; no sample places saved. Matching is not independent ground truth.",
+    "reports": [
+      {
+        "input": "https://www.instagram.com/p/DZ9PJzuj1h5/?img_index=8",
+        "status": "complete",
+        "candidates": [
+          {
+            "sourceName": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              7
+            ],
+            "evidence": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+              "searchQuery": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+              "searchRegion": "",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "타임스퀘어 돌아다니면서 쇼핑하기",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              8
+            ],
+            "evidence": "타임스퀘어 돌아다니면서 쇼핑하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "타임스퀘어 돌아다니면서 쇼핑하기",
+              "searchQuery": "Times Square",
+              "searchRegion": "",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "밤에 전망대 올라가서 뉴욕 야경 보기",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              9
+            ],
+            "evidence": "밤에 전망대 올라가서 뉴욕 야경 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "밤에 전망대 올라가서 뉴욕 야경 보기",
+              "searchQuery": "밤에 전망대 올라가서 뉴욕 야경 보기",
+              "searchRegion": "",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "AMBASSADOR",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              10
+            ],
+            "evidence": "AMBASSADOR",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "AMBASSADOR",
+              "searchQuery": "AMBASSADOR",
+              "searchRegion": "",
+              "status": "unchanged"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "Voa Ambassador Flat",
+              "address": "Voa Ambassador Flat, Avenida Cabo Branco, 1890, Cabo Branco, João Pessoa - PB, 58045-010, Brazil",
+              "countryCode": "BR",
+              "coordinates": {
+                "longitude": -34.82384,
+                "latitude": -7.12665
+              }
+            }
+          },
+          {
+            "sourceName": "MEZZ MEZZROW",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              11
+            ],
+            "evidence": "MEZZ MEZZROW",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "MEZZ MEZZROW",
+              "searchQuery": "MEZZ MEZZROW",
+              "searchRegion": "",
+              "status": "unchanged"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관",
+            "regionHint": "",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관",
+              "searchQuery": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관",
+              "searchRegion": "",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          }
+        ],
+        "photos": 13,
+        "ignoredSlides": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          13
+        ]
+      }
+    ]
+  },
+  "extractionExperiments": [
+    {
+      "mode": "three-slide-expanded-prompt",
+      "result": {
+        "checkedAt": "2026-11-16T18:56:19.905Z",
+        "shortcode": "DZ9PJzuj1h5",
+        "region": "us-east-1",
+        "modelId": "qwen.qwen3-vl-235b-a22b",
+        "method": "experimental_public_html_then_bedrock",
+        "fetchedImages": 13,
+        "modelRequests": 5,
+        "usage": {
+          "inputTokens": 21661,
+          "outputTokens": 782,
+          "totalTokens": 22443
+        },
+        "elapsedMs": 25429,
+        "automaticAccuracyVerified": false,
+        "result": {
+          "places": [
+            {
+              "locationHint": "",
+              "name": "센트럴파크",
+              "regionHint": "뉴욕",
+              "evidence": "센트럴파크, 도미노파크 등 공원에서",
+              "slides": [
+                2
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "도미노파크",
+              "regionHint": "뉴욕",
+              "evidence": "센트럴파크, 도미노파크 등 공원에서",
+              "slides": [
+                2
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "lost stars",
+              "regionHint": "뉴욕",
+              "evidence": "lost stars 들으면서 뉴욕 선셋 보기",
+              "slides": [
+                3
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "브루클린 윌리엄스버그",
+              "regionHint": "뉴욕",
+              "evidence": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+              "slides": [
+                7
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "타임스퀘어",
+              "regionHint": "뉴욕",
+              "evidence": "타임스퀘어 돌다니면서 쇼핑하기",
+              "slides": [
+                8
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "전망대",
+              "regionHint": "뉴욕",
+              "evidence": "밤에 전망대 올라가서 뉴욕 야경 보기",
+              "slides": [
+                9
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "AMBASSADOR",
+              "regionHint": "뉴욕",
+              "evidence": "AMBASSADOR",
+              "slides": [
+                10
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "MEZZ MEZZROW",
+              "regionHint": "뉴욕",
+              "evidence": "MEZZ MEZZROW",
+              "slides": [
+                11
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "모마",
+              "regionHint": "뉴욕",
+              "evidence": "모마",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "메트로폴리탄",
+              "regionHint": "뉴욕",
+              "evidence": "메트로폴리탄",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "구겐하임 미술관",
+              "regionHint": "뉴욕",
+              "evidence": "구겐하임 미술관",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            }
+          ],
+          "ignoredSlides": [
+            1,
+            4,
+            5,
+            6,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "mode": "single-slide-before-overlay-rule",
+      "result": {
+        "checkedAt": "2026-11-16T18:57:24.389Z",
+        "shortcode": "DZ9PJzuj1h5",
+        "region": "us-east-1",
+        "modelId": "qwen.qwen3-vl-235b-a22b",
+        "method": "experimental_public_html_then_bedrock",
+        "fetchedImages": 13,
+        "modelRequests": 13,
+        "usage": {
+          "inputTokens": 26437,
+          "outputTokens": 1058,
+          "totalTokens": 27495
+        },
+        "elapsedMs": 37258,
+        "automaticAccuracyVerified": false,
+        "result": {
+          "places": [
+            {
+              "locationHint": "",
+              "name": "센트럴파크",
+              "regionHint": "뉴욕",
+              "evidence": "센트럴파크, 도미노파크 등 공원에서",
+              "slides": [
+                2
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "도미노파크",
+              "regionHint": "뉴욕",
+              "evidence": "센트럴파크, 도미노파크 등 공원에서",
+              "slides": [
+                2
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "브루클린 브릿지",
+              "regionHint": "뉴욕",
+              "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+              "slides": [
+                6
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "맨해튼 브릿지",
+              "regionHint": "뉴욕",
+              "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+              "slides": [
+                6
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "브루클린 윌리엄스버그",
+              "regionHint": "뉴욕",
+              "evidence": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+              "slides": [
+                7
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "타임스퀘어",
+              "regionHint": "뉴욕",
+              "evidence": "타임스퀘어 돌다니면서 쇼핑하기",
+              "slides": [
+                8
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "AMBASSADOR",
+              "regionHint": "뉴욕",
+              "evidence": "AMBASSADOR",
+              "slides": [
+                10
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "CHICAGO THE MUSICAL",
+              "regionHint": "뉴욕",
+              "evidence": "CHICAGO THE MUSICAL",
+              "slides": [
+                10
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "MEZZ MEZZROW",
+              "regionHint": "",
+              "evidence": "MEZZ MEZZROW",
+              "slides": [
+                11
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "모마",
+              "regionHint": "뉴욕",
+              "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "메트로폴리탄",
+              "regionHint": "뉴욕",
+              "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            },
+            {
+              "locationHint": "",
+              "name": "구겐하임 미술관",
+              "regionHint": "뉴욕",
+              "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+              "slides": [
+                12
+              ],
+              "needsLocationConfirmation": true
+            }
+          ],
+          "ignoredSlides": [
+            1,
+            3,
+            4,
+            5,
+            9,
+            13
+          ]
+        }
+      }
+    },
+    {
+      "mode": "targeted-overlay-rule-check",
+      "result": {
+        "checkedAt": "2026-11-16T18:58:26.404Z",
+        "shortcode": "DZ9PJzuj1h5",
+        "region": "us-east-1",
+        "modelId": "qwen.qwen3-vl-235b-a22b",
+        "method": "experimental_public_html_then_bedrock",
+        "fetchedImages": 13,
+        "modelRequests": 3,
+        "usage": {
+          "inputTokens": 6331,
+          "outputTokens": 121,
+          "totalTokens": 6452
+        },
+        "elapsedMs": 11093,
+        "automaticAccuracyVerified": false,
+        "result": {
+          "places": [
+            {
+              "locationHint": "",
+              "name": "브로드웨이에서 뮤지컬 보기",
+              "regionHint": "뉴욕",
+              "evidence": "브로드웨이에서 뮤지컬 보기",
+              "slides": [
+                10
+              ],
+              "needsLocationConfirmation": true
+            }
+          ],
+          "ignoredSlides": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            12,
+            13,
+            3,
+            11
+          ]
+        }
+      }
+    }
+  ],
+  "thirdSampleRun": {
+    "checkedAt": "2026-11-16T19:03:44.664Z",
+    "method": "Deployed jobs and runtime name-matching helper; no sample places saved. Matching is not independent ground truth.",
+    "reports": [
+      {
+        "input": "https://www.instagram.com/p/DZ9PJzuj1h5/?img_index=8",
+        "status": "complete",
+        "candidates": [
+          {
+            "sourceName": "센트럴파크",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              2
+            ],
+            "evidence": "센트럴파크, 도미노파크 등 공원에서",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "센트럴파크",
+              "searchQuery": "Central Park",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "도미노파크",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              2
+            ],
+            "evidence": "센트럴파크, 도미노파크 등 공원에서",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "도미노파크",
+              "searchQuery": "도미노파크",
+              "searchRegion": "뉴욕",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "lost stars",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              3
+            ],
+            "evidence": "lost stars 들으면서 뉴욕 선셋 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "lost stars",
+              "searchQuery": "Lost Stars",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "페리타고 맨해튼 스카인라인 보기",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              4
+            ],
+            "evidence": "날씨 좋은 날 페리타고 맨해튼 스카인라인 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "페리타고 맨해튼 스카인라인 보기",
+              "searchQuery": "Ferry to Manhattan Skyline",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "브루클린 브릿지",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              6
+            ],
+            "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브루클린 브릿지",
+              "searchQuery": "Brooklyn Bridge",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "Brooklyn Bridge Blvd, Brooklyn, NY 11201, United States",
+              "address": "Brooklyn Bridge Blvd, Brooklyn, NY 11201, United States",
+              "countryCode": "US",
+              "coordinates": {
+                "longitude": -73.98887,
+                "latitude": 40.69576
+              }
+            }
+          },
+          {
+            "sourceName": "맨해튼 브릿지",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              6
+            ],
+            "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "맨해튼 브릿지",
+              "searchQuery": "Manhattan Bridge",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "Under the Manhattan Bridge",
+              "address": "Under the Manhattan Bridge, Manhattan Brg, New York, NY 10002, United States",
+              "countryCode": "US",
+              "coordinates": {
+                "longitude": -73.99085,
+                "latitude": 40.70764
+              }
+            }
+          },
+          {
+            "sourceName": "브루클린 윌리엄스버그",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              7
+            ],
+            "evidence": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브루클린 윌리엄스버그",
+              "searchQuery": "Brooklyn Williamsburg",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "타임스퀘어",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              8
+            ],
+            "evidence": "타임스퀘어 돌다니면서 쇼핑하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "타임스퀘어",
+              "searchQuery": "Times Square",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "브로드웨이에서 뮤지컬 보기",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              10
+            ],
+            "evidence": "브로드웨이에서 뮤지컬 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브로드웨이에서 뮤지컬 보기",
+              "searchQuery": "Broadway musicals",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "모마",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "모마",
+              "searchQuery": "모마",
+              "searchRegion": "뉴욕",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "메트로폴리탄",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "메트로폴리탄",
+              "searchQuery": "Metropolitan",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "The Metropolitan",
+              "address": "The Metropolitan, 437 Union Ave, Brooklyn, NY 11211-3424, United States",
+              "countryCode": "US",
+              "coordinates": {
+                "longitude": -73.95157,
+                "latitude": 40.71424
+              }
+            }
+          },
+          {
+            "sourceName": "구겐하임 미술관",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "구겐하임 미술관",
+              "searchQuery": "Guggenheim Museum",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "Guggenheim Museum Cafe",
+              "address": "Guggenheim Museum Cafe, 1071 5th Ave, New York, NY 10128-0112, United States",
+              "countryCode": "US",
+              "coordinates": {
+                "longitude": -73.95912,
+                "latitude": 40.78301
+              }
+            }
+          }
+        ],
+        "photos": 13,
+        "ignoredSlides": [
+          1,
+          5,
+          9,
+          11,
+          13
+        ]
+      }
+    ]
+  },
+  "providerShapeProbe": [
+    {
+      "query": "Central Park, New York",
+      "results": [
+        {
+          "name": "Central Park, New York, NY, United States",
+          "type": "District",
+          "address": "Central Park, New York, NY, United States",
+          "coordinates": [
+            -73.96584,
+            40.78392
+          ]
+        }
+      ]
+    },
+    {
+      "query": "Guggenheim Museum, New York",
+      "results": [
+        {
+          "name": "Guggenheim Museum Cafe",
+          "type": "PointOfInterest",
+          "address": "Guggenheim Museum Cafe, 1071 5th Ave, New York, NY 10128-0112, United States",
+          "coordinates": [
+            -73.95912,
+            40.78301
+          ]
+        }
+      ]
+    }
+  ],
+  "finalLiveRun": {
+    "testedAt": "2026-11-16T19:10:57.088Z",
+    "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+    "checks": [
+      "Real Cognito sign-in on HTTPS Amplify origin",
+      "Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs",
+      "Cross-account job and saved-place isolation",
+      "Session and 10 saved places survive reload; sidebar toggle preserves layout",
+      "Automatic representative photo renders without upload",
+      "Mobile detail has no horizontal overflow; no uncaught browser errors",
+      "Deployed note and visit edits persist after reload",
+      "Deployed collection color persists and map renders",
+      "Journey uncertainty labels match saved results: 3 unknown-hours visits, 0 suggested visits",
+      "All nine unvisited selections scheduled; journey saved, reopened, edited, shared, revoked and deleted against real AWS",
+      "Anonymous collection sharing excludes private notes and revocation removes access",
+      "Real direct search/save and visited state; collection create/rename/move/delete preserves the saved place",
+      "Private saved-place links require authentication and do not expose details anonymously",
+      "Real sign-out clears session and signed-out saving prompts sign-in"
+    ],
+    "passed": true,
+    "failure": null,
+    "errors": [],
+    "cleanupErrors": [],
+    "networkFailures": [
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "GET",
+        "path": "/places/:id/photo",
+        "error": "net::ERR_FAILED",
+        "responseStatus": null
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      },
+      {
+        "method": "POST",
+        "path": "/jobs",
+        "error": "net::ERR_ABORTED",
+        "responseStatus": 202
+      }
+    ],
+    "jobs": [
+      {
+        "operation": "import"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      },
+      {
+        "operation": "search"
+      },
+      {
+        "operation": "details"
+      }
+    ]
+  },
+  "finalSampleRun": {
+    "checkedAt": "2026-11-16T19:10:35.389Z",
+    "method": "Deployed jobs and runtime name-matching helper; no sample places saved. Matching is not independent ground truth.",
+    "reports": [
+      {
+        "input": "https://www.instagram.com/p/DZ9PJzuj1h5/?img_index=8",
+        "status": "complete",
+        "candidates": [
+          {
+            "sourceName": "센트럴파크",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              2
+            ],
+            "evidence": "센트럴파크, 도미노파크 등 공원에서",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "센트럴파크",
+              "searchQuery": "Central Park",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "도미노파크",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              2
+            ],
+            "evidence": "센트럴파크, 도미노파크 등 공원에서",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "도미노파크",
+              "searchQuery": "도미노파크",
+              "searchRegion": "뉴욕",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "lost stars",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              3
+            ],
+            "evidence": "lost stars 들으면서 뉴욕 선셋 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "lost stars",
+              "searchQuery": "Lost Stars",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "페리타고 맨해튼 스카인라인 보기",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              4
+            ],
+            "evidence": "날씨 좋은 날 페리타고 맨해튼 스카인라인 보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "페리타고 맨해튼 스카인라인 보기",
+              "searchQuery": "Ferry to Manhattan Skyline",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "브루클린 브릿지",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              6
+            ],
+            "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브루클린 브릿지",
+              "searchQuery": "Brooklyn Bridge",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "맨해튼 브릿지",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              6
+            ],
+            "evidence": "밤에 브루클린 브릿지나 맨해튼 브릿지 올라가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "맨해튼 브릿지",
+              "searchQuery": "Manhattan Bridge",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "브루클린 윌리엄스버그",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              7
+            ],
+            "evidence": "브루클린 윌리엄스버그에서 빈티지 구경하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "브루클린 윌리엄스버그",
+              "searchQuery": "Brooklyn Williamsburg",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "타임스퀘어",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              8
+            ],
+            "evidence": "타임스퀘어 돌다니면서 쇼핑하기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "타임스퀘어",
+              "searchQuery": "Times Square",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "AMBASSADOR",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              10
+            ],
+            "evidence": "AMBASSADOR",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "AMBASSADOR",
+              "searchQuery": "Ambassador Hotel",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          },
+          {
+            "sourceName": "모마",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "모마",
+              "searchQuery": "모마",
+              "searchRegion": "뉴욕",
+              "status": "needs_review"
+            },
+            "outcome": "unresolved_translation"
+          },
+          {
+            "sourceName": "메트로폴리탄",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "메트로폴리탄",
+              "searchQuery": "Metropolitan Museum of Art",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "provider_match_requires_source_review",
+            "place": {
+              "name": "The Metropolitan Museum of Art",
+              "placeType": "PointOfInterest",
+              "address": "The Metropolitan Museum of Art, 1000 5th Ave, New York, NY 10028, United States",
+              "countryCode": "US",
+              "coordinates": {
+                "longitude": -73.96344,
+                "latitude": 40.77945
+              }
+            }
+          },
+          {
+            "sourceName": "구겐하임 미술관",
+            "regionHint": "뉴욕",
+            "locationHint": "",
+            "slides": [
+              12
+            ],
+            "evidence": "모마, 메트로폴리탄, 구겐하임 미술관 등 미술관 가보기",
+            "searchStatus": "complete",
+            "conversion": {
+              "originalQuery": "구겐하임 미술관",
+              "searchQuery": "Guggenheim Museum",
+              "searchRegion": "New York",
+              "status": "translated"
+            },
+            "outcome": "unresolved_match"
+          }
+        ],
+        "photos": 13,
+        "ignoredSlides": [
+          1,
+          5,
+          9,
+          11,
+          13
+        ]
+      }
+    ]
+  },
+  "finalArtifacts": {
+    "verifiedAt": "2026-11-16T19:07:18.941Z",
+    "baseCommit": "49d1244565f64a2f567b295ca9d120687fdfbb73",
+    "workingTreeDirty": true,
+    "origin": "https://demo.d297h6ubgr1uhw.amplifyapp.com",
+    "frontend": [
+      {
+        "file": "TripSchedule-BpklkJkt.js",
+        "sha256": "7baa86e6e310ce34315d61b4d386bf66d1979d5d6e20a1a7cf78d5bd20998fbd"
+      },
+      {
+        "file": "SharedItineraryPage-CV3w10KV.js",
+        "sha256": "9691d4fdb95d4b88b3f35da40f4e520c4b3a9b5ef024375b28a4abf792d9098c"
+      },
+      {
+        "file": "index.browser-D8pjy8wt.js",
+        "sha256": "24b057a9c28a8d14d2bb620de766fd327e5b279f70a29f09e8290c39e18b6429"
+      },
+      {
+        "file": "ItineraryPlanner-B5NFTxOW.js",
+        "sha256": "ac4de4a7799aa2e33223ed0da2a7d9d2f7fd99cbe6fa54da44d3e025610b6e52"
+      },
+      {
+        "file": "SharedCollectionPage-CtUzabub.js",
+        "sha256": "a47a456ce603225f5e4bb7a79af666d6d76650b6375b20288d7fcfc7d11602fd"
+      },
+      {
+        "file": "collection-sharing-D1il3Qu7.js",
+        "sha256": "d8699a2b7fffa2ac38803e3920538b826a4bd625e1092bdc0ec89287975c234a"
+      },
+      {
+        "file": "cognito-client-5LcxWXb5.js",
+        "sha256": "8f4b5d48038794d70e244d097ef6b54e7262bf3c69779433331af543cb711b5b"
+      },
+      {
+        "file": "CollectionSharing-86gTGRjR.js",
+        "sha256": "065b1ae63026808e5e52fdf400cc5b8defd0811c1e9f7fb9406e507e9f3d0449"
+      },
+      {
+        "file": "maplibre-gl-worker-DTh23QKw.js",
+        "sha256": "a0da9c70dd13e7313cd609659ac1d231424e1a9ec2cb701758b64bc1ee5c09d9"
+      },
+      {
+        "file": "LiveMap-DeZNtndZ.js",
+        "sha256": "7031e2c1d4148acf0455cc46aafe40b1427fe9a23c26ff5d22c1ea27fe67d6cc"
+      },
+      {
+        "file": "index-CUtLjsun.css",
+        "sha256": "c442d8b1806b9740f1eaa73e66e5e353ac6e74620ef4bc368732472c34175e4a"
+      },
+      {
+        "file": "index-7MPNQLwq.js",
+        "sha256": "b73813ec6269973ed12ebf5f807185786c63e298ae2bccb884d3db078b3903d4"
+      },
+      {
+        "file": "LiveMap-qvkd0SPb.css",
+        "sha256": "280f62458bee97adaab9c817e977cc89e02cc34d07a3107ba4a545c17c41976d"
+      }
+    ],
+    "backend": [
+      {
+        "function": "storage",
+        "sourceSha256": "6e3840bb748f07045ffa3af95ad6f71799bc30e9bb02ac5a1aa02146aafdd40d",
+        "awsCodeSha256": "lN/4vhlakVMsPD5Xry4kd0dc7rygiAh5NEvJ/ql5P3U="
+      },
+      {
+        "function": "processing",
+        "sourceSha256": "69ab657bf8f4dba15509986bbddf1ee6117257b0775ba2d9ccab990a01c4e678",
+        "awsCodeSha256": "qa/BpL5d8JONHfnhtRLWZYCU6UoydrHdNitdLFjh9xc="
+      },
+      {
+        "function": "worker",
+        "sourceSha256": "69ab657bf8f4dba15509986bbddf1ee6117257b0775ba2d9ccab990a01c4e678",
+        "awsCodeSha256": "qa/BpL5d8JONHfnhtRLWZYCU6UoydrHdNitdLFjh9xc="
+      },
+      {
+        "function": "pause",
+        "sourceSha256": "42898b83830acd0e3b0b8c2d186cfac428378ef2a958e94ff44594194e4fe435",
+        "awsCodeSha256": "luj+F6Oi4kN1S+3arGDsdZJpzZnNuJTCcQ7UgOqhzGs="
+      }
+    ],
+    "frontendArchiveSha256": "7564df7f7c337c8341b5378cfe43781fc19f203d9e7449a96c338a72d5ccbf8e",
+    "amplifyJob": "21"
+  },
+  "finalDataComparison": {
+    "checkedAt": "2026-11-16T19:11:17.056Z",
+    "records": {
+      "before": 11,
+      "after": 11,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "accounts": {
+      "before": 1,
+      "after": 1,
+      "changedOrMissing": 0,
+      "added": 0
+    },
+    "photos": {
+      "before": 9,
+      "after": 9,
+      "changedOrMissing": 0,
+      "added": 0
+    }
+  },
+  "finalSampleAssessment": {
+    "sample": "DZ9PJzuj1h5",
+    "accuracyPassed": false,
+    "extractedCandidates": 12,
+    "sourceNamedCandidates": 9,
+    "activityOrIncidentalCandidates": 3,
+    "providerMatchesAfterGuards": 1,
+    "sourceConsistentMatch": "The Metropolitan Museum of Art",
+    "samplePlacesSaved": 0,
+    "limitations": [
+      "Activity and background-sign false candidates remain",
+      "District results excluded by existing supported-place contract",
+      "Unresolved English name conversion and provider venue coverage",
+      "No universal accuracy or physical-device claim"
+    ]
+  },
+  "releaseReadiness": "Core deployed workflows passed; unfamiliar Instagram import accuracy remains incomplete."
+}

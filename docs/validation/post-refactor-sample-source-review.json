@@ -1,0 +1,85 @@
+{
+  "reviewedAt": "2026-11-16",
+  "method": "Independent visual review of complete downloaded slide contact sheets before reading provider matching results. Names/activities only; not proof of current business hours. Used for validation only, never runtime matching.",
+  "samples": [
+    {
+      "shortcode": "DZ9PJzuj1h5",
+      "slides": 13,
+      "coverAndEnding": [
+        1,
+        13
+      ],
+      "explicitNamedPlaces": {
+        "2": [
+          "Central Park",
+          "Domino Park"
+        ],
+        "6": [
+          "Brooklyn Bridge",
+          "Manhattan Bridge"
+        ],
+        "7": [
+          "Williamsburg"
+        ],
+        "8": [
+          "Times Square"
+        ],
+        "10": [
+          "Broadway"
+        ],
+        "12": [
+          "MoMA",
+          "Metropolitan Museum of Art",
+          "Guggenheim Museum"
+        ]
+      },
+      "activityOrBroadLocationOnly": [
+        3,
+        4,
+        5,
+        9,
+        11
+      ],
+      "notes": "Slide 11 says jazz bar without naming a venue in its main heading; incidental background signage is not a venue heading. Slide 4 says Manhattan skyline from a ferry; it does not identify a ferry terminal."
+    },
+    {
+      "shortcode": "DSuNUlDERWj",
+      "slides": 12,
+      "coverAndEnding": [
+        1,
+        11,
+        12
+      ],
+      "explicitNamedPlaces": {
+        "2": [
+          "아디다스 SPORTS HUB"
+        ],
+        "3": [
+          "뉴발란스 북촌 런 허브"
+        ],
+        "4": [
+          "동대문 런닷"
+        ],
+        "5": [
+          "뚝섬역 (2호선) 핏스테이션"
+        ],
+        "6": [
+          "회현역 (4호선) Runner’s Base"
+        ],
+        "7": [
+          "여의나루역 (5호선) 러너스테이션"
+        ],
+        "8": [
+          "광화문역 (5호선) Runner’s Base"
+        ],
+        "9": [
+          "월드컵경기장역 (6호선) Runner’s Base"
+        ],
+        "10": [
+          "먹골 (7호선) 스마트무브 스테이션"
+        ]
+      },
+      "notes": "Nine Seoul running facilities; detailed South Korean matching is outside the current integration. Extracting names is distinct from resolving coordinates."
+    }
+  ]
+}

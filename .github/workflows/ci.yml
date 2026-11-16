@@ -20,3 +20,18 @@ jobs:
       - run: npm ci
       - run: npm run test:unit
       - run: npm run check
+
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run test:direct-ui -- --workers=2
+      - run: npm run test:cloud-ui -- --workers=2
+      - run: npm run test:webkit-ui -- --workers=2

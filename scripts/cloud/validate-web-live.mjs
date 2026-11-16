@@ -6,6 +6,8 @@ import { chromium, expect } from '@playwright/test'
 import { aws, configuration } from './aws-util.mjs'
 if (process.env.PINWISH_RUN_LIVE_WEB_TESTS !== '1')
   throw Error('Explicit live test opt-in required')
+if (process.env.PINWISH_VERIFY_IMPORT_ACCURACY_ONLY === '1' && process.env.PINWISH_VERIFY_IMPORT_ACCURACY !== '1')
+  throw Error('Accuracy-only mode requires the accuracy check opt-in')
 const { outputs } = configuration(),
   { origin } = JSON.parse(await readFile('infra/generated/hosting.json'))
 const users = [],
@@ -165,14 +167,14 @@ try {
   page.on('pageerror', (e) => errors.push(e.message))
   page.on('requestfailed', async (r) => {
     if (r.url().startsWith(outputs.ApiUrl)) {
-      const item = { method: r.method(), path: new URL(r.url()).pathname.replace(/\/[a-f0-9]{32,}/g, '/:id'), error: r.failure()?.errorText, responseStatus: (await r.response().catch(() => null))?.status() ?? null }
+      const item = { method: r.method(), path: new URL(r.url()).pathname.replace(/\/[a-f0-9-]{32,}/g, '/:id'), error: r.failure()?.errorText, responseStatus: (await r.response().catch(() => null))?.status() ?? null }
       networkFailures.push(item)
       console.log('API network failure:', JSON.stringify(item))
     }
   })
   page.on('response', (r) => {
     if (r.url().startsWith(outputs.ApiUrl) && r.status() >= 400)
-      console.log('API error:', r.request().method(), new URL(r.url()).pathname.replace(/\/[a-f0-9]{32,}/g, '/:id'), r.status())
+      console.log('API error:', r.request().method(), new URL(r.url()).pathname.replace(/\/[a-f0-9-]{32,}/g, '/:id'), r.status())
   })
   page.on('request', (request) => {
     if (
@@ -186,104 +188,114 @@ try {
       } catch {}
     }
   })
-  await page.goto(origin + '/?validation=' + Date.now())
-  console.log(
-    'Hosted page loaded; sign-in buttons:',
-    await page.getByRole('button', { name: 'Sign in', exact: true }).count(),
-  )
-  await page
-    .getByRole('button', { name: 'Sign in', exact: true })
-    .first()
-    .click()
-  const dialog = page.getByRole('dialog')
-  await dialog.getByLabel('Email', { exact: true }).fill(users[0].email)
-  await dialog.getByLabel('Password', { exact: true }).fill(users[0].password)
-  await dialog
-    .getByRole('button', { name: 'Sign in', exact: true })
-    .last()
-    .click()
-  await expect(dialog).toHaveCount(0, { timeout: 20000 })
-  record('Real Cognito sign-in on HTTPS Amplify origin')
-  console.log('Cognito sign-in completed')
-  await page
-    .locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true })
-    .first()
-    .click()
-  await page
-    .getByLabel('Instagram post link', { exact: true })
-    .fill('https://www.instagram.com/p/DfFCMjzk02S/?img_index=1')
-  await page.getByRole('button', { name: 'Find place', exact: true }).click()
-  // The application auto-saves all matched locations and closes the dialog.
-  await expect
-    .poll(
-      async () => {
-        const saved = await request(users[0].token, '/places')
-        return saved.body.items?.length ?? 0
-      },
-      { timeout: 240000, intervals: [2000] },
+  if (process.env.PINWISH_VERIFY_IMPORT_ACCURACY_ONLY !== '1') {
+    await page.goto(origin + '/?validation=' + Date.now())
+    console.log(
+      'Hosted page loaded; sign-in buttons:',
+      await page.getByRole('button', { name: 'Sign in', exact: true }).count(),
     )
-    .toBe(10)
-  await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 30000 })
-  await expect(page.locator('.live-map canvas')).toBeVisible({ timeout: 30000 })
-  const saved = await request(users[0].token, '/places')
-  assert.equal(saved.status, 200)
-  assert.ok(
-    saved.body.items.every((p) => !/\p{Script=Hangul}/u.test(p.displayName)),
-  )
-  const imports = jobs.filter((job) => job.operation === 'import')
-  assert.equal(imports.length, 1)
-  const imported = await request(users[0].token, '/jobs/' + imports[0].id)
-  assert.equal(imported.body.result.fetchedImages, 12)
-  assert.equal(imported.body.result.result.places.length, 10)
-  record(
-    'Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs',
-  )
-  const jobId = jobs.find((j) => j.operation === 'import')?.id
-  assert.equal((await request(users[1].token, '/jobs/' + jobId)).status, 404)
-  assert.equal((await request(users[1].token, '/places')).body.items.length, 0)
-  record('Cross-account job and saved-place isolation')
-  await page
-    .getByRole('button', { name: 'Hide collections', exact: true })
-    .click()
-  await expect(page.locator('#collection-sidebar')).toBeHidden()
-  await page
-    .getByRole('button', { name: 'Show collections', exact: true })
-    .click()
-  await expect(page.locator('#collection-sidebar')).toBeVisible()
-  await page.screenshot({ path: '/tmp/pinwish-deployed-desktop.png' })
-  await page.reload()
-  await expect(
-    page.getByRole('button', { name: 'Sign out', exact: true }),
-  ).toBeVisible({ timeout: 20000 })
-  await expect
-    .poll(async () => page.locator('.place-card').count(), { timeout: 20000 })
-    .toBe(10)
-  record(
-    'Session and 10 saved places survive reload; sidebar toggle preserves layout',
-  )
-  await page
-    .locator('.place-card-title')
-    .filter({ hasText: 'Griffith Observatory' })
-    .click()
-  await expect(page.locator('#place-heading')).toContainText(
-    'Griffith Observatory',
-  )
-  await expect(page.locator('.cover-frame img')).toBeVisible({ timeout: 45000 })
-  record('Automatic representative photo renders without upload')
-  await page.setViewportSize({ width: 390, height: 844 })
-  assert.ok(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
-    ),
-  )
-  await page.screenshot({ path: '/tmp/pinwish-deployed-mobile.png' })
-  assert.deepEqual(errors, [])
-  record(
-    'Mobile detail has no horizontal overflow; no uncaught browser errors',
-  )
-  if (process.env.PINWISH_RUN_RELEASE_TESTS === '1') {
-    const { validateReleaseBrowser } = await import('./validate-release-browser.mjs')
-    await validateReleaseBrowser({ page, browser, origin, user: users[0], request, checks, shareTokens })
+    await page
+      .getByRole('button', { name: 'Sign in', exact: true })
+      .first()
+      .click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByLabel('Email', { exact: true }).fill(users[0].email)
+    await dialog.getByLabel('Password', { exact: true }).fill(users[0].password)
+    await dialog
+      .getByRole('button', { name: 'Sign in', exact: true })
+      .last()
+      .click()
+    await expect(dialog).toHaveCount(0, { timeout: 20000 })
+    record('Real Cognito sign-in on HTTPS Amplify origin')
+    console.log('Cognito sign-in completed')
+    await page
+      .locator('.mobile-save').getByRole('button', { name: 'Save a place', exact: true })
+      .first()
+      .click()
+    await page
+      .getByLabel('Instagram post link', { exact: true })
+      .fill('https://www.instagram.com/p/DfFCMjzk02S/?img_index=1')
+    await page.getByRole('button', { name: 'Find place', exact: true }).click()
+    // The application auto-saves all matched locations and closes the dialog.
+    await expect
+      .poll(
+        async () => {
+          const saved = await request(users[0].token, '/places')
+          return saved.body.items?.length ?? 0
+        },
+        { timeout: 240000, intervals: [2000] },
+      )
+      .toBe(10)
+    await expect(page.getByRole('dialog')).toHaveCount(0, { timeout: 30000 })
+    await expect(page.locator('.live-map canvas')).toBeVisible({ timeout: 30000 })
+    const saved = await request(users[0].token, '/places')
+    assert.equal(saved.status, 200)
+    assert.ok(
+      saved.body.items.every((p) => !/\p{Script=Hangul}/u.test(p.displayName)),
+    )
+    const imports = jobs.filter((job) => job.operation === 'import')
+    assert.equal(imports.length, 1)
+    const imported = await request(users[0].token, '/jobs/' + imports[0].id)
+    assert.equal(imported.body.result.fetchedImages, 12)
+    assert.equal(imported.body.result.result.places.length, 10)
+    record(
+      'Real 12-slide Instagram post: 10 English locations resolved and saved through AWS jobs',
+    )
+    const jobId = jobs.find((j) => j.operation === 'import')?.id
+    assert.equal((await request(users[1].token, '/jobs/' + jobId)).status, 404)
+    assert.equal((await request(users[1].token, '/places')).body.items.length, 0)
+    record('Cross-account job and saved-place isolation')
+    await page
+      .getByRole('button', { name: 'Hide collections', exact: true })
+      .click()
+    await expect(page.locator('#collection-sidebar')).toBeHidden()
+    await page
+      .getByRole('button', { name: 'Show collections', exact: true })
+      .click()
+    await expect(page.locator('#collection-sidebar')).toBeVisible()
+    await page.screenshot({ path: '/tmp/pinwish-deployed-desktop.png' })
+    await page.reload()
+    await expect(
+      page.getByRole('button', { name: 'Sign out', exact: true }),
+    ).toBeVisible({ timeout: 20000 })
+    await expect
+      .poll(async () => page.locator('.place-card').count(), { timeout: 20000 })
+      .toBe(10)
+    record(
+      'Session and 10 saved places survive reload; sidebar toggle preserves layout',
+    )
+    await page
+      .locator('.place-card-title')
+      .filter({ hasText: 'Griffith Observatory' })
+      .click()
+    await expect(page.locator('#place-heading')).toContainText(
+      'Griffith Observatory',
+    )
+    await expect(page.locator('.cover-frame img')).toBeVisible({ timeout: 45000 })
+    record('Automatic representative photo renders without upload')
+    await page.setViewportSize({ width: 390, height: 844 })
+    assert.ok(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    )
+    await page.screenshot({ path: '/tmp/pinwish-deployed-mobile.png' })
+    assert.deepEqual(errors, [])
+    record(
+      'Mobile detail has no horizontal overflow; no uncaught browser errors',
+    )
+    if (process.env.PINWISH_RUN_RELEASE_TESTS === '1') {
+      const { validateReleaseBrowser } = await import('./validate-release-browser.mjs')
+      await validateReleaseBrowser({ page, browser, origin, user: users[0], request, checks, shareTokens })
+    }
+  }
+  if (process.env.PINWISH_VERIFY_IMPORT_ACCURACY === '1') {
+    const { validateImportAccuracyBrowser } = await import('./validate-import-accuracy-browser.mjs')
+    await validateImportAccuracyBrowser({ page, origin, user: users[1], request, jobs, checks })
+  }
+  if (process.env.PINWISH_IMPORT_SAMPLE_URLS) {
+    const { validateImportSamples } = await import('./validate-import-samples.mjs')
+    await validateImportSamples({ request, user: users[1], urls: JSON.parse(process.env.PINWISH_IMPORT_SAMPLE_URLS) })
   }
   assert.deepEqual(errors, [])
   console.log(JSON.stringify({ checks }, null, 2))
