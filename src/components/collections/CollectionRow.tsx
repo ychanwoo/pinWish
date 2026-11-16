@@ -160,6 +160,11 @@ export function CollectionRow({
             role="menu"
             aria-label={`${name} options`}
             ref={menu}
+            onMouseDown={(event) => {
+              // Safari can blur the focused menu item before delivering click.
+              // Keep focus inside the menu until its action handles the click.
+              if (event.button === 0) event.preventDefault()
+            }}
           >
             <button
               role="menuitem"
