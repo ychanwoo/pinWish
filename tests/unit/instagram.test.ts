@@ -24,9 +24,17 @@ for (const url of [
   'https://instagram.com/p/a%2fb/', 'https://instagram.com\\@evil.test/p/a/',
   'https://instagram.com/p/abc/ extra', 'x'.repeat(2049), '',
 ]) test(`rejects ${url.slice(0, 70)}`, () => assert.equal(parseInstagramLink(url).ok, false))
-test('preserves case-sensitive shortcodes and supports reels', () => {
-  const r = parseInstagramLink(' https://m.instagram.com/reel/Ab_C-d/?img_index=-1#x ')
+test('preserves case-sensitive photo shortcodes', () => {
+  const r = parseInstagramLink(' https://m.instagram.com/p/Ab_C-d/?img_index=-1#x ')
   assert.ok(r.ok)
-  assert.equal(r.source.canonicalUrl, 'https://www.instagram.com/reel/Ab_C-d/')
+  assert.equal(r.source.canonicalUrl, 'https://www.instagram.com/p/Ab_C-d/')
   assert.equal(r.source.selectedSlide, null)
+})
+test('rejects Reels before starting provider work', () => {
+  const r = parseInstagramLink('https://www.instagram.com/reel/Ab_C-d/')
+  assert.equal(r.ok, false)
+  if (!r.ok) {
+    assert.equal(r.code, 'unsupported_media')
+    assert.match(r.message, /Reels are not supported/)
+  }
 })

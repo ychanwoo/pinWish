@@ -127,7 +127,17 @@ export function createProcessing({
         const parsed = parseInstagramLink(payload.input)
         result = {
           source: parsed.source,
-          ...(await extract(parsed.source.shortcode)),
+          ...(await extract(parsed.source.shortcode, {
+            onProgress: async (progress) => {
+              await db.send(new UpdateItemCommand({
+                TableName: table, Key: item(k),
+                UpdateExpression: 'SET progress = :progress',
+                ConditionExpression: '#s = :running',
+                ExpressionAttributeNames: { '#s': 'status' },
+                ExpressionAttributeValues: item({ ':progress': JSON.stringify(progress), ':running': 'running' }),
+              }))
+            },
+          })),
         }
       } else {
         service = serviceFactory({
@@ -225,6 +235,7 @@ export function createProcessing({
           status: job.status,
           ...(job.result ? { result: JSON.parse(job.result) } : {}),
           ...(job.code ? { code: job.code } : {}),
+          ...(job.status === 'running' && job.progress ? { progress: JSON.parse(job.progress) } : {}),
         })
       }
       if (method !== 'POST') fail(405, 'method_not_allowed')
@@ -250,7 +261,7 @@ export function createProcessing({
         const parsed = parseInstagramLink(
           typeof payload.input === 'string' ? payload.input : '',
         )
-        if (!parsed.ok) fail(400, parsed.code)
+        if (!parsed.ok) fail(parsed.code === 'unsupported_media' ? 422 : 400, parsed.code)
         if (parsed.source.kind !== 'p') fail(422, 'unsupported_media')
       } else if (operation === 'search') validateSearch(payload)
       else if (!/^[0-9a-f-]{36}$/.test(payload.selectionToken ?? ''))
