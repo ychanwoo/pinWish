@@ -1,9 +1,22 @@
 import { accessToken, getSession, expireSession } from './cloud-auth'
+export interface ImportProgress {
+  stage: 'reading_post' | 'reading_photos' | 'identifying_places'
+  completed?: number
+  total?: number
+}
+export function isImportProgress(value: unknown): value is ImportProgress {
+  if (!value || typeof value !== 'object') return false
+  const p = value as ImportProgress
+  if (p.stage === 'reading_post' || p.stage === 'identifying_places') return true
+  return p.stage === 'reading_photos' && Number.isInteger(p.completed) && Number.isInteger(p.total) &&
+    p.total! > 0 && p.total! <= 20 && p.completed! >= 0 && p.completed! <= p.total!
+}
 const api = (import.meta.env.VITE_PROCESSING_API_URL ?? '').replace(/\/$/, '')
 export const cloudProcessing = Boolean(api)
 export async function processingRequest(
   path: string,
   init: RequestInit,
+  onProgress?: (progress: ImportProgress) => void,
 ): Promise<Response> {
   if (!api) return fetch(path, init)
   const owner = getSession()?.sub
@@ -23,7 +36,7 @@ export async function processingRequest(
       const token = await accessToken(refresh)
       let response: Response
       try {
-        response = await fetch(api + '/jobs' + suffix, {
+        const incoming = await fetch(api + '/jobs' + suffix, {
           method: body ? 'POST' : 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -32,8 +45,14 @@ export async function processingRequest(
           body: body ? JSON.stringify(body) : undefined,
           signal: AbortSignal.any([signal, AbortSignal.timeout(15000)]),
         })
+        // Fetch resolves at headers: include body transfer in the same retry
+        // boundary so a dropped polling response can resume the existing job.
+        const text = await incoming.text()
+        if (incoming.ok) JSON.parse(text)
+        response = new Response(text, { status: incoming.status, headers: incoming.headers })
       } catch (failure) {
-        if (signal.aborted || attempt === 2) throw failure
+        if (signal.aborted) throw failure
+        if (attempt === 2) return error(failure instanceof SyntaxError ? 'processing_invalid_response' : 'processing_connection_failed')
         await delay(1000 * (attempt + 1))
         continue
       }
@@ -76,12 +95,15 @@ export async function processingRequest(
     payload = JSON.parse(String(init.body))
   const started = await send('', { id, operation, payload })
   if (!started.ok) return started
+  await started.body?.cancel() // Acknowledgement only; the result is read through polling.
   for (let attempt = 0; attempt < 70; attempt++) {
     await delay(operation === 'import' ? 2000 : 750)
     const response = await send('/' + id)
     if (!response.ok) return response
     const job = await response.json()
     if (job.id !== id) return error('invalid_job')
+    if (!signal.aborted && getSession()?.sub === owner && isImportProgress(job.progress))
+      onProgress?.(job.progress)
     if (job.status === 'complete')
       return new Response(JSON.stringify(job.result), {
         status: 200,

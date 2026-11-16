@@ -29,22 +29,22 @@ export function AutomaticPlaces(props: Props) {
       latest.current.onBusy(true)
       const reviews = { ...latest.current.value }
       try {
-        // Serial requests keep the local AWS request budget and concurrency bounded.
-        for (const [
-          index,
-          candidate,
-        ] of latest.current.preview.result.places.entries()) {
-          if (controller.signal.aborted) return
-          if (reviews[index]?.targets.every((t) => t.status === 'confirmed'))
-            continue
-          reviews[index] = await resolveCandidate(
-            candidate,
-            latest.current.source,
-            controller.signal,
-          )
-          if (controller.signal.aborted) return
-          latest.current.onChange({ ...reviews })
+        const candidates = latest.current.preview.result.places
+        const source = latest.current.source
+        let next = 0
+        async function worker() {
+          while (!controller.signal.aborted && next < candidates.length) {
+            const index = next++
+            if (reviews[index]?.targets.every(t => t.status === 'confirmed')) continue
+            const review = await resolveCandidate(candidates[index], source, controller.signal)
+            if (controller.signal.aborted) return
+            reviews[index] = review
+            latest.current.onChange({ ...reviews })
+          }
         }
+        // Match the server's two-worker bound; search/details within each place
+        // remain ordered, and saves wait for every candidate to settle.
+        await Promise.all([worker(), worker()])
         if (!controller.signal.aborted)
           latest.current.onComplete({ ...reviews })
       } finally {

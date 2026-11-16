@@ -217,7 +217,7 @@ function App() {
       setCollection((current) =>
         collectionResult.items.some((c) => c.name === current)
           ? current
-          : 'Saved places',
+          : (collectionResult.items.find(c => c.isDefault)?.name ?? collectionResult.items[0]?.name ?? 'Saved places'),
       )
       if (pendingPlaceLink.current) {
         const linked = incoming.find((p) => p.id === pendingPlaceLink.current)
@@ -856,27 +856,26 @@ function App() {
               }
               onPersist={
                 cloudEnabled
-                  ? async (confirmed, note, targetCollection) => {
+                  ? async (confirmed, note, targetCollection, targetCollectionId) => {
                       const owner = getSession()?.sub
                       if (!owner) throw new Error('Sign in to save places.')
-                      let available = catalog
-                      // A failed initial read is not evidence that a collection
-                      // was deleted. Recover before rejecting a completed import.
-                      if (!available.length) {
+                      let available = catalogRef.current
+                      const findTarget = () => targetCollectionId
+                        ? available.find(c => c.id === targetCollectionId)
+                        : available.find(c => c.name === targetCollection) ??
+                          (targetCollection === 'Saved places' ? available.find(c => c.isDefault) : undefined)
+                      let target = findTarget()
+                      if (!target) {
                         const fresh = await listCollections()
                         requireOwner(owner)
                         available = fresh.items
                         setCatalog(available)
-                        setCollections(available.map((c) => c.name))
+                        setCollections(available.map(c => c.name))
+                        target = findTarget()
                       }
-                      const target =
-                        available.find((c) => c.name === targetCollection) ??
-                        (!catalog.length && targetCollection === 'Saved places'
-                          ? available.find((c) => c.isDefault)
-                          : undefined)
                       if (!target)
                         throw new Error(
-                          'This collection is no longer available. Close this dialog, refresh your places, and choose another collection.',
+                          'This collection is no longer available. Choose another collection below and add these places without analyzing the post again.',
                         )
                       if (!targetCollection.trim())
                         throw new Error('Enter a collection name.')
@@ -931,6 +930,7 @@ function App() {
               onDraft={keepDraft}
               initialState={saveState}
               collections={collections}
+              collectionOptions={cloudEnabled ? catalog : undefined}
               defaultCollection={collection}
               places={places}
               scenario={params.get('scenario')}

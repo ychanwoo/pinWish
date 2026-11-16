@@ -23,8 +23,12 @@ export function RefreshIcon() {
 export function LoadingOverlay({
   active,
   onCancel,
+  label = 'Loading…',
+  detail,
 }: {
   active: boolean
+  label?: string
+  detail?: string
   onCancel?: () => void
 }) {
   const root = useRef<HTMLDivElement>(null)
@@ -67,7 +71,8 @@ export function LoadingOverlay({
     >
       <div className="loading-screen-content" role="status" aria-live="polite">
         <span className="loading-spinner" aria-hidden="true" />
-        <span>Loading…</span>
+        <span>{label}</span>
+        {detail && <span className="loading-detail">{detail}</span>}
       </div>
       {onCancel && (
         <button className="loading-cancel" type="button" onClick={onCancel}>

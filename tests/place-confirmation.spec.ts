@@ -273,3 +273,84 @@ for (const recovers of [true, false]) {
     expect(details).toBe(recovers ? 1 : 0)
   })
 }
+
+// Reproduced in a real import: an incidental AMBASSADOR sign with no city
+// otherwise matched a hotel in Brazil. No provider request should run.
+test('an import without source geography cannot automatically save a global namesake', async ({ page }) => {
+  let requests = 0
+  await page.route('**/api/places/**', route => {
+    requests++
+    return route.fulfill({ json: results() })
+  })
+  const region = await openImport(page, { ...report, result: { ...report.result, places: [{
+    ...candidate, name: 'AMBASSADOR', regionHint: '   ', locationHint: '', evidence: 'AMBASSADOR',
+  }] } })
+  await expect(region).toContainText('The post does not identify a city or address.')
+  await expect(page.getByRole('button', { name: 'Add to map' })).toHaveCount(0)
+  await region.getByRole('button', { name: 'Retry missing places' }).click()
+  await expect(region).toContainText('The post does not identify a city or address.')
+  expect(requests).toBe(0)
+})
+
+test('a one-word imported abbreviation without an address is not automatically a namesake venue', async ({ page }) => {
+  let details = 0
+  await page.route('**/api/places/search', r => r.fulfill({ json: {
+    ...results([{ ...a, name: 'The Metropolitan', englishName: 'The Metropolitan' }]),
+    queryConversion: { originalQuery: 'Metropolitan', searchQuery: 'Metropolitan', searchRegion: 'New York', status: 'unchanged' },
+  } }))
+  await page.route('**/api/places/details', r => { details++; return r.fulfill({ json: { place: a } }) })
+  const region = await openImport(page, { ...report, result: { ...report.result, places: [{ ...candidate, name: 'Metropolitan', regionHint: 'New York', locationHint: '' }] } })
+  await expect(region).toContainText('This name is ambiguous without an address.')
+  await expect(page.getByRole('button', { name: 'Add to map' })).toHaveCount(0)
+  expect(details).toBe(0)
+})
+
+test('contextual English search hints retain the original source and allow a named district', async ({ page }) => {
+  let input: {query:string;region:string} | undefined
+  const area={...a,name:'Williamsburg, Brooklyn, NY',englishName:'Williamsburg',placeType:'District'}
+  await page.route('**/api/places/search', r => { input=r.request().postDataJSON(); return r.fulfill({json:{...results([area]),regionResolved:true,queryConversion:{originalQuery:'Williamsburg',searchQuery:'Williamsburg',searchRegion:'Brooklyn, New York',status:'unchanged'}}}) })
+  await page.route('**/api/places/details', r => r.fulfill({json:{place:{...area,retrievedAt:new Date().toISOString()}}}))
+  const region=await openImport(page,{...report,result:{...report.result,places:[{...candidate,name:'브루클린 윌리엄스버그',locationHint:'',searchQuery:'Williamsburg',searchName:'Williamsburg',searchRegion:'Brooklyn, New York',locationType:'area'}]}})
+  await expect(region).toContainText('Williamsburg')
+  await expect(region).toContainText('Matched automatically')
+  expect(input).toEqual({query:'Williamsburg',region:'Brooklyn, New York',countryCode:''})
+})
+
+test('a provider result without a verified search region is not automatically saved', async ({ page }) => {
+  await page.route('**/api/places/search', r => r.fulfill({json:{...results(),regionResolved:false}}))
+  const region=await openImport(page)
+  await expect(region).toContainText('The city or address could not be verified.')
+  await expect(page.getByRole('button',{name:'Add to map'})).toHaveCount(0)
+})
+
+test('location checks run two at a time, keep source order and wait for every result', async ({ page }) => {
+  const names = ['First Museum', 'Second Museum', 'Third Museum']
+  const tokens = names.map((_, i) => `${i}aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`)
+  const pending = new Map<string, () => Promise<void>>()
+  let active = 0, peak = 0
+  await page.route('**/api/places/search', async r => {
+    const query = r.request().postDataJSON().query
+    peak = Math.max(peak, ++active)
+    await new Promise<void>(resolve => pending.set(query, async () => {
+      active--
+      await r.fulfill({json:{...results([{...a,name:query,englishName:query,placeId:query,selectionToken:tokens[names.indexOf(query)]}]),queryConversion:{status:'unchanged',originalQuery:query,searchQuery:query,searchRegion:'Los Angeles'}}})
+      resolve()
+    }))
+  })
+  await page.route('**/api/places/details', r => {
+    const name = names[tokens.indexOf(r.request().postDataJSON().selectionToken)]
+    return r.fulfill({json:{place:{...a,name,englishName:name,placeId:name,retrievedAt:new Date().toISOString()}}})
+  })
+  const region = await openImport(page, {...report,result:{places:names.map(name=>({...candidate,name,locationHint:''})),ignoredSlides:[1]}})
+  await expect.poll(()=>pending.size).toBe(2)
+  await expect(page.locator('.loading-screen')).toContainText('0 of 3 checked')
+  await pending.get(names[1])!()
+  await expect.poll(()=>pending.size).toBe(3)
+  await expect(page.locator('.loading-screen')).toContainText('1 of 3 checked')
+  await pending.get(names[2])!()
+  await expect(page.locator('.loading-screen')).toContainText('2 of 3 checked')
+  await pending.get(names[0])!()
+  await expect(page.locator('.loading-screen')).toHaveCount(0)
+  expect(peak).toBe(2)
+  await expect(region.locator('li strong')).toHaveText(names)
+})

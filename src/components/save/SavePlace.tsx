@@ -10,6 +10,7 @@ export function SavePlace({
   onDraft,
   initialState,
   collections,
+  collectionOptions,
   defaultCollection,
   places,
   scenario,
@@ -22,6 +23,7 @@ export function SavePlace({
   authenticated,
 }: SavePlaceProps) {
   const {
+    importProgress,
     action,
     address,
     busy,
@@ -68,6 +70,7 @@ export function SavePlace({
     onDraft,
     initialState,
     collections,
+    collectionOptions,
     defaultCollection,
     places,
     scenario,
@@ -83,6 +86,14 @@ export function SavePlace({
     <div className="save-overlay">
       <LoadingOverlay
         active={busy}
+        label={persisting ? 'Saving places…' : state === 'import_review' ? 'Finding locations…' :
+          state === 'resolving' && instagramSource.ok ?
+            importProgress.stage === 'reading_photos' ? 'Reading photos…' :
+            importProgress.stage === 'identifying_places' ? 'Identifying places…' : 'Opening post…' : undefined}
+        detail={persisting ? 'Adding verified locations to your map' : state === 'import_review' && preview ?
+          `${Object.values(locationReviews).filter(r => r.targets.every(t => t.status !== 'pending')).length} of ${preview.result.places.length} checked` :
+          state === 'resolving' && importProgress.stage === 'reading_photos' ?
+            `${importProgress.completed} of ${importProgress.total} photos read` : undefined}
         onCancel={state === 'resolving' ? editOriginal : undefined}
       />
       <div
@@ -156,6 +167,17 @@ export function SavePlace({
           }}
         >
           <div className="save-body">
+            {state === 'import_review' && !!persistError && onPersist && (
+              <>
+                <label className="field-label" htmlFor="retry-collection">Collection</label>
+                <div className="collection-select-wrap">
+                  <select id="retry-collection" value={collection} disabled={busy} onChange={e => setCollection(e.target.value)}>
+                    {!collections.includes(collection) && <option value={collection} disabled>Choose a collection</option>}
+                    {collections.map(name => <option key={name}>{name}</option>)}
+                  </select>
+                </div>
+              </>
+            )}
             {state === 'entry' && (
               <div className="save-intro">
                 <h2>Save somewhere worth going.</h2>
@@ -265,6 +287,17 @@ export function SavePlace({
                     <Icon name="61e58" />
                     Paste
                   </button>
+                </div>
+              </>
+            )}
+            {state === 'import_review' && !!persistError && onPersist && (
+              <>
+                <label className="field-label" htmlFor="retry-collection">Collection</label>
+                <div className="collection-select-wrap">
+                  <select id="retry-collection" value={collection} disabled={busy} onChange={e => setCollection(e.target.value)}>
+                    {!collections.includes(collection) && <option value={collection} disabled>Choose a collection</option>}
+                    {collections.map(name => <option key={name}>{name}</option>)}
+                  </select>
                 </div>
               </>
             )}

@@ -129,3 +129,19 @@ test('rejects malformed successful responses without showing candidates', async 
     page.getByRole('region', { name: 'Extracted place candidates' }),
   ).toHaveCount(0)
 })
+
+test('unsupported Reel is rejected locally and retains its URL', async ({ page }) => {
+  let calls = 0
+  await page.route('**/api/instagram/preview', route => {
+    calls += 1
+    return route.fulfill({ status: 500, json: {} })
+  })
+  await page.goto('/?state=entry')
+  const input = page.getByLabel('Link or address', { exact: true })
+  const reel = 'https://www.instagram.com/reel/Ab_C-d/'
+  await input.fill(reel)
+  await page.getByRole('button', { name: 'Find place', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('Reels are not supported')
+  await expect(input).toHaveValue(reel)
+  expect(calls).toBe(0)
+})
