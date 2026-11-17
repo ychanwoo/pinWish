@@ -5,6 +5,7 @@ const {
   QueryCommand,
   TransactWriteItemsCommand,
 } = require('@aws-sdk/client-dynamodb')
+const { palette } = require('./map-details.cjs')
 const DEFAULT_ID = 'default'
 const normalize = (name) =>
   name.normalize('NFKC').trim().toLocaleLowerCase('en-US')
@@ -47,6 +48,7 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
   const publicCollection = (c, catalog) => ({
     id: c.id,
     name: c.name,
+    ...(c.color ? { color: c.color } : {}),
     isDefault: c.id === defaultId(catalog),
     version: c.version,
     createdAt: c.createdAt,
@@ -277,19 +279,54 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
     if (!collection) fail(409, 'collection_conflict')
     return { catalog, collection }
   }
-  async function writePlace(catalog, place, previousVersion) {
+  async function bindImport(pk, post, title, previous) {
+    const catalog = await ensure(pk)
+    if (previous) return { catalog, collection: resolve(catalog, previous) }
+    const entries = active(catalog)
+    const existing = entries.find(c => c.importPost === post)
+    if (existing) return { catalog, collection: existing }
+    if (entries.length >= 100 || Object.keys(catalog.collections).length >= 500)
+      fail(409, 'collection_limit')
+    const base = validateName(title)
+    let name = base, suffix = 2
+    while (entries.some(c => normalize(c.name) === normalize(name)))
+      name = base.slice(0, 54).trim() + ' (' + suffix++ + ')'
+    const preferences = unmarshal((await send(new GetItemCommand({
+      TableName: table, Key: marshal({ pk, sk: 'COLLECTION_MAP_PREFERENCES' }), ConsistentRead: true,
+    }))).Item)
+    const counts = new Map(palette.map(color => [color, 0]))
+    for (const c of entries) {
+      let hash = 0
+      for (const char of c.id) hash = (Math.imul(hash, 31) + char.charCodeAt(0)) >>> 0
+      const color = preferences?.colors?.[c.id] || c.color || palette[c.id === DEFAULT_ID ? 0 : hash % palette.length]
+      counts.set(color, (counts.get(color) ?? 0) + 1)
+    }
+    const color = palette.reduce((a, b) => counts.get(a) <= counts.get(b) ? a : b)
+    const now = new Date().toISOString()
+    const collection = { id: randomUUID(), name, color, importPost: post, version: 1, createdAt: now, updatedAt: now }
+    catalog.collections[collection.id] = collection
+    if (Buffer.byteLength(JSON.stringify(catalog)) > 280000) fail(409, 'collection_limit')
+    return { catalog, collection, isNew: true }
+  }
+  async function writePlace(catalog, place, previousVersion, createCatalogEntry = false) {
     try {
       await send(
         new TransactWriteItemsCommand({
           TransactItems: [
             {
-              ConditionCheck: {
+              ...(createCatalogEntry ? { Put: {
+                TableName: table,
+                Item: marshal({ ...catalog, version: catalog.version + 1 }),
+                ConditionExpression: '#v = :v',
+                ExpressionAttributeNames: { '#v': 'version' },
+                ExpressionAttributeValues: marshal({ ':v': catalog.version }),
+              } } : { ConditionCheck: {
                 TableName: table,
                 Key: marshal(key(catalog.pk)),
                 ConditionExpression: '#v = :v',
                 ExpressionAttributeNames: { '#v': 'version' },
                 ExpressionAttributeValues: marshal({ ':v': catalog.version }),
-              },
+              } }),
             },
             {
               Put: {
@@ -322,6 +359,6 @@ function createCollections({ send, table, marshal, unmarshal, fail }) {
       throw e
     }
   }
-  return { ensure, resolve, present, bind, route, writePlace, update }
+  return { ensure, resolve, present, bind, bindImport, route, writePlace, update }
 }
 module.exports = { createCollections, DEFAULT_ID }
