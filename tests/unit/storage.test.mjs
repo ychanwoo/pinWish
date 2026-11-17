@@ -169,3 +169,27 @@ test('a verified named district is persisted without relabeling it as a venue', 
   assert.deepEqual(stored.coordinates,place.coordinates)
   assert.throws(() => validatePlace({place:{...place,placeType:'Locality'}}))
 })
+
+test('imports create one colored collection with its first new place, never for duplicates alone', async () => {
+  const client = db(), handler = createHandler({ client, table: 'test' })
+  async function save(id, post, title) {
+    const response = await handler(event('POST', { place: { ...place, placeId: id, source: {
+      ...place.source, instagram: { originalUrl: 'https://www.instagram.com/p/' + post + '/' },
+      candidateIndex: 0, candidateCount: 1,
+    } }, importTitle: title }))
+    assert.ok([200,201].includes(response.statusCode), response.body)
+    return JSON.parse(response.body)
+  }
+  const results = await Promise.all([save('1','First','New York'), save('2','First','New York')])
+  assert.equal(results[0].item.collectionId, results[1].item.collectionId)
+  assert.equal(results[0].item.collection, 'New York')
+  const overlap = await save('1','Second','New York')
+  assert.ok(overlap.duplicate)
+  const catalog = () => Object.values([...client.data.values()].find(x=>x.sk === 'COLLECTIONS').collections)
+  assert.equal(catalog().length, 2)
+  const additional = await save('3','Second','New York')
+  assert.equal(additional.item.collection, 'New York (2)')
+  assert.notEqual(catalog().find(c=>c.id===additional.item.collectionId).color,
+    catalog().find(c=>c.id===overlap.item.collectionId).color)
+  assert.deepEqual(Object.values(overlap.item.sources).map(s=>s.candidateIndexes), [[0],[0]])
+})

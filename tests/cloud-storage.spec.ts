@@ -287,7 +287,8 @@ test('cloud note edits retry after failure, visit updates persist, and deletion 
   await expect(page.locator('.place-card')).toHaveCount(0)
   expect(deleted).toBe(true)
 })
-test('partial import save keeps confirmations and retry is idempotent', async ({
+for (const allExisting of [false,true]) {
+test(`partial import save retains matches and reports ${allExisting ? 'all existing' : 'mixed'} places on retry`, async ({
   page,
 }) => {
   await setup(page)
@@ -366,6 +367,8 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
     })
   })
   const records = new Map<string, typeof record>()
+  // Museum A already belongs to the owner through a different source.
+  const alreadySaved = new Set(allExisting ? ['A','B'] : ['A'])
   let fail = true
   await page.route('https://storage.example.test/**', (r) => {
     if(new URL(r.request().url()).pathname === '/collections') return r.fulfill({json: collectionResponse})
@@ -381,7 +384,7 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
         displayName: p.displayName,
       }
       records.set(p.placeId, item)
-      return r.fulfill({ json: { item } })
+      return r.fulfill({ json: { item, duplicate: alreadySaved.has(p.placeId) } })
     }
     return r.fulfill({ json: { items: [...records.values()], cursor: null, collectionVersion: 1 } })
   })
@@ -397,11 +400,15 @@ test('partial import save keeps confirmations and retry is idempotent', async ({
     .getByRole('button', { name: 'Add to map', exact: true })
     .click()
   await expect(page.getByRole('button', { name: 'View map', exact: true })).toBeVisible()
+  await expect(page.locator('#save-status')).toContainText(allExisting ? 'All places are already saved' : '1 added · 1 already saved')
+  await expect(page.getByLabel('Place candidate 1')).toContainText('Already saved')
   expect(records.size).toBe(2)
   await page.getByRole('button', { name: 'View map', exact: true }).click()
   await page.getByRole('button', { name: 'Your places', exact: true }).click()
   await expect(page.locator('.place-card')).toHaveCount(2)
 })
+
+}
 
 test('expired access token refreshes without dropping remembered login or loading another account', async ({
   page,
@@ -531,7 +538,8 @@ test(`an overseas post auto-saves in English after initial load failure: ${faile
     }
     if (r.request().method() === 'POST') {
       saves++
-      expect(r.request().postDataJSON().collectionId).toBe('default')
+      expect(r.request().postDataJSON().collectionId).toBeUndefined()
+      expect(r.request().postDataJSON().importTitle).toBe('Los Angeles')
       const place = r.request().postDataJSON().place
       original = place.source.extractedName
       return r.fulfill({ json: { item: { ...record, displayName: 'Example Museum', sources: { source: { ...record.sources.source, extractedName: original, evidence: original } } } } })

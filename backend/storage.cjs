@@ -81,7 +81,7 @@ function validatePlace(body, direct = false) {
     }
     if (
       url.protocol !== 'https:' ||
-      !['instagram.com', 'www.instagram.com'].includes(url.hostname) ||
+      !['instagram.com', 'www.instagram.com', 'm.instagram.com'].includes(url.hostname) ||
       url.username ||
       url.password ||
       url.port ||
@@ -92,6 +92,9 @@ function validatePlace(body, direct = false) {
     cleanSource = {
       originalUrl,
       canonicalUrl,
+      ...(Number.isInteger(source.candidateIndex) && Number.isInteger(source.candidateCount) &&
+          source.candidateIndex >= 0 && source.candidateIndex < source.candidateCount && source.candidateCount <= 100
+        ? { candidateIndexes: [source.candidateIndex], candidateCount: source.candidateCount } : {}),
       slides: [...new Set(source.slides)].sort((a, b) => a - b),
       extractedName: str(source.extractedName, 500),
       evidence: str(source.evidence, 2000, true),
@@ -367,16 +370,23 @@ function createHandler({
           directOrigin = { query, region }
         }
         const value = validatePlace(body, !!directOrigin)
-        const bound = await collections.bind(pk, body)
+        const auto = !!value.source && body.importTitle !== undefined
         const id = hash(`amazon-location:${value.place.placeId}`)
         const key = { pk, sk: `PLACE#${id}` }
-        const sourceId = value.source
-          ? hash(
-              value.source.canonicalUrl + JSON.stringify(value.source.slides),
-            )
-          : null
         for (let attempt = 0; attempt < 4; attempt++) {
           const previous = await read(key)
+          const bound = auto
+            ? await collections.bindImport(pk, value.source.canonicalUrl, body.importTitle, previous)
+            : await collections.bind(pk, body)
+          const same = value.source && Object.entries(previous?.sources ?? {}).find(([, s]) => s.canonicalUrl === value.source.canonicalUrl)
+          const sourceId = value.source ? same?.[0] ?? hash(value.source.canonicalUrl) : null
+          if (same) {
+            const old = same[1]
+            value.source = { ...old, ...value.source, originalUrl: old.originalUrl,
+              slides: [...new Set([...old.slides, ...value.source.slides])].sort((a,b) => a-b),
+              ...(value.source.candidateIndexes ? { candidateIndexes: [...new Set([...(old.candidateIndexes ?? []), ...value.source.candidateIndexes])].sort((a,b) => a-b) } : {}),
+            }
+          }
           if (
             previous &&
             (directOrigin ||
@@ -423,7 +433,7 @@ function createHandler({
                 updatedAt: now,
               }
           try {
-            await collections.writePlace(bound.catalog, item, previous?.version)
+            await collections.writePlace(bound.catalog, item, previous?.version, bound.isNew)
             return response(previous ? 200 : 201, {
               item: publicItem(
                 collections.present(bound.catalog, await startPhoto(key, item)),
@@ -431,7 +441,7 @@ function createHandler({
               duplicate: !!previous,
             })
           } catch (e) {
-            if (e.name !== 'ConditionalCheckFailedException') throw e
+            if (e.name !== 'ConditionalCheckFailedException' && !(auto && e.message === 'collection_conflict')) throw e
           }
         }
         fail(409, 'conflict')

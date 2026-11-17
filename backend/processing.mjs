@@ -257,12 +257,15 @@ export function createProcessing({
         typeof payload !== 'object'
       )
         fail(400, 'invalid_job')
+      let postKey
       if (operation === 'import') {
         const parsed = parseInstagramLink(
           typeof payload.input === 'string' ? payload.input : '',
         )
         if (!parsed.ok) fail(parsed.code === 'unsupported_media' ? 422 : 400, parsed.code)
         if (parsed.source.kind !== 'p') fail(422, 'unsupported_media')
+        postKey = key(owner, 'IMPORT#' + parsed.source.shortcode)
+        payload.input = parsed.source.canonicalUrl
       } else if (operation === 'search') validateSearch(payload)
       else if (!/^[0-9a-f-]{36}$/.test(payload.selectionToken ?? ''))
         fail(400, 'invalid_selection')
@@ -274,6 +277,16 @@ export function createProcessing({
         if (previous.hash !== hash) fail(409, 'job_conflict')
         return reply(202, { id, status: previous.status })
       }
+      async function reusable(pointer) {
+        if (!pointer || pointer.expiresAt <= now() / 1000) return null
+        const job = await get(key(owner, 'JOB#' + pointer.jobId))
+        if (!job || job.status === 'failed' || job.expiresAt <= now() / 1000 ||
+            (job.status !== 'complete' && now() - job.createdAt > 150000)) return null
+        return reply(202, { id: pointer.jobId, status: job.status })
+      }
+      const pointer = postKey && await get(postKey)
+      const cached = await reusable(pointer)
+      if (cached) return cached
       const day = new Date(now()).toISOString().slice(0, 10),
         kind = operation === 'import' ? 'import' : 'places'
       const cap = kind === 'import' ? 3 : 100,
@@ -314,6 +327,12 @@ export function createProcessing({
                   ConditionExpression: 'attribute_not_exists(pk)',
                 },
               },
+              ...(postKey ? [{ Put: {
+                TableName: table,
+                Item: item({ ...postKey, jobId: id, expiresAt: job.expiresAt }),
+                ConditionExpression: pointer ? 'jobId = :previous' : 'attribute_not_exists(pk)',
+                ...(pointer ? { ExpressionAttributeValues: item({ ':previous': pointer.jobId }) } : {}),
+              } }] : []),
             ],
           }),
         )
@@ -323,6 +342,8 @@ export function createProcessing({
           if (raced?.hash === hash)
             return reply(202, { id, status: raced.status })
           if (raced) fail(409, 'job_conflict')
+          const winner = postKey && await reusable(await get(postKey))
+          if (winner) return winner
           const quotaExceeded = e.CancellationReasons?.slice(0, 2).some(
             (reason) => reason.Code === 'ConditionalCheckFailed',
           )

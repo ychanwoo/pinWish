@@ -1,3 +1,4 @@
+import { ImportedPostSummary } from './ImportedPostSummary'
 import { LoadingOverlay } from '../shared/LoadingOverlay'
 import { AutomaticPlaces } from './AutomaticPlaces'
 import { Icon } from '../shared/Icon'
@@ -5,6 +6,7 @@ import { MiniMap } from '../maps/MapView'
 export type { SaveDraft } from './useSavePlace'
 import { useSavePlace, type SavePlaceProps } from './useSavePlace'
 export function SavePlace({
+  readPlaces,
   onDirectSearch,
   draft,
   onDraft,
@@ -23,6 +25,8 @@ export function SavePlace({
   authenticated,
 }: SavePlaceProps) {
   const {
+    previousImport,
+    summary,
     importProgress,
     action,
     address,
@@ -65,6 +69,7 @@ export function SavePlace({
     setState,
     state,
   } = useSavePlace({
+    readPlaces,
     onDirectSearch,
     draft,
     onDraft,
@@ -82,6 +87,9 @@ export function SavePlace({
     onRequireLogin,
     authenticated,
   })
+  const sharedCollection = previousImport?.places.every(place => place.collection === previousImport.places[0]?.collection)
+    ? previousImport.places[0]?.collection
+    : undefined
   return (
     <div className="save-overlay">
       <LoadingOverlay
@@ -97,7 +105,7 @@ export function SavePlace({
         onCancel={state === 'resolving' ? editOriginal : undefined}
       />
       <div
-        className={`save-dialog save-${state}`}
+        className={`save-dialog save-${state}${previousImport ? ' saved-post-dialog' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="save-title"
@@ -114,7 +122,7 @@ export function SavePlace({
           >
             <Icon name="f0e6c" />
           </button>
-          <h1 id="save-title">Save a place</h1>
+          <h1 id="save-title">{previousImport ? sharedCollection || 'Saved places' : 'Save a place'}</h1>
           <button
             className="desktop-only icon-button"
             disabled={state === 'saving'}
@@ -124,6 +132,15 @@ export function SavePlace({
             <Icon name="c8142" />
           </button>
         </header>
+        {previousImport ? (
+          <ImportedPostSummary
+            places={previousImport.places}
+            showCollections={!sharedCollection}
+            onView={place => { onDraft(null); onClose(); onView(place) }}
+            onRecover={previousImport.legacy ? () => void lookup(true) : undefined}
+            onDone={() => { onDraft(null); onClose() }}
+          />
+        ) : <>
         {onDirectSearch &&
           ['entry', 'invalid', 'lookup_error'].includes(state) && (
             <div
@@ -167,17 +184,6 @@ export function SavePlace({
           }}
         >
           <div className="save-body">
-            {state === 'import_review' && !!persistError && onPersist && (
-              <>
-                <label className="field-label" htmlFor="retry-collection">Collection</label>
-                <div className="collection-select-wrap">
-                  <select id="retry-collection" value={collection} disabled={busy} onChange={e => setCollection(e.target.value)}>
-                    {!collections.includes(collection) && <option value={collection} disabled>Choose a collection</option>}
-                    {collections.map(name => <option key={name}>{name}</option>)}
-                  </select>
-                </div>
-              </>
-            )}
             {state === 'entry' && (
               <div className="save-intro">
                 <h2>Save somewhere worth going.</h2>
@@ -218,12 +224,6 @@ export function SavePlace({
                 {persistError}
               </p>
             )}
-            {persistSuccess && (
-              <p role="status">
-                Located places were added to your map. Some locations may still
-                need another lookup.
-              </p>
-            )}
             {state === 'import_review' && preview && instagramSource.ok && (
               <AutomaticPlaces
                 preview={preview}
@@ -232,6 +232,7 @@ export function SavePlace({
                 onChange={setLocationReviews}
                 saving={persisting}
                 saved={persistSuccess}
+                existingIds={persistSuccess ? summary?.existing : undefined}
                 onBusy={(value) => {
                   setAutoBusy(value)
                   if (value) setPersistSuccess(false)
@@ -507,6 +508,7 @@ export function SavePlace({
             )}
           </footer>
         </form>
+        </>}
       </div>
     </div>
   )

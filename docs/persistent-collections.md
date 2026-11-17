@@ -16,9 +16,10 @@ No new always-on AWS service is introduced.
 - Every collection, including **Saved places**, can be renamed or deleted. Deleting the fallback selects another existing collection; if none remains, a fresh **Saved places** collection keeps the places. The catalog stores `defaultCollectionId`, with legacy catalogs defaulting to `default`.
 - In place detail, choose **Collection → Move**. The selected collection follows
   the moved place. Each saved place currently belongs to one collection.
-- Imports save into the selected collection using its stable ID. Re-importing an
-  existing provider place retains its current collection and merges source data;
-  use Move to relocate it deliberately.
+- Each Instagram post creates its own collection when its first new place is saved.
+  Existing places keep their collection and gain the new source. A post containing
+  only saved places creates no collection. Direct place search still lets the user
+  choose an existing collection or create one.
 - Signed-out creation opens Sign in. Create the collection after signing in.
 - A failed request keeps the form draft. A stale version or deleted destination
   asks the user to close the dialog, refresh places and retry with current data.

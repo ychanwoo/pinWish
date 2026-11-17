@@ -88,7 +88,7 @@ export function MapAppearancePanel({
                     ))}
                     <button
                       className="map-color-reset"
-                      disabled={!appearance.colors[group.id]}
+                      disabled={!appearance.customColors[group.id]}
                       onClick={() => void appearance.saveColor(group.id, null)}
                     >
                       Reset
