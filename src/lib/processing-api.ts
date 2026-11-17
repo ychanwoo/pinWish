@@ -91,11 +91,12 @@ export async function processingRequest(
   }
   const operation =
     path === '/api/instagram/preview' ? 'import' : path.split('/').at(-1)
-  const id = crypto.randomUUID(),
+  const requestId = crypto.randomUUID(),
     payload = JSON.parse(String(init.body))
-  const started = await send('', { id, operation, payload })
+  const started = await send('', { id: requestId, operation, payload })
   if (!started.ok) return started
-  await started.body?.cancel() // Acknowledgement only; the result is read through polling.
+  const { id } = await started.json()
+  if (typeof id !== 'string' || !/^[0-9a-f-]{36}$/.test(id)) return error('invalid_job')
   for (let attempt = 0; attempt < 70; attempt++) {
     await delay(operation === 'import' ? 2000 : 750)
     const response = await send('/' + id)

@@ -61,14 +61,19 @@ function fixture(options = {}) {
       }
       if (name === 'TransactWriteItemsCommand') {
         const put = p.TransactItems[2].Put
-        if (quotaBlocked || records.has(key(decode(put.Item))))
+        const pointer = p.TransactItems[3]?.Put
+        const previous = pointer && records.get(key(decode(pointer.Item)))
+        const lostRace = pointer && (pointer.ExpressionAttributeValues
+          ? previous?.jobId.S !== pointer.ExpressionAttributeValues[':previous'].S
+          : !!previous)
+        if (lostRace || quotaBlocked || records.has(key(decode(put.Item))))
           throw Object.assign(Error(), {
             name: 'TransactionCanceledException',
             CancellationReasons: [
               { Code: quotaBlocked ? 'ConditionalCheckFailed' : 'None' },
             ],
           })
-        assert.equal(p.TransactItems.length, 3)
+        if (pointer) records.set(key(decode(pointer.Item)), pointer.Item)
         assert.ok(
           p.TransactItems[0].Update.ConditionExpression.includes(':limit'),
         )
@@ -302,4 +307,20 @@ test('real OCR progress is owner-scoped and does not survive as stale progress a
   assert.equal((await f.get(input.id, 'user-b')).statusCode, 404)
   release(); await run
   assert.equal(JSON.parse((await f.get(input.id)).body).progress, undefined)
+})
+
+test('canonical imports join across tabs before quota; another owner has an independent job', async () => {
+  const f = fixture(), a = job(), b = job()
+  b.payload.input += '?img_index=3&igsh=abc'
+  const replies = await Promise.all([f.submit(a), f.submit(b)])
+  assert.ok(replies.every(r => r.statusCode === 202))
+  assert.equal(new Set(replies.map(r => JSON.parse(r.body).id)).size, 1)
+  assert.equal(f.invoked.length, 1)
+  await f.handler(f.invoked[0])
+  const other = await f.submit(b, 'user-b')
+  assert.equal(other.statusCode, 202)
+  assert.equal(f.invoked.length, 2)
+  f.block()
+  assert.equal(JSON.parse((await f.submit(job())).body).status, 'complete')
+  assert.equal(f.extracts(), 1)
 })
