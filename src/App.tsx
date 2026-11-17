@@ -854,32 +854,26 @@ function App() {
                     }
                   : undefined
               }
+              readPlaces={cloudEnabled ? async () => {
+                const owner = getSession()?.sub
+                if (!owner) throw Error('Sign in to check this post.')
+                const snapshot = await loadWorkspaceSnapshot(null, () => getSession()?.sub === owner)
+                requireOwner(owner)
+                if (!snapshot) throw Error('Refresh your places and try again.')
+                setCloudError('')
+                const items = snapshot.result.items.map(toUIPlace)
+                setPlaces(items)
+                setCatalog(snapshot.collectionResult.items)
+                setCollections(snapshot.collectionResult.items.map(c => c.name))
+                return items
+              } : undefined}
               onPersist={
                 cloudEnabled
-                  ? async (confirmed, note, targetCollection, targetCollectionId) => {
+                  ? async (confirmed, note, title) => {
                       const owner = getSession()?.sub
                       if (!owner) throw new Error('Sign in to save places.')
-                      let available = catalogRef.current
-                      const findTarget = () => targetCollectionId
-                        ? available.find(c => c.id === targetCollectionId)
-                        : available.find(c => c.name === targetCollection) ??
-                          (targetCollection === 'Saved places' ? available.find(c => c.isDefault) : undefined)
-                      let target = findTarget()
-                      if (!target) {
-                        const fresh = await listCollections()
-                        requireOwner(owner)
-                        available = fresh.items
-                        setCatalog(available)
-                        setCollections(available.map(c => c.name))
-                        target = findTarget()
-                      }
-                      if (!target)
-                        throw new Error(
-                          'This collection is no longer available. Choose another collection below and add these places without analyzing the post again.',
-                        )
-                      if (!targetCollection.trim())
-                        throw new Error('Enter a collection name.')
-                      let saved = 0
+                      const added = new Set<string>(), existing = new Set<string>()
+                      let newCollection = ''
                       const failures: string[] = []
                       const savedCollections: string[] = []
                       for (const [index, place] of confirmed.entries()) {
@@ -896,12 +890,16 @@ function App() {
                           const result = await saveConfirmed(
                             place,
                             note,
-                            target.id,
+                            title,
                           )
                           requireOwner(owner)
                           loadGeneration.current++
                           setCloudLoading(false)
-                          saved++
+                          if (!result.duplicate) {
+                            added.add(place.placeId)
+                            existing.delete(place.placeId)
+                            newCollection = result.item.collection
+                          } else if (!added.has(place.placeId)) existing.add(place.placeId)
                           const next = toUIPlace(result.item)
                           savedCollections.push(next.collection)
                           setPlaces((items) => [
@@ -915,15 +913,16 @@ function App() {
                         }
                       }
                       requireOwner(owner)
-                      if (savedCollections[0])
-                        setCollection(savedCollections[0])
+                      const fresh = await listCollections()
+                      requireOwner(owner)
+                      setCatalog(fresh.items)
+                      setCollections(fresh.items.map(c => c.name))
+                      if (savedCollections[0]) setCollection(newCollection || savedCollections[0])
                       setSelectedId('')
                       setView('list')
-                      if (failures.length)
-                        throw new Error(
-                          `${saved} of ${confirmed.length} saved. Retry safely; already saved places will not be duplicated. ${failures.join(' ')}`,
-                        )
-                      if (!catalog.length) await loadPlaces()
+
+                      if (added.size) setNotice(`${added.size} ${added.size === 1 ? 'place' : 'places'} added to ${newCollection}${existing.size ? ` · ${existing.size} already saved` : ''}`)
+                      return { added: [...added], existing: [...existing], failures }
                     }
                   : undefined
               }

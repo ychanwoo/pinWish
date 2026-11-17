@@ -9,6 +9,8 @@ import {
 } from './cloud-auth'
 import type { ConfirmedPlace } from './place-search'
 export interface SavedSource {
+  candidateCount?: number
+  candidateIndexes?: number[]
   originalUrl: string
   canonicalUrl: string
   slides: number[]
@@ -40,6 +42,7 @@ export interface SavedPlace {
   sources: Record<string, SavedSource>
 }
 export interface SavedCollection {
+  color?: string
   id: string
   name: string
   version: number
@@ -174,12 +177,12 @@ export const listSaved = (cursor: string | null) =>
 export const saveConfirmed = (
   place: ConfirmedPlace,
   note: string,
-  collectionId: string,
+  importTitle: string,
 ) =>
   storageRequest<{ item: SavedPlace; duplicate: boolean }>('', 'POST', {
     place,
     note,
-    collectionId,
+    importTitle,
   })
 export const patchSaved = (
   place: SavedPlace,

@@ -11,6 +11,7 @@ interface Props {
   onBusy: (busy: boolean) => void
   onComplete: (value: AutoReviews) => void
   saving: boolean
+  existingIds?: string[]
   saved: boolean
 }
 export function AutomaticPlaces(props: Props) {
@@ -78,7 +79,7 @@ export function AutomaticPlaces(props: Props) {
         {running
           ? 'Finding locations automatically…'
           : props.saved
-            ? 'Located places have been added to your map.'
+            ? 'Saved locations are available on your map.'
             : 'Locations matched automatically using Amazon Location.'}
       </p>
       {!props.preview.result.places.length && (
@@ -105,7 +106,7 @@ export function AutomaticPlaces(props: Props) {
               )}
               <small>
                 Photos {candidate.slides.join(', ')}
-                {place ? ' · Matched automatically' : ''}
+                {place && props.existingIds?.includes(place.placeId) ? ' · Already saved' : place ? ' · Matched automatically' : ''}
               </small>
               <p>
                 <a

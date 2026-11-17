@@ -1,3 +1,4 @@
+import { readImportHistory, restoreMatches } from '../../lib/import-history'
 import { processingRequest, type ImportProgress } from '../../lib/processing-api'
 import type {
   ConfirmedPlace,
@@ -32,6 +33,7 @@ export interface SaveDraft {
   locationReviews?: Record<number, CandidateLocationDraft>
 }
 export interface SavePlaceProps {
+  readPlaces?: () => Promise<Place[]>
   onDirectSearch?: () => void
   draft: SaveDraft | null
   onDraft: (draft: SaveDraft | null) => void
@@ -48,14 +50,14 @@ export interface SavePlaceProps {
   onPersist?: (
     places: ConfirmedPlace[],
     note: string,
-    collection: string,
-    collectionId?: string,
-  ) => Promise<void>
+    title: string,
+  ) => Promise<{ added: string[]; existing: string[]; failures: string[] }>
   onRequireLogin?: (draft: SaveDraft) => void
   authenticated?: boolean
 }
 export function useSavePlace({
   draft,
+  readPlaces,
   onDraft,
   initialState,
   collections,
@@ -111,6 +113,8 @@ export function useSavePlace({
     Record<number, CandidateLocationDraft>
   >(draft?.locationReviews ?? {})
   const [importProgress, setImportProgress] = useState<ImportProgress>({ stage: 'reading_post' })
+  const [previousImport, setPreviousImport] = useState<ReturnType<typeof readImportHistory> | null>(null)
+  const [summary, setSummary] = useState<{ added: string[]; existing: string[] } | null>(null)
   const [autoBusy, setAutoBusy] = useState(false)
   const [persisting, setPersisting] = useState(false)
   const [persistError, setPersistError] = useState('')
@@ -211,7 +215,9 @@ export function useSavePlace({
       previous?.focus()
     }
   }, [onClose])
-  const lookup = async () => {
+  const lookup = async (recover = false) => {
+    setPreviousImport(null)
+    setSummary(null)
     const value = (manual ? address : input).trim()
     cancelPending()
     if (onPersist ? !parseInstagramLink(value).ok : !validInput(value)) {
@@ -259,6 +265,16 @@ export function useSavePlace({
       setState('resolving')
       const deadline = setTimeout(() => controller.abort(), 155000)
       try {
+        const parsed = parseInstagramLink(value)
+        const library = readPlaces ? await readPlaces() : places
+        if (id !== request.current) return
+        const history = readImportHistory(library, parsed.ok ? parsed.source.canonicalUrl : '')
+        if (!recover && (history.complete || history.legacy)) {
+          setPreviousImport(history)
+          setState('entry')
+          return
+        }
+        setPreviousImport(null)
         const response = await processingRequest('/api/instagram/preview', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -297,6 +313,7 @@ export function useSavePlace({
             })),
           },
         })
+        if (parsed.ok) setLocationReviews(restoreMatches(history, data, parsed.source))
         setState('import_review')
       } catch {
         if (id !== request.current) return
@@ -388,6 +405,8 @@ export function useSavePlace({
   }
   const editOriginal = () => {
     if (persisting) return
+    setSummary(null)
+    setPreviousImport(null)
     setPersistSuccess(false)
     setPersistError('')
     cancelPending()
@@ -421,9 +440,9 @@ export function useSavePlace({
       return
     }
     if (!onPersist || persisting) return
-    const confirmedPlaces = Object.values(reviews).flatMap((r) =>
+    const confirmedPlaces = Object.entries(reviews).flatMap(([index, r]) =>
       r.targets.flatMap((t) =>
-        t.status === 'confirmed' && t.confirmed ? [t.confirmed] : [],
+        t.status === 'confirmed' && t.confirmed ? [{ ...t.confirmed, source: { ...t.confirmed.source, candidateIndex: Number(index), candidateCount: preview?.result.places.length } }] : [],
       ),
     )
     if (!confirmedPlaces.length) {
@@ -435,11 +454,21 @@ export function useSavePlace({
     setPersisting(true)
     setPersistError('')
     try {
-      await onPersist(confirmedPlaces, note, collection, collectionId.current || collectionOptions?.find(c => c.name === collection)?.id)
+      const region = preview?.result.places.map(p => p.searchRegion || p.regionHint)
+        .find(name => name && !/\p{Script=Hangul}/u.test(name))
+      const title = (region || confirmedPlaces[0].countryName || 'Instagram places').trim().slice(0, 60)
+      const result = await onPersist(confirmedPlaces, note, title)
+      const added = new Set([...(summary?.added ?? []), ...result.added])
+      const existing = [...new Set([...(summary?.existing ?? []), ...result.existing])].filter(id => !added.has(id))
+      setSummary({ added: [...added], existing })
+      if (result.failures.length) {
+        setPersistError(`${result.added.length + result.existing.length} of ${confirmedPlaces.length} saved. Retry to finish adding these places. ${result.failures.join(' ')}`)
+        return
+      }
       setPersistSuccess(true)
       onDraft(null)
       if (
-        automatic &&
+        automatic && !existing.length &&
         Object.values(reviews).every((r) =>
           r.targets.every((t) => t.status === 'confirmed'),
         )
@@ -471,6 +500,12 @@ export function useSavePlace({
           (target) => target.status !== 'pending',
         ),
     )
+  const unresolved = Object.values(locationReviews).filter(r => r.targets.some(t => t.status !== 'confirmed')).length
+  const countSummary = summary && [
+    summary.added.length ? `${summary.added.length} added` : '',
+    summary.existing.length ? `${summary.existing.length} already saved` : '',
+    unresolved ? `${unresolved} unresolved` : '',
+  ].filter(Boolean).join(' · ')
   const messages: Partial<Record<SaveState, [string, string]>> = {
     resolving:
       instagramSource.ok && (onPersist || input.trim() !== sampleLink)
@@ -506,10 +541,12 @@ export function useSavePlace({
     ],
     import_review: [
       persistSuccess
-        ? 'Places added to your map'
+        ? summary?.added.length === 0
+          ? unresolved ? 'Matched places are already saved' : 'All places are already saved'
+          : 'Places added to your map'
         : 'Finding places for your map',
       persistSuccess
-        ? 'Located places are saved. You can retry any missing locations or open the map.'
+        ? countSummary || 'View the locations on your map.'
         : 'Locations are matched automatically. Found places will be added together; unavailable locations will be listed separately.',
     ],
     lookup_error: [
@@ -557,6 +594,8 @@ export function useSavePlace({
                     ? 'View place'
                     : 'Find place'
   return {
+    previousImport,
+    summary,
     importProgress,
     action,
     address,

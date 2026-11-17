@@ -19,7 +19,7 @@ export interface ConfirmedPlace extends PlaceMatch {
   retrievedAt: string
   confirmedAt: string
   displayName: string
-  source: { instagram: InstagramSource; slides: number[]; extractedName: string; correctedName?: string; evidence: string }
+  source: { candidateIndex?: number; candidateCount?: number; instagram: InstagramSource; slides: number[]; extractedName: string; correctedName?: string; evidence: string }
 }
 export interface LocationTarget {
   id: string

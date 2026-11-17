@@ -3306,3 +3306,27 @@ a {
 @media (prefers-reduced-motion: reduce) { .loading-spinner { animation: none; border-style: dotted; } }
 
 .loading-screen-content .loading-detail { color: #686e68; font-size: 13px; font-weight: 400; letter-spacing: .01em; font-variant-numeric: tabular-nums; }
+
+.saved-post-dialog .save-header { padding-bottom: 4px; }
+.saved-post-dialog .save-header h1 {
+  font: 400 30px/1.15 Georgia, "Times New Roman", serif;
+  letter-spacing: -.7px;
+  overflow-wrap: anywhere;
+}
+.saved-post-dialog .save-body { gap: 22px; }
+.saved-post-caption { margin: 0; font-size: 13px; line-height: 1.5; color: #696560; }
+.import-history { margin: 0; padding: 0; list-style: none; border-top: 1px solid #dfe2db; }
+.import-history li { border-bottom: 1px solid #e6e8e2; }
+.import-history button {
+  display: flex; align-items: center; gap: 12px; width: 100%; min-height: 51px;
+  padding: 12px 2px; text-align: left; font-size: 15px; line-height: 1.4;
+}
+.import-history button:hover, .import-history button:focus-visible { color: var(--brand); }
+.import-history button:focus-visible { outline-offset: -2px; }
+.import-history button > span { flex: 1; overflow-wrap: anywhere; }
+.import-history small { max-width: 36%; overflow-wrap: anywhere; color: #696560; font-size: 12px; }
+.import-history svg { flex-shrink: 0; color: #77776e; }
+@media (max-width: 767px) {
+  .saved-post-dialog .save-header { height: auto; }
+  .saved-post-dialog .save-header h1 { font-size: 27px; }
+}

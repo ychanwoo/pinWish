@@ -192,13 +192,17 @@ export function useMapAppearance(
       count: counts.get(c.id) ?? 0,
     }))
   }, [catalog, places])
+  const colors = useMemo(() => dataOwner === owner
+    ? { ...Object.fromEntries(catalog.filter(c => c.color).map(c => [c.id, c.color!])), ...preferences.colors }
+    : {}, [catalog, dataOwner, owner, preferences.colors])
   return {
     collections,
     details: dataOwner === owner ? details : {},
     errors: dataOwner === owner ? errors : {},
     refresh,
     reloadPreferences,
-    colors: dataOwner === owner ? preferences.colors : {},
+    customColors: dataOwner === owner ? preferences.colors : {},
+    colors,
     saveColor,
     saving,
     preferenceError,
