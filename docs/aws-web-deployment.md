@@ -155,3 +155,11 @@ After the final demo, inventory the Amplify app, stack resources, retained
 DynamoDB/S3 data, CloudWatch logs and deployment artifacts, export anything needed,
 and explicitly delete disposable resources. Data deletion is a separate action
 from `cloud:test:stop`.
+
+### Reopening an Instagram import
+
+The processing API keys each import by account and Instagram shortcode. Slide and sharing parameters identify the same post. A queued, running or successful job can be reused within its 24-hour lifetime before either daily quota is charged. A failed or timed-out job permits a new attempt.
+
+The web app checks saved sources before submitting a job. A complete set of saved locations can be opened after the analysis cache expires. If a location was deleted or a lookup did not finish, the app reuses the remaining matches and looks up the missing candidates. After 24 hours this recovery can require fresh analysis. Older saves without candidate counts offer an explicit check for missing places.
+
+The first new provider place and its import collection are written together. Subsequent new places from the post use that collection. An already-saved provider place retains its original collection, notes and visit status. Its source links identify the posts and slides where it appeared. New import collections get the least-used color from the existing six-color palette, accounting for personal overrides.

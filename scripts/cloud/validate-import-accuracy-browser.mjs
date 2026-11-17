@@ -75,11 +75,34 @@ export async function validateImportAccuracyBrowser({ page, origin, user, reques
     const importedJob=jobs.slice(priorJobs).find(j=>j.operation==='import')
     assert.ok(importedJob)
     const imported=await request(user.token,'/jobs/'+importedJob.id)
+    const joined = await request(user.token,'/jobs','POST',{id:crypto.randomUUID(),operation:'import',payload:{input:url.replace('img_index=8','igsh=example')}})
+    assert.equal(joined.status,202)
+    assert.equal(joined.body.id,importedJob.id)
+    assert.equal(joined.body.status,'complete')
     assert.equal(imported.body.result.fetchedImages,13)
     assert.equal(imported.body.result.result.places.length,10)
     assert.deepEqual([...imported.body.result.result.ignoredSlides].sort((a,b)=>a-b),[1,3,4,5,9,11,13])
     report.extraction=imported.body.result
+    const ids = new Set(records.map(p => p.collectionId))
+    assert.equal(ids.size, 1)
+    const collections = (await request(user.token, '/collections')).body.items
+    const importedCollection = collections.find(c => ids.has(c.id))
+    assert.ok(importedCollection && !importedCollection.isDefault && importedCollection.color)
+    const jobCount = jobs.length
+    const versions = records.map(p => [p.id,p.collectionId,p.note,p.visited,Object.keys(p.sources).length]).sort()
     await page.reload()
+    await page.locator('.mobile-save').getByRole('button',{name:'Save a place',exact:true}).click()
+    await page.getByLabel('Instagram post link',{exact:true}).fill(url.replace('img_index=8','img_index=2&igsh=example'))
+    await page.getByRole('button',{name:'Find place',exact:true}).click()
+    await expect(dialog.getByRole('heading',{name:importedCollection.name,exact:true})).toBeVisible()
+    await expect(dialog.getByText('You’ve already saved these 10 places from this post.')).toBeVisible()
+    await expect(page.locator('.import-history button')).toHaveCount(10)
+    assert.equal(jobs.length,jobCount)
+    const reloaded = (await request(user.token,'/places')).body.items
+    assert.deepEqual(reloaded.map(p=>[p.id,p.collectionId,p.note,p.visited,Object.keys(p.sources).length]).sort(),versions)
+    await page.getByRole('button',{name:'Done',exact:true}).click()
+    await page.locator('.collection-link').filter({hasText:importedCollection.name}).first().click()
+    checks.push('Repeat link with different slide: ten saved places listed, zero job requests, original records preserved, one colored import collection')
     await expect.poll(async()=>page.locator('.place-card').count(),{timeout:20000}).toBe(10)
     await expect(page.locator('.live-map canvas')).toBeVisible({timeout:30000})
     await expect(page.locator('.live-map-status')).toHaveCount(0,{timeout:30000})
@@ -88,6 +111,21 @@ export async function validateImportAccuracyBrowser({ page, origin, user, reques
     await page.getByRole('button',{name:'Show all',exact:true}).click()
     await page.waitForTimeout(1500) // Allow the bounded fit-to-places camera animation to finish for visual review.
     await page.screenshot({path:'/tmp/pinwish-nyc-accuracy-desktop.png'})
+    // A different source may refer to a place the account already saved.
+    const original = records[0]
+    const source = Object.values(original.sources)[0]
+    const duplicate = await request(user.token,'/places','POST',{importTitle:'Overlap validation',note:'Do not replace the original note',place:{
+      ...original, koreanName:null, englishName:original.displayName, source:{
+        instagram:{originalUrl:'https://www.instagram.com/p/PinWishValidationOnly/'},
+        slides:[2], evidence:source.evidence, extractedName:source.extractedName, candidateIndex:0, candidateCount:1,
+      },
+    }})
+    assert.equal(duplicate.status,200)
+    assert.equal(duplicate.body.duplicate,true)
+    for (const field of ['id','collectionId','note','visited','bookmarked']) assert.deepEqual(duplicate.body.item[field],original[field])
+    assert.equal(Object.keys(duplicate.body.item.sources).length,2)
+    assert.equal((await request(user.token,'/collections')).body.items.length,collections.length)
+    checks.push('Completed job replay reused its ID; overlapping provider ID retained user fields, gained one source and created no empty collection')
     report.passed=true
     checks.push('NYC 13-slide source: all 10 named places saved through the real UI, correct identities/regions, original evidence preserved, covers/activities excluded, reload and map verified')
     console.log('Passed: NYC source accuracy — 10 of 10 named places, no false places')

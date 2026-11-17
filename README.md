@@ -7,7 +7,7 @@ Built with React, TypeScript, Vite and Tailwind CSS, with an AWS serverless back
 ## What works
 
 - **Accounts:** email/password registration, email verification, sign-in, password reset and optional seven-day remembered sessions. Saving requires sign-in; users' private records are isolated.
-- **Instagram imports:** analyze public photo carousels, extract place candidates and automatically search/save resolved locations. Original links, slide references and source text are preserved. Unresolved places remain retryable rather than receiving invented coordinates.
+- **Instagram imports:** analyze public photo carousels, extract place candidates and automatically search/save resolved locations. Repeated links open previously saved places. New places go into a color-coded collection for the post. Existing places keep their notes, collection and visited status. Original links, slide references and source text are preserved. Unresolved places remain retryable rather than receiving invented coordinates.
 - **Direct search:** find a place or address, select a provider result, choose or create a collection, and add it to the map.
 - **Saved places and collections:** persistent empty collections, rename/delete, move places, edit notes, bookmark and mark visits. Deleting a collection keeps its places in the current fallback collection. Every collection, including Saved places, can be renamed or deleted.
 - **Maps:** Amazon Location with MapLibre, clustering, hover labels, selected-place centering, visited checks and account-persisted collection colors reflected in the sidebar. Directions open Google Maps externally; no Google Maps API key is required.
