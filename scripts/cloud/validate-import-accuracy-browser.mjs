@@ -95,7 +95,7 @@ export async function validateImportAccuracyBrowser({ page, origin, user, reques
     await page.getByLabel('Instagram post link',{exact:true}).fill(url.replace('img_index=8','img_index=2&igsh=example'))
     await page.getByRole('button',{name:'Find place',exact:true}).click()
     await expect(dialog.getByRole('heading',{name:importedCollection.name,exact:true})).toBeVisible()
-    await expect(dialog.getByText('You’ve already saved these 10 places from this post.')).toBeVisible()
+    await expect(dialog.getByText('10 places already saved from this post.')).toBeVisible()
     await expect(page.locator('.import-history button')).toHaveCount(10)
     assert.equal(jobs.length,jobCount)
     const reloaded = (await request(user.token,'/places')).body.items

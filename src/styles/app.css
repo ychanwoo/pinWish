@@ -3331,11 +3331,11 @@ a {
 
 .saved-post-dialog .save-header { padding-bottom: 4px; }
 .saved-post-dialog .save-header h1 {
-  font: 400 30px/1.15 Georgia, "Times New Roman", serif;
+  font: 550 24px/1.2 var(--pw-font-family);
   letter-spacing: -.7px;
   overflow-wrap: anywhere;
 }
-.saved-post-dialog .save-body { gap: 22px; }
+.saved-post-dialog .save-body { gap: 16px; }
 .saved-post-caption { margin: 0; font-size: 13px; line-height: 1.5; color: #696560; }
 .import-history { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--pw-surface-container); }
 .import-history li { border-bottom: 1px solid var(--pw-surface-container); }
@@ -3350,7 +3350,7 @@ a {
 .import-history svg { flex-shrink: 0; color: #77776e; }
 @media (max-width: 767px) {
   .saved-post-dialog .save-header { height: auto; }
-  .saved-post-dialog .save-header h1 { font-size: 27px; }
+  .saved-post-dialog .save-header h1 { font-size: 22px; }
 }
 
 .collection-row > .collection-link {
@@ -3376,6 +3376,17 @@ a {
 .cloud-enabled .desktop-dossier > span { text-transform: none; letter-spacing: 0; }
 .cloud-enabled .feed-heading select { border: 0; background: transparent; color: var(--pw-text-muted); }
 .cloud-enabled .cloud-list-status .refresh-places-button { text-decoration: none; }
+.import-history button { min-height: 54px; font-weight: 520; }
+.import-history button:hover { background: var(--pw-surface-subtle); }
+.automatic-places ol { list-style: none; padding: 0; }
+.automatic-places li {
+  margin: 0; padding-block: 16px;
+  border-top: 1px solid var(--pw-surface-container);
+}
+.automatic-places li strong { font-size: 16px; font-weight: 550; letter-spacing: -.02em; }
+.automatic-places li p, .automatic-places li small { font-size: 13px; line-height: 1.5; color: var(--pw-text-muted); }
+.automatic-places li a { display: inline-flex; align-items: center; min-height: 44px; color: var(--pw-brand-primary); }
+.save-import_review .inline-status:not(.error) { background: transparent; padding-inline: 0; }
 @media (max-width: 767px) {
   .cloud-enabled .feed-heading { flex-wrap: wrap; }
   .cloud-enabled .feed-heading > div { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
