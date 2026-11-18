@@ -61,6 +61,8 @@ These checks use local fixtures. CI runs unit tests, lint, TypeScript checking a
 
 ## AWS architecture and operation
 
+![PinWish AWS architecture showing browser requests flowing through API Gateway to Lambda, storage, and processing services](docs/images/aws-architecture.png)
+
 | Service | Role |
 | --- | --- |
 | Amplify Hosting | HTTPS static frontend and paused-session page |
