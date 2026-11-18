@@ -464,7 +464,7 @@ for (const mobile of [false, true]) test(`create collection during direct save r
   await page.getByRole('button', { name: 'Add to map', exact: true }).click()
   await expect(page.locator('.collection-tag')).toContainText('Campus visits')
   await page.reload()
-  if (mobile) await page.locator('.collection-chips button').filter({ hasText: 'Campus visits' }).click()
+  if (mobile) await page.getByRole('combobox', { name: 'Active collection' }).selectOption('Campus visits')
   else await page.locator('.collection-link').filter({ hasText: 'Campus visits' }).click()
   await expect(page.locator('.place-card')).toHaveCount(1)
   await page.screenshot({ path: `/tmp/pinwish-refined-card-${mobile ? 'mobile' : 'desktop'}.png` })

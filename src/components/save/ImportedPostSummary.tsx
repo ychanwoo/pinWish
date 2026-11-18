@@ -13,7 +13,7 @@ export function ImportedPostSummary({ places, showCollections, onView, onRecover
     <div className="save-form">
       <div className="save-body">
         <p className="saved-post-caption">
-          {places.length === 1 ? 'You’ve already saved this place' : `You’ve already saved these ${places.length} places`} from this post.
+          {places.length} {places.length === 1 ? 'place' : 'places'} already saved from this post.
         </p>
         <ul className="import-history" aria-label="Places from this post">
           {places.map(place => (

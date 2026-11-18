@@ -132,14 +132,12 @@ export function PlaceDetail({
         <div className="detail-scroll">
           <div className="detail-heading">
             <div>
-              <p className="detail-category">
+              {(!place.saved || place.category !== 'Other') && <p className="detail-category">
                 <Icon name="05b16" />
                 {place.id === 'grand-central'
                   ? 'DTLA FOOD HALL'
-                  : place.saved && place.category === 'Other'
-                    ? place.kind
-                    : place.category.toUpperCase()}
-              </p>
+                  : place.category.toUpperCase()}
+              </p>}
               <h1 tabIndex={-1} id="place-heading">
                 {place.name}
                 {!place.saved && (

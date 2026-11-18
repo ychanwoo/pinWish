@@ -378,13 +378,19 @@ try {
     .getByRole('button', { name: 'Sign in', exact: true })
     .last()
     .click()
-  const choose = async (name) =>
-    page
-      .locator('.collection-link, .collection-chips button')
+  const choose = async (name) => {
+    const picker = page.getByRole('combobox', { name: 'Active collection' })
+    if (await picker.isVisible()) {
+      await picker.selectOption(name)
+      return
+    }
+    await page
+      .locator('.collection-link')
       .filter({ hasText: name })
       .filter({ visible: true })
       .first()
       .click()
+  }
   const button = (name) =>
     page
       .getByRole('button', { name, exact: true })

@@ -99,8 +99,13 @@ const visibleButton = (page: Page, name: string) =>
     .filter({ visible: true })
     .first()
 async function selectCollection(page: Page, name: string) {
+  const picker = page.getByRole('combobox', { name: 'Active collection' })
+  if (await picker.isVisible()) {
+    await picker.selectOption(name)
+    return
+  }
   const locator = page
-    .locator('.collection-link, .collection-chips button')
+    .locator('.collection-link')
     .filter({ hasText: name })
     .filter({ visible: true })
     .first()

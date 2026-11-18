@@ -122,7 +122,7 @@ export function SavePlace({
           >
             <Icon name="f0e6c" />
           </button>
-          <h1 id="save-title">{previousImport ? sharedCollection || 'Saved places' : 'Save a place'}</h1>
+          <h1 id="save-title">{previousImport ? sharedCollection || 'Saved places' : state === 'import_review' ? 'Places from this post' : 'Save a place'}</h1>
           <button
             className="desktop-only icon-button"
             disabled={state === 'saving'}
@@ -186,10 +186,9 @@ export function SavePlace({
           <div className="save-body">
             {state === 'entry' && (
               <div className="save-intro">
-                <h2>Save somewhere worth going.</h2>
                 <p>
                   {onPersist
-                    ? 'Paste an Instagram post link to find its places. Use Place search to add a place by name or address.'
+                    ? 'Paste the link to a post to find its places.'
                     : 'Paste a social post, a map link, or a street address.'}
                 </p>
               </div>

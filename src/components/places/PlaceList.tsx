@@ -96,54 +96,6 @@ export function PlaceList({
             <Icon name="cebd9" />
           </button>
         </div>
-        <div className="mobile-collections">
-          <div className="collection-chips">
-            {!persistent && (
-              <>
-                <button
-                  className={collection === 'LA weekend' ? 'active' : ''}
-                  onClick={() => onCollection('LA weekend')}
-                >
-                  <Icon name="c3cc4" />
-                  LA weekend
-                  {collection === 'LA weekend' && <Icon name="9d316" />}
-                </button>
-                <button
-                  className={
-                    !persistent && collection === 'Coffee' ? 'active' : ''
-                  }
-                  onClick={() => onCollection('Coffee')}
-                >
-                  Coffee
-                </button>
-                <button
-                  className={collection === 'Galleries' ? 'active' : ''}
-                  onClick={() => onCollection('Galleries')}
-                >
-                  Galleries
-                </button>
-              </>
-            )}
-            {collections
-              .filter((c) => persistent || c !== 'LA weekend')
-              .map((c) => (
-                <button
-                  key={c}
-                  className={collection === c ? 'active' : ''}
-                  onClick={() => onCollection(c)}
-                >
-                  {c}
-                </button>
-              ))}
-          </div>
-          <button
-            className="add-collection"
-            aria-label="Create collection"
-            onClick={onNewCollection}
-          >
-            <Icon name="fe01d" />
-          </button>
-        </div>
         <div className="desktop-list-heading">
           <div>
             <Icon name="75e71" />
@@ -155,13 +107,28 @@ export function PlaceList({
                   : collection}
             </h1>
           </div>
-          <span className="count">{filtered.length} places</span>
+          <span className="count">{filtered.length} {filtered.length === 1 ? 'place' : 'places'}</span>
         </div>
-        {onManageCollection && (
-          <button className="collection-manage" onClick={onManageCollection}>
-            Manage collection
+        <div className="collection-tools">
+          <select
+            className="mobile-only collection-picker"
+            aria-label="Active collection"
+            value={collection}
+            onChange={(event) => onCollection(event.target.value)}
+          >
+            {[...new Set([...(persistent ? [] : ['LA weekend', 'Coffee', 'Galleries']), ...collections, collection])].map(name => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          {onManageCollection && (
+            <button className="collection-manage" onClick={onManageCollection}>
+              Manage collection
+            </button>
+          )}
+          <button className="collection-manage mobile-only" aria-label="Create collection" onClick={onNewCollection}>
+            New collection
           </button>
-        )}
+        </div>
         {!persistent && (
           <div className="category-tabs">
             {categories.map((item) => (
@@ -186,14 +153,17 @@ export function PlaceList({
         )}
       </div>
       <div className="mobile-save">
-        <button className="primary" onClick={onSave}>
+        <button type="button" className="save-place-trigger" onClick={onSave}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" />
+          </svg>
           Save a place
         </button>
       </div>
       <div className="feed-heading">
         <div>
           {persistent ? collection : 'Saved in Los Angeles'}{' '}
-          <span className="count">{filtered.length} places</span>
+          <span className="count">{filtered.length} {filtered.length === 1 ? 'place' : 'places'}</span>
         </div>
         <select
           aria-label="Sort places"
