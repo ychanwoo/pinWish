@@ -113,6 +113,7 @@ export function CollectionRow({
         className={`collection-link ${active ? 'active' : ''}`}
         onClick={onSelect}
         aria-label={`${name} ${count}`}
+        aria-current={active || undefined}
       >
         <svg
           className="collection-color-icon"

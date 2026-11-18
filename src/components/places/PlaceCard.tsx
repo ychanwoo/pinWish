@@ -23,7 +23,7 @@ export function PlaceCard({
     <article className={`place-card ${selected ? 'selected' : ''}`}>
       <div className="place-card-top">
         <button
-          className="place-photo"
+          className={place.photo === 'place-placeholder.svg' ? 'place-photo missing-thumbnail' : 'place-photo'}
           onClick={() => onSelect(place)}
           aria-label={`View ${place.name}`}
         >

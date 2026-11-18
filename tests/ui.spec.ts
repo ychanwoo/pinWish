@@ -265,18 +265,12 @@ test('new collections remain selectable and isolate their places', async ({
     .last()
     .click()
   await expect(page.locator('.place-card')).toHaveCount(0)
-  await page
-    .getByRole('button', {
-      name: info.project.name === 'mobile' ? 'LA weekend' : 'All Curated Pins',
-      exact: false,
-    })
-    .filter({ visible: true })
-    .click()
+  const picker = page.getByRole('combobox', { name: 'Active collection' })
+  if (info.project.name === 'mobile') await picker.selectOption('LA weekend')
+  else await page.getByRole('button', { name: /All Curated Pins/ }).filter({ visible: true }).click()
   await expect(page.locator('.place-card')).toHaveCount(5)
-  await page
-    .getByRole('button', { name: 'Weekend trip', exact: false })
-    .filter({ visible: true })
-    .click()
+  if (info.project.name === 'mobile') await picker.selectOption('Weekend trip')
+  else await page.getByRole('button', { name: /Weekend trip/ }).filter({ visible: true }).click()
   await expect(page.locator('.place-card')).toHaveCount(0)
   await expect(page.locator('.map-pin')).toHaveCount(0)
 })
