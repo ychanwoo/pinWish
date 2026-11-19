@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { useModalFocus } from '../../hooks/useModalFocus'
 import type { SavedPlace } from '../../lib/storage-api'
-import { cachedPhoto, loadPhoto } from '../../lib/place-photo'
+import { cachedPhoto, loadPhoto, photoRetryDelay } from '../../lib/place-photo'
+const retryMessage = 'Photo temporarily unavailable. Try again shortly.'
+
 export function PlaceCoverPhoto({
   place,
   name,
@@ -24,9 +26,10 @@ export function PlaceCoverPhoto({
     let cancelled = false,
       timer: ReturnType<typeof setTimeout> | undefined
     let attempts = 0
+    let retriedUnavailable = false
     async function load() {
       try {
-        const result = await loadPhoto(place.id, retry > 0 && attempts === 0)
+        const result = await loadPhoto(place.id, retry > 0 && attempts === 0 && !retriedUnavailable)
         if (cancelled) {
           return
         }
@@ -41,14 +44,20 @@ export function PlaceCoverPhoto({
           timer = setTimeout(() => void load(), 3000)
           return
         }
+        if (result.status === 'unavailable' && !retriedUnavailable) {
+          retriedUnavailable = true
+          setStatus('Photo temporarily unavailable. Retrying…')
+          timer = setTimeout(() => void load(), photoRetryDelay(place.id) + 10)
+          return
+        }
         setStatus(
           result.status === 'not_found'
             ? 'Photo unavailable'
-            : 'Photo temporarily unavailable. Try again shortly.',
+            : retryMessage,
         )
       } catch {
         if (!cancelled)
-          setStatus('Photo temporarily unavailable. Try again shortly.')
+          setStatus(retryMessage)
       }
     }
     void Promise.resolve().then(() => {
@@ -79,7 +88,7 @@ export function PlaceCoverPhoto({
               alt={name}
               onError={() => {
                 setUrl('')
-                setStatus('Photo temporarily unavailable. Try again shortly.')
+                setStatus(retryMessage)
               }}
             />
           </button>
@@ -89,7 +98,7 @@ export function PlaceCoverPhoto({
           </div>
         )}
       </div>
-      {status.includes('temporarily') && (
+      {status === retryMessage && (
         <button
           className="cover-text-button"
           onClick={() => setRetry((n) => n + 1)}

@@ -20,6 +20,7 @@ export interface SavedSource {
 }
 export interface SavedPlace {
   searchOrigin?: { query: string; region: string }
+  photoLookup?: { status: string; retryAt: number }
   coverPhoto?: CoverPhoto
   id: string
   provider: string
