@@ -211,3 +211,20 @@ test('old negative lookup is retried once after discovery upgrade, current failu
   await f.photos.ensure(key)
   assert.equal(f.jobs.length, 1)
 })
+
+test('concurrent dossier reads share one discovery job after a provider failure expires', async () => {
+  const f = fixture({ broken: true })
+  await f.photos.ensure(key)
+  await f.photos.process(key, f.jobs[0].jobId)
+  const failed = await f.photos.handle('GET', key)
+  assert.equal(failed.status, 'unavailable')
+  assert.equal(f.jobs.length, 1)
+  f.item.photoLookup.retryAt = Date.now() - 1
+  const reopened = await Promise.all(Array.from({ length: 4 }, () => f.photos.handle('GET', key)))
+  assert.equal(f.jobs.length, 2)
+  for (const response of reopened) {
+    assert.equal(response.status, 'pending')
+    assert.equal(response.item.photoLookup.jobId, f.jobs[1].jobId)
+    assert.equal(response.item.note, 'Keep note')
+  }
+})

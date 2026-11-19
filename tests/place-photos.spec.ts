@@ -16,7 +16,7 @@ const record = {
   countryName: 'United States',
   coordinates: { longitude: -118, latitude: 34 },
   placeType: 'PointOfInterest',
-  note: '',
+  note: 'Meet at the museum entrance.',
   collection: 'Saved places',
   collectionId: 'default',
   visited: false,
@@ -28,7 +28,7 @@ const record = {
 }
 async function setup(
   page: Page,
-  mode: 'ready' | 'pending' | 'not_found' | 'failure' = 'ready',
+  mode: 'ready' | 'pending' | 'not_found' | 'failure' | 'provider' | 'corrupt' | 'throttled' | 'offline' | 'cooldown' = 'ready',
   openDetail = true,
 ) {
   let requests = 0,
@@ -65,6 +65,12 @@ async function setup(
     if (new URL(r.request().url()).pathname.endsWith('/photo')) {
       expect(r.request().method()).toBe('GET')
       requests++
+      if (requests === 1 && mode === 'offline') return r.abort('failed')
+      if (requests === 1 && mode === 'throttled') return r.fulfill({ status: 429, json: {} })
+      if (requests === 1 && (mode === 'provider' || mode === 'cooldown'))
+        return r.fulfill({ json: { status: 'unavailable', item: {
+          ...record, photoLookup: { status: 'unavailable', retryAt: Date.now() + (mode === 'cooldown' ? 300000 : 1100) },
+        } } })
       if (failing)
         return r.fulfill({ status: 503, json: { code: 'photos_unavailable' } })
       if (mode === 'not_found')
@@ -75,7 +81,7 @@ async function setup(
         json: {
           status: 'ready',
           item: row,
-          imageBase64: photoBytes.toString('base64'),
+          imageBase64: requests === 1 && mode === 'corrupt' ? 'YmFk' : photoBytes.toString('base64'),
           contentType: 'image/jpeg',
           objectKey: row.coverPhoto.objectKey,
         },
@@ -199,4 +205,57 @@ test('prefetch finishes before opening detail; repeated openings reuse the photo
       }),
     )
     .toBe(false)
+})
+
+for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+  for (const mode of ['provider', 'corrupt', 'throttled', 'offline'] as const) {
+    test(`${mode} photo recovers with one shared retry at ${viewport.width}px`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      const fixture = await setup(page, mode)
+      const image = page.getByRole('button', { name: 'Enlarge photo of Museum' }).locator('img')
+      await expect.poll(() => image.evaluateAll(images =>
+        images.some(img => (img as HTMLImageElement).naturalWidth === 640),
+      ), { timeout: 7000 }).toBe(true)
+      expect(fixture.requests).toBe(2)
+      await expect(page.locator('#place-heading')).toHaveText('Museum')
+      await expect(page.getByRole('link', { name: 'Photo source' })).toBeVisible()
+    })
+  }
+}
+
+for (const width of [1280, 390]) {
+  test(`no-match at ${width}px survives reopening and keeps the note and mapped place`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 })
+    const fixture = await setup(page, 'not_found')
+    await expect(page.getByText('Photo unavailable', { exact: true })).toBeVisible()
+    await expect(page.locator('.personal-note')).toContainText(record.note)
+    await expect(page.locator('#move-collection')).toHaveValue(record.collection)
+    await expect(page.getByRole('button', { name: 'Retry photo' })).toHaveCount(0)
+    await page.clock.install()
+    await page.clock.fastForward(60_000)
+    await page.getByRole('button', { name: 'Close place details', exact: true })
+      .filter({ visible: true }).click()
+    await page.locator('.place-card-title').first().click()
+    await expect(page.getByText('Photo unavailable', { exact: true })).toBeVisible()
+    await expect(page.locator('.personal-note')).toContainText(record.note)
+    await expect(page.locator('select[aria-label="Select a saved place on the map"] option')
+      .filter({ hasText: 'Museum' }).first()).toHaveCount(1)
+    expect(fixture.requests).toBe(1)
+  })
+}
+
+test('background recovery waits for the discovery lease and is reused by detail', async ({ page }) => {
+  await page.clock.install()
+  const fixture = await setup(page, 'cooldown', false)
+  await page.waitForFunction(async () => {
+    const { cachedPhoto } = await import('/src/lib/place-photo.ts')
+    return cachedPhoto('a'.repeat(64))?.status === 'unavailable'
+  })
+  await page.clock.fastForward(290000)
+  expect(fixture.requests).toBe(1)
+  await page.clock.fastForward(11000)
+  await expect.poll(() => fixture.requests).toBe(2)
+  await page.locator('.place-card-title').first().click()
+  await expect(page.getByRole('button', { name: 'Enlarge photo of Museum' })).toBeVisible()
+  expect(fixture.requests).toBe(2)
 })
