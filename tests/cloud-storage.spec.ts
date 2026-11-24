@@ -624,3 +624,30 @@ for (const failure of ['network', 'server']) {
     await expect(page.getByText('Failed to fetch', { exact: true })).toHaveCount(0)
   })
 }
+
+test('keeps the active import collection across reload and sign-in in a new tab', async ({ page }) => {
+  const vegas = { ...record, id: 'b'.repeat(64), placeId: 'sphere-id', displayName: 'Sphere', name: 'Sphere', collectionId: 'vegas', collection: 'Las Vegas' }
+  async function fixture(tab: Page) {
+    await setup(tab, [{ ...record, collection: 'New York' }, vegas])
+    await tab.route('https://storage.example.test/collections', route => route.fulfill({json:{
+    ...collectionResponse, items: [
+      { ...collectionResponse.items[0], name: 'New York' },
+      { ...collectionResponse.items[0], id: 'vegas', name: 'Las Vegas', isDefault: false },
+    ],
+    }}))
+  }
+  await fixture(page)
+  await page.goto('/')
+  await login(page)
+  await page.locator('.collection-link').filter({ hasText: 'Las Vegas' }).click()
+  await expect(page.locator('.place-card-title')).toHaveText([/^Sphere/])
+  await page.reload()
+  await expect(page.locator('.place-card-title')).toHaveText([/^Sphere/])
+  const newTab = await page.context().newPage()
+  await fixture(newTab)
+  await newTab.goto('/')
+  await login(newTab)
+  await expect(newTab.locator('.place-card-title')).toHaveText([/^Sphere/])
+  await newTab.locator('.collection-link').filter({ hasText: 'New York' }).click()
+  await expect(newTab.locator('.place-card-title')).toHaveText([/^Museum/])
+})

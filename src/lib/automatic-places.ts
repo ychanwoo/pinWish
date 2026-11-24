@@ -7,9 +7,39 @@ import {
   placeSearchErrors,
   type CandidateLocationDraft,
   type ConfirmedPlace,
+  type PlaceMatch,
 } from './place-search'
 import { visiblePlaceText } from './place-name'
 import { pickNamedPlace, regionalSearchHint } from './place-match'
+// These aliases refer to verified provider entries for the named attractions.
+const lasVegasAliases = [
+  {
+    names: ['high roller', 'high roller observation wheel'],
+    query: 'High Roller',
+    region: 'Las Vegas, Nevada',
+    providerNames: ['High Roller', 'High Roller Observation Wheel'],
+  },
+  {
+    names: ['grand canal at the venetian', 'venetian grand canal', 'grand canal shoppes'],
+    query: 'Grand Canal Shoppes',
+    region: 'Las Vegas, Nevada',
+    providerNames: ['Grand Canal Shoppes The Venetian Resort'],
+  },
+  {
+    names: ['seven magic mountains'],
+    query: 'Seven Magic Mountains',
+    region: 'Nevada',
+    providerNames: ['Seven Magic Mountains'],
+  },
+]
+
+function exactAttraction(matches: PlaceMatch[], names: string[]) {
+  return matches.find((match) =>
+    match.countryCode === 'US' && match.placeType === 'PointOfInterest' &&
+    names.includes(match.englishName || match.name),
+  )
+}
+
 export type AutoReviews = Record<number, CandidateLocationDraft>
 export async function resolveCandidate(
   candidate: InstagramPreview['result']['places'][number],
@@ -79,6 +109,21 @@ export async function resolveCandidate(
         const fallback = await request('search', { query: displayQuery || target.query, region, countryCode: target.countryCode })
         if (!isPlaceSearchResponse(fallback)) throw new Error('The search response could not be verified.')
         match = pickNamedPlace(fallback.matches, displayQuery, candidate.locationType)
+      }
+    }
+    if (!match && /^las vegas(?:,? (?:nv|nevada))?$/i.test(target.region.trim())) {
+      const alias = lasVegasAliases.find(({ names }) =>
+        [displayQuery, target.query].some((name) => names.includes(name.trim().toLowerCase())),
+      )
+      if (alias) {
+        match = exactAttraction(results.matches, alias.providerNames)
+        if (!match) {
+          const retry = await request('search', {
+            query: alias.query, region: alias.region, countryCode: 'US',
+          })
+          if (isPlaceSearchResponse(retry) && retry.regionResolved === true)
+            match = exactAttraction(retry.matches, alias.providerNames)
+        }
       }
     }
     if (!match)

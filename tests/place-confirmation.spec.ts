@@ -354,3 +354,33 @@ test('location checks run two at a time, keep source order and wait for every re
   expect(peak).toBe(2)
   await expect(region.locator('li strong')).toHaveText(names)
 })
+
+test('verified Las Vegas aliases recover the wheel, resort attraction and regional artwork', async ({ page }) => {
+  const examples = [
+    { source: 'High Roller', query: 'High Roller Observation Wheel', name: 'High Roller Observation Wheel' },
+    { source: 'Grand Canal at The Venetian', query: 'Grand Canal at The Venetian', name: 'Grand Canal Shoppes The Venetian Resort' },
+    { source: 'Seven Magic Mountains', query: 'Seven Magic Mountains', name: 'Seven Magic Mountains' },
+  ]
+  const places = examples.map((example, i) => ({
+    ...a, name: example.name, englishName: example.name, placeType: 'PointOfInterest',
+    placeId: String(i), selectionToken: `${i}aaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa`,
+  }))
+  const calls: string[] = []
+  await page.route('**/api/places/search', r => {
+    const {query, region} = r.request().postDataJSON()
+    calls.push(region)
+    const i = examples.findIndex(x => x.query === query)
+    return r.fulfill({json:{...results(i === 2 && region === 'Las Vegas' ? [] : [places[i]]), regionResolved:true}})
+  })
+  await page.route('**/api/places/details', r => {
+    const p = places.find(x => x.selectionToken === r.request().postDataJSON().selectionToken)
+    return r.fulfill({json:{place:{...p,retrievedAt:new Date().toISOString()}}})
+  })
+  const region = await openImport(page, {...report,result:{...report.result,places:examples.map(p=>({
+    ...candidate, name:p.source, searchName:p.source, searchQuery:p.query, locationHint:'',
+    searchRegion:'Las Vegas', locationType:'place',
+  }))}})
+  await expect(region.locator('li strong')).toHaveText(examples.map(x => x.name))
+  await expect(region.getByText(/Photos .*Matched automatically/)).toHaveCount(3)
+  expect(calls.filter(r => r !== 'Las Vegas')).toEqual(['Nevada'])
+})
