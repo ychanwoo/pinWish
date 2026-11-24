@@ -24,7 +24,6 @@ import {
   renameCollection,
   deleteCollection,
   type SavedCollection,
-  type SavedPlace,
   saveConfirmed,
   saveDirectPlace,
   patchSaved,
@@ -151,20 +150,7 @@ function App() {
     places,
     catalog,
   )
-  const catalogRef = useRef(catalog)
-  useEffect(() => {
-    catalogRef.current = catalog
-  }, [catalog])
-  const canonicalPlace = (saved: SavedPlace) => {
-    const c =
-      catalogRef.current.find((c) => c.id === saved.collectionId) ??
-      (saved.collectionId
-        ? catalogRef.current.find((c) => c.isDefault)
-        : undefined)
-    return toUIPlace(
-      c ? { ...saved, collectionId: c.id, collection: c.name } : saved,
-    )
-  }
+  const collectionSelectionOwner = useRef<string | null>(null)
   const [collectionDialogMode, setCollectionDialogMode] = useState<
     'manage' | 'rename' | 'delete'
   >('manage')
@@ -214,10 +200,21 @@ function App() {
       setCatalog(collectionResult.items)
       setCollections(collectionResult.items.map((c) => c.name))
       setCursor(result.cursor)
+      let rememberedCollection: string | undefined
+      if (collectionSelectionOwner.current !== owner) {
+        collectionSelectionOwner.current = owner
+        try {
+          const key = `pinwish:collection:${owner}`
+          const rememberedId = localStorage.getItem(key) ?? sessionStorage.getItem(key)
+          rememberedCollection = collectionResult.items.find(c => c.id === rememberedId)?.name
+        } catch {
+          // The default collection still works when browser storage is unavailable.
+        }
+      }
       setCollection((current) =>
-        collectionResult.items.some((c) => c.name === current)
+        rememberedCollection ?? (collectionResult.items.some((c) => c.name === current)
           ? current
-          : (collectionResult.items.find(c => c.isDefault)?.name ?? collectionResult.items[0]?.name ?? 'Saved places'),
+          : (collectionResult.items.find(c => c.isDefault)?.name ?? collectionResult.items[0]?.name ?? 'Saved places')),
       )
       if (pendingPlaceLink.current) {
         const linked = incoming.find((p) => p.id === pendingPlaceLink.current)
@@ -243,6 +240,7 @@ function App() {
     if (!cloudEnabled) return
     // Clear private data when the external authentication session changes.
     loadGeneration.current++
+    collectionSelectionOwner.current = null
     // eslint-disable-next-line react/set-state-in-effect
     setPlaces([])
     setTripCollection(null)
@@ -272,6 +270,17 @@ function App() {
     }
     if (session?.sub) void loadPlaces()
   }, [session?.sub, loadPlaces, setCollection, setView, setSelectedId])
+  useEffect(() => {
+    const owner = session?.sub
+    if (!owner || collectionSelectionOwner.current !== owner) return
+    const selectedCollection = catalog.find(c => c.name === collection)
+    if (!selectedCollection) return
+    try {
+      localStorage.setItem(`pinwish:collection:${owner}`, selectedCollection.id)
+    } catch {
+      // Selection still works in memory.
+    }
+  }, [catalog, collection, session?.sub])
   const photoIds = session?.sub
     ? places
         .filter((p) => p.saved && p.collection === collection)
@@ -676,9 +685,13 @@ function App() {
                 onPhotoUpdated={(saved) =>
                   setPlaces((items) =>
                     items.map((p) =>
-                      p.id === saved.id &&
-                      (p.saved?.version ?? 0) <= saved.version
-                        ? canonicalPlace(saved)
+                      p.id === saved.id && p.saved && p.saved.version <= saved.version
+                        ? toUIPlace({
+                            ...saved,
+                            // A cached photo read can predate a collection change.
+                            collectionId: p.saved.collectionId,
+                            collection: p.collection,
+                          })
                         : p,
                     ),
                   )
@@ -917,7 +930,12 @@ function App() {
                       requireOwner(owner)
                       setCatalog(fresh.items)
                       setCollections(fresh.items.map(c => c.name))
-                      if (savedCollections[0]) setCollection(newCollection || savedCollections[0])
+                      if (savedCollections[0]) {
+                        setCollection(newCollection || savedCollections[0])
+                        setSearch('')
+                        setCategory('All')
+                        setOnlyUnvisited(false)
+                      }
                       setSelectedId('')
                       setView('list')
 
